@@ -1,0 +1,24 @@
+# Artificial public fixture/template. No personal profile information.
+profile_id = "public-fixture-v1"
+confirmed_by_user = false
+updated_at = "2026-10-13"
+source = "人工合成公开示例；未实测，不代表任何个人档案"
+[identity]
+role = "演示用户"
+background = "未知/未提供"
+assistance = "离线fixture演示，不代表实际安装或学习能力"
+language_preference = "未知/未提供"
+devices = "未知/未提供"
+daily_time = "未知/未提供"
+[goals]
+current = "离线阅读项目报告示例"
+focus = "Agent与软件工程示例"
+values = "仅用于演示"
+outcome_habit = "示例，不推断个人偏好"
+deliverable_expectation = "fixture报告与来源示例"
+[resources]
+available_api = "未配置，不能假定存在任何凭据"
+other_providers = "未配置"
+cloud = "未知/未提供"
+gpu = "未知/未提供"
+os = "未知/未提供"

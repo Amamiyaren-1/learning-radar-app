@@ -1,0 +1,21 @@
+# 邮件配置模板（可以提交 Git）。
+#
+# 使用方法二选一：
+#   1) 复制成 config/email.toml（该文件已被 .gitignore 忽略）；
+#   2) 在 systemd 里用环境变量 LEARNRADAR_EMAIL_CONFIG 指向受限配置文件，
+#      推荐 /etc/learning-radar/email.toml（chown root:learningradar、chmod 0640）。
+#
+# 密码**永远不要写在这个文件里**：只从环境变量读取（下面的 password_env 指定变量名）。
+# TLS 证书校验始终开启（starttls 与 ssl 都是）。
+
+[email]
+host = "smtp.example.com"          # SMTP 服务器
+port = 587                          # 587 通常配 starttls；465 配 ssl
+security = "starttls"               # starttls | ssl
+sender = "learning-radar@example.com"
+recipient = "you@example.com"       # 只支持一个收件人；发件人与收件人可以不同
+subject_prefix = "[Learning Radar]"
+username = "learning-radar@example.com"   # 留空表示不做 SMTP 认证
+password_env = "LEARNRADAR_SMTP_PASSWORD"
+timeout_seconds = 30
+attach_markdown = true              # 正常推荐邮件附带完整 Markdown 报告

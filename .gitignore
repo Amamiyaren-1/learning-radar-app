@@ -1,0 +1,52 @@
+# ---------------------------------------------------------------------------
+# 凭据与本地私密配置（绝不进 Git）
+# ---------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+config/profile.toml
+config/settings.local.toml
+# 邮件真实配置（发件/收件地址、SMTP 主机）；模板是 config/email.example.toml
+config/email.toml
+config/web.toml
+*.key
+*.pem
+
+# ---------------------------------------------------------------------------
+# 运行数据：真实档案、证据缓存、报告输出、SQLite、日志、原始材料
+# ---------------------------------------------------------------------------
+data/
+logs/
+out/
+backups/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.db
+cache/
+
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+frontend/node_modules/
+frontend/dist/
+.venv/
+venv/
+
+# ---------------------------------------------------------------------------
+# 编辑器 / 系统
+# ---------------------------------------------------------------------------
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+desktop.ini
+*.tmp
+*.log
+
+# Commercial fonts are private optional local assets, never public history.
+frontend/public/fonts/NovecentoWide-*.woff2

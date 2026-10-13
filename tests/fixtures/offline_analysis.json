@@ -1,0 +1,118 @@
+{
+  "title": "[离线夹具] example-offline/target 与同类项目对比（不是真实模型输出）",
+  "target": {
+    "repo": "example-offline/target",
+    "version": "v0.1.0",
+    "category": ["测试夹具", "工具调用"],
+    "summary_one_line": "用于在没有模型凭据时验证完整流程的占位项目。"
+  },
+  "highlight": {
+    "items": [
+      {
+        "name": "夹具亮点（占位）",
+        "plain": "夹具用来在没有模型凭据时验证整条流程。",
+        "scenario": "假设场景：没有夹具就无法离线验证渲染与校验。",
+        "how": "夹具直接提供占位报告，尚未核验任何真实项目。",
+        "difference": "证据不足以比较优劣。",
+        "value": "只验证流程，增量价值有限。",
+        "evidence_ids": ["E-readme-fixture-target"],
+        "quote": "该项目声称提供工具调用示例"
+      }
+    ]
+  },
+  "novelty": {
+    "what": "夹具内容，不代表任何真实项目的创新性。",
+    "when": "不确定",
+    "kind": "unclear",
+    "evidence_ids": ["E-readme-fixture-target"],
+    "quote": "该项目声称提供工具调用示例"
+  },
+  "claims": [
+    {
+      "type": "fact",
+      "text": "夹具记录为 1234 星（测试数据）。",
+      "evidence_ids": ["E-repo-fixture-target"],
+      "quote": "Stars=1234"
+    },
+    {
+      "type": "vendor_claim",
+      "text": "夹具 README 声称提供工具调用示例（测试数据）。",
+      "evidence_ids": ["E-readme-fixture-target"],
+      "quote": "该项目声称提供工具调用示例"
+    },
+    {
+      "type": "inference",
+      "text": "该夹具只能验证流程，不能用于评价任何真实项目。",
+      "evidence_ids": ["E-readme-fixture-target"]
+    }
+  ],
+  "comparisons": [
+    {
+      "comparator": "example-offline/baseline-a",
+      "why_this_comparator": "同为夹具对照，用于验证对比结构。",
+      "problem": "夹具对照 A 解决的问题。",
+      "key_difference": "夹具对照 A 与目标的差异。",
+      "fit_conditions": "夹具对照 A 的适用条件。",
+      "limitations": "夹具对照 A 的限制。",
+      "evidence_ids": ["E-repo-fixture-a"]
+    },
+    {
+      "comparator": "example-offline/baseline-b",
+      "why_this_comparator": "同为夹具对照，用于验证对比结构。",
+      "problem": "夹具对照 B 解决的问题。",
+      "key_difference": "夹具对照 B 与目标的差异。",
+      "fit_conditions": "夹具对照 B 的适用条件。",
+      "limitations": "夹具对照 B 的限制。",
+      "evidence_ids": ["E-repo-fixture-b"]
+    }
+  ],
+  "value_for_user": {
+    "learn": "夹具不提供真实学习收益。",
+    "demo": "夹具只验证渲染，不构成演示。",
+    "artifact": "夹具不产生个人成果。"
+  },
+  "starting_conditions": {
+    "have": ["夹具运行环境（无真实依赖）"],
+    "gaps": ["全部为夹具数据，没有可执行的真实条件"]
+  },
+  "difficulty": {
+    "level": "run_example",
+    "basis": "夹具设定：只需运行一次流程测试。",
+    "conditions": [
+      {"condition": "runtime", "value": "未知（夹具未提供）", "status": "unknown"},
+      {"condition": "os_support", "value": "未知（夹具未提供）", "status": "unknown"},
+      {"condition": "gpu", "value": "不适用（夹具不调用模型）", "status": "not_applicable"},
+      {"condition": "external_cost", "value": "无外部费用", "status": "inference",
+       "basis": "夹具不调用任何外部服务"}
+    ]
+  },
+  "learning_action": {
+    "executable": true,
+    "action": "运行一次离线流程测试。",
+    "done_criteria": "报告能渲染出对比表格。",
+    "entry": "https://github.com/example-offline/target#readme"
+  },
+  "mini_experiment": {
+    "suggested_change": "夹具建议改动：把对照数量从 2 调到 3（仅为夹具示意）。",
+    "observable": "夹具报告里出现第三个对照行。",
+    "boundary": "不修改任何真实项目。"
+  },
+  "explore_further": {
+    "repo": "https://github.com/example-offline/target",
+    "docs": "未核验到",
+    "example_entry": "https://github.com/example-offline/target#readme",
+    "known_limits": ["夹具数据，不含真实限制"]
+  },
+  "verification": {
+    "docs_reviewed": true,
+    "source_reviewed": false,
+    "actually_ran": false,
+    "note": "离线夹具：没有任何真实查阅或运行。"
+  },
+  "recommendation": {
+    "decision": "watch",
+    "reason": "夹具数据不可用于推荐。",
+    "evidence_gaps": ["全部为夹具数据"],
+    "uncertainties": ["不适用"]
+  }
+}

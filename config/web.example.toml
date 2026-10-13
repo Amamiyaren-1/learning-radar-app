@@ -1,0 +1,9 @@
+# Copy to ignored config/web.toml only when preparing a real HTTPS proxy.
+# For local HTTP, explicitly pass --web-mode loopback instead.
+[web]
+mode = "https"
+public_origin = "https://radar.example.invalid"
+trusted_proxies = ["127.0.0.1"]
+absolute_seconds = 43200
+idle_seconds = 1800
+prelogin_seconds = 600

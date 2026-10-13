@@ -1,0 +1,32 @@
+# 候选发现用的搜索主题。搜索词是配置，不依赖用户列出仓库名。
+# broad 使用本文件作为轮换方向池；focused 只使用明确指定方向，搜索来源不是归档标签。
+
+[[topic]]
+id = "tool-calling"
+label = "工具调用 / 函数调用"
+github_query = "agent tool calling framework stars:>200 pushed:>2025-01-01"
+purpose = "候选"
+
+[[topic]]
+id = "agent-memory"
+label = "Agent 记忆"
+github_query = "agent memory long-term stars:>200 pushed:>2025-01-01"
+purpose = "候选"
+
+[[topic]]
+id = "retrieval"
+label = "检索 / 上下文工程"
+github_query = "retrieval augmented generation context engineering stars:>200 pushed:>2025-01-01"
+purpose = "候选"
+
+[[topic]]
+id = "evals"
+label = "评估"
+github_query = "llm evaluation harness stars:>300 pushed:>2025-01-01"
+purpose = "对照"
+
+[[topic]]
+id = "code-review"
+label = "代码审查"
+github_query = "ai code review agent stars:>200 pushed:>2025-01-01"
+purpose = "候选"

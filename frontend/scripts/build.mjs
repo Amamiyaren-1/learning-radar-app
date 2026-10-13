@@ -1,0 +1,15 @@
+import {build} from 'vite';
+import {readFile,writeFile,stat} from 'node:fs/promises';
+import {spawnSync} from 'node:child_process';
+const theme=await readFile('src/theme.css','utf8');
+const shell=(await readFile('templates/shell.source.html','utf8')).replace('@theme@',theme.replaceAll('$','$$'));
+if(Buffer.byteLength(shell)>32768) throw new Error('shell exceeds v1 template limit');
+await writeFile('templates/shell.html',shell);
+await build({base:'/static/ui/',build:{outDir:'dist',sourcemap:false,cssCodeSplit:false,rollupOptions:{input:'src/main.ts',output:{entryFileNames:'assets/app.js',chunkFileNames:'assets/[name]-[hash].js',assetFileNames:'assets/app[extname]'}}}});
+const pythonExec = process.env.LEARNRADAR_PYTHON || 'python';
+const manifestArgs = ['../scripts/ui_manifest.py','--dist','dist','--script','assets/app.js','--style','assets/app.css'];
+const result = spawnSync(pythonExec, manifestArgs, {stdio:'inherit'});
+if(result.status!==0) process.exit(result.status||1);
+const manifest=JSON.parse(await readFile('dist/manifest.json','utf8'));
+for(const file of manifest.files) await stat('dist/'+file);
+console.log(`UI v1: ${manifest.files.length} same-origin assets; inline theme ${Buffer.byteLength(theme)} bytes`);

@@ -1,0 +1,55 @@
+[
+  {
+    "evidence_id": "E-repo-fixture-target",
+    "kind": "github_repo",
+    "url": "https://github.com/example-offline/target",
+    "title": "[测试夹具] example-offline/target 仓库元数据",
+    "retrieved_at": "2026-09-21T00:00:00+00:00",
+    "source_type": "metadata",
+    "owner": "example-offline/target",
+    "locator": "fixture://repo",
+    "excerpt": "测试夹具仓库元数据：example-offline/target；Stars=1234。不是真实 GitHub 数据。",
+    "notes": "测试夹具，不得当作真实证据。",
+    "extra": {"full_name": "example-offline/target", "html_url": "https://github.com/example-offline/target", "stars": 1234, "archived": false, "is_fork": false}
+  },
+  {
+    "evidence_id": "E-readme-fixture-target",
+    "kind": "github_readme",
+    "url": "https://github.com/example-offline/target#readme",
+    "title": "[测试夹具] example-offline/target README",
+    "retrieved_at": "2026-09-21T00:00:00+00:00",
+    "source_type": "official",
+    "owner": "example-offline/target",
+    "commit_sha": "fixturecommit0000",
+    "locator": "README.md @ fixturecommit0000（章节：Quickstart）",
+    "excerpt": "测试夹具 README 摘录：该项目声称提供工具调用示例，用于验证离线流程能否跑通。",
+    "notes": "测试夹具，不得当作真实证据。",
+    "extra": {}
+  },
+  {
+    "evidence_id": "E-repo-fixture-a",
+    "kind": "github_repo",
+    "url": "https://github.com/example-offline/baseline-a",
+    "title": "[测试夹具] example-offline/baseline-a 仓库元数据",
+    "retrieved_at": "2026-09-21T00:00:00+00:00",
+    "source_type": "metadata",
+    "owner": "example-offline/baseline-a",
+    "locator": "fixture://repo",
+    "excerpt": "测试夹具仓库元数据：example-offline/baseline-a；Stars=5678。不是真实 GitHub 数据。",
+    "notes": "测试夹具，不得当作真实证据。",
+    "extra": {"full_name": "example-offline/baseline-a", "stars": 5678}
+  },
+  {
+    "evidence_id": "E-repo-fixture-b",
+    "kind": "github_repo",
+    "url": "https://github.com/example-offline/baseline-b",
+    "title": "[测试夹具] example-offline/baseline-b 仓库元数据",
+    "retrieved_at": "2026-09-21T00:00:00+00:00",
+    "source_type": "metadata",
+    "owner": "example-offline/baseline-b",
+    "locator": "fixture://repo",
+    "excerpt": "测试夹具仓库元数据：example-offline/baseline-b；Stars=900。不是真实 GitHub 数据。",
+    "notes": "测试夹具，不得当作真实证据。",
+    "extra": {"full_name": "example-offline/baseline-b", "stars": 900}
+  }
+]
