@@ -37,6 +37,7 @@
 .lr-archive-body .lr-archive-reading[hidden],.lr-archive-info[hidden]{display:none}
 .lr-archive:has(.lr-archive-reading:not([hidden]))>.lr-notice{display:none}
 .lr-archive-reading{min-width:0;padding:24px;max-height:720px;overflow:auto;border-left:1px solid var(--lr-rule);background:var(--lr-panel)}
+@media(min-width:761px){.lr-archive-body.lr-archive-reading-mode{grid-template-columns:minmax(0,38fr) minmax(0,62fr)}}
 .lr-reader-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:-24px;background:var(--lr-panel);z-index:2;padding:12px 0;border-bottom:1px solid var(--lr-rule)}
 .lr-reader-bar button{background:transparent;color:var(--lr-ink);border:0;padding:8px 0;font-size:14px}
 .lr-reader-bar a{font-size:12px}.lr-archive-reading h1{font-size:28px;line-height:1.4}.lr-archive-reading h2{font-size:22px}.lr-archive-reading .card{padding:24px 0}.lr-archive-reading article{font-size:16px;line-height:1.9}

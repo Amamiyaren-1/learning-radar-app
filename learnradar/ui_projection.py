@@ -43,9 +43,26 @@ def task_summary(task):
 
 
 def report_summary(row):
-    return {'run_id': text(row.get('run_id'), 200), 'url': link('/report/', row.get('run_id')),
+    return {**display_projection(row), 'run_id': text(row.get('run_id'), 200), 'url': link('/report/', row.get('run_id')),
             'title': text(row.get('title')), 'status': text(row.get('status') or row.get('report_status'), 80),
             'date': text(row.get('created_at') or row.get('date'), 80)}
+
+
+def display_projection(row):
+    """Allowlist only presentation text/provenance, never saved payloads."""
+    sources = row.get('display_sources') or {}
+    original = row.get('original_summary_source') or {}
+    return {'display_title': text(row.get('display_title'), 300),
+            'display_summary': text(row.get('display_summary'), 500),
+            'display_note': text(row.get('display_note'), 200),
+            'display_missing': [text(x, 40) for x in (row.get('display_missing') or [])[:4]],
+            'repo': text(row.get('repo'), 200), 'repo_label': text(row.get('repo_label'), 200),
+            'display_sources': {field: {key: text((sources.get(field) or {}).get(key), 200)
+                               for key in ('kind', 'run_id', 'report_status', 'url')}
+                                for field in ('title', 'summary')},
+            'original_summary': text(row.get('original_summary'), 1000),
+            'original_summary_source': {key: text(original.get(key), 200)
+                                        for key in ('kind', 'run_id', 'url', 'label')}}
 
 
 def home_data(tasks, reports):
@@ -58,7 +75,7 @@ def home_data(tasks, reports):
 
 def project_summary(project):
     reports = project['reports']
-    return {'repo': text(project['repo'], 200), 'url': '/history?' + urlencode({'project': project['repo']}),
+    return {**display_projection(project), 'repo': text(project['repo'], 200), 'url': '/history?' + urlencode({'project': project['repo']}),
             'description': text(project['description'], 500),
             'tags': [{'label': text(t['label'], 32), 'source': text(t['source'], 20)} for t in project['tags'][:MAX_ITEMS]],
             'reports': [report_summary(r) for r in reports[:MAX_ITEMS]], 'report_count': len(reports),

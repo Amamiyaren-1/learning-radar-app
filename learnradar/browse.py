@@ -55,6 +55,11 @@ def history_records(store, topics):
         value=repo or context.get("target")
         project=normalize_repo_name(value) if isinstance(value,str) else ""
         row["project"]=project if re.fullmatch(r"[a-z0-9_.-]+/[a-z0-9_.-]+",project) else UNCATEGORIZED
+        from .archive import saved_report_display
+        row['_saved_display'] = saved_report_display(row, payload)
+        if (not row['_saved_display']['repo_label'] and isinstance(value, str)
+                and re.fullmatch(r'[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+', value.strip())):
+            row['_saved_display']['repo_label'] = value.strip()
         if row["project"]:
             for candidate in store.conn.execute('SELECT full_name,raw FROM candidates WHERE run_id=?', (row['run_id'],)):
                 if normalize_repo_name(candidate['full_name']) != row["project"]:

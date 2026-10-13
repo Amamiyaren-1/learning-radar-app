@@ -1,5 +1,5 @@
 {
-  "source_sha": "213ab5ed4880bdc38afde4606e6b031e6f1b1d8b",
+  "source_sha": "81e86ea704d0cb8d1ed4e15398adb71b96ebde64",
   "local_worktree_changes_included": false,
   "copied_files": [
     {
@@ -49,8 +49,8 @@
     },
     {
       "file": "docs/PUBLIC-SOURCE-GUIDE.md",
-      "bytes": 3556,
-      "sha256": "dc4a3d0e3732e9b95b758578fb0258deaa3e0dcd04a64b0c1cd980ad45bb7b47"
+      "bytes": 4199,
+      "sha256": "88c630d724327766300b64b468e3d077d530c406650f65d25bef4bcf43fc3ca2"
     },
     {
       "file": "docs/VIDEO-OUTLINE.md",
@@ -194,8 +194,8 @@
     },
     {
       "file": "frontend/src/archive.ts",
-      "bytes": 13632,
-      "sha256": "e2122958c893b541cbaff48de329bf3aa6884374f50d815d1ca61547d0bd236c"
+      "bytes": 15224,
+      "sha256": "e6ae4d06d3effe2d9b25513e4dfbf1b190b128198bce395fead125f54f528382"
     },
     {
       "file": "frontend/src/buffered-music.ts",
@@ -209,8 +209,8 @@
     },
     {
       "file": "frontend/src/enhancement.css",
-      "bytes": 3292,
-      "sha256": "271fafa07df0d198c485959888c9300dca03da9b486a0a36bdd8ec8696539267"
+      "bytes": 3505,
+      "sha256": "9db06d2d50ded068d662647b5f13a1e1e1a2574217a07ac6a1479aef96f2cdfb"
     },
     {
       "file": "frontend/src/full-screen-intro.ts",
@@ -219,8 +219,8 @@
     },
     {
       "file": "frontend/src/intro.css",
-      "bytes": 6073,
-      "sha256": "3c3215095aa1f7ee4f1f490cbed58aacffefa567d110de715c1dc92d3be7b07d"
+      "bytes": 6192,
+      "sha256": "aead6968d314a569b02242bc8972548610edf868e43c1a0b2b4ea3b41370c9be"
     },
     {
       "file": "frontend/src/login-loop-motion.ts",
@@ -234,8 +234,8 @@
     },
     {
       "file": "frontend/src/main.ts",
-      "bytes": 11073,
-      "sha256": "d7b89b69fb61cd02574696a785ce47dbd28c48cc0c9a18901903e2921dd926c6"
+      "bytes": 11314,
+      "sha256": "efd9dfef45a669bbb0bf00501a5cdc311a85454c3cae9233f180f87c7aee2baa"
     },
     {
       "file": "frontend/src/music-playback.ts",
@@ -299,8 +299,8 @@
     },
     {
       "file": "frontend/src/reference/data.ts",
-      "bytes": 1315,
-      "sha256": "568b1eb247d86615f9b1cf1dbf98afce6f536a5e0bc11ef23a78c61ff8e518d7"
+      "bytes": 1370,
+      "sha256": "b0ba3469ee71a9638578ff2e56ea128dca40f873d2d179cffe0d800d2924b60b"
     },
     {
       "file": "frontend/src/reference/decryption.ts",
@@ -369,8 +369,8 @@
     },
     {
       "file": "frontend/src/theme.css",
-      "bytes": 23498,
-      "sha256": "ea749e8582f64971061f444a5416dc5f9f2039363e2b9c7eeecb307b1d81a229"
+      "bytes": 23629,
+      "sha256": "55949e3442ca7c4af3af0767c548eb9769ef4fa9aee14cbd89737ea9bffd2c9a"
     },
     {
       "file": "frontend/src/vite-env.d.ts",
@@ -379,8 +379,8 @@
     },
     {
       "file": "frontend/templates/shell.html",
-      "bytes": 25494,
-      "sha256": "41481dc2ba4363d783196238e3e2008dc9d0d13c6110c264ca4a72b229308842"
+      "bytes": 25625,
+      "sha256": "5a8c62002cbdf20e6e3844f4a45850aeaab7faeb30d401b8ec2b995164e98ea1"
     },
     {
       "file": "frontend/templates/shell.source.html",
@@ -434,13 +434,13 @@
     },
     {
       "file": "learnradar/archive.py",
-      "bytes": 5469,
-      "sha256": "89a020d0cefacaee300ce69c37bdef132d902e3caa3a347239951d88ed636c5a"
+      "bytes": 11049,
+      "sha256": "cc87b2edbe512d5602e00203e7d15bb77ababacf74228c20f7a7fe2109ad856d"
     },
     {
       "file": "learnradar/archive_web.py",
-      "bytes": 5179,
-      "sha256": "238db6b7ea4ca8231581f96ee25acda8fd24b728485e85759b57c9d380fe1396"
+      "bytes": 7127,
+      "sha256": "25b7ae1a1a4979bc607419377a97ea833ae52cc71103a321261ba474a22ed4a9"
     },
     {
       "file": "learnradar/auth.py",
@@ -464,8 +464,8 @@
     },
     {
       "file": "learnradar/browse.py",
-      "bytes": 4009,
-      "sha256": "5f7b2dcb53e5827100b45725802a657374b09116842a3fbebd45a390c272a8bd"
+      "bytes": 4355,
+      "sha256": "cdfcb26cbf7a15f93669844f59ebaf13982c339d81a892066b3d1a0167ccb94f"
     },
     {
       "file": "learnradar/bundle_manifest.py",
@@ -599,8 +599,8 @@
     },
     {
       "file": "learnradar/ui_projection.py",
-      "bytes": 4326,
-      "sha256": "2081c95905689568c108f3fa714c9d4137154e94459c94d51ff32bea84b91c17"
+      "bytes": 5466,
+      "sha256": "8ad2aa777d6f705e88e4a3568526324e3ef98f8d7f3ec9253ac3b68249677abb"
     },
     {
       "file": "learnradar/ui_shell.py",
@@ -614,8 +614,8 @@
     },
     {
       "file": "learnradar/web.py",
-      "bytes": 39440,
-      "sha256": "49575b71b1b34cdacc5a26b4bb416ad60c7115a6de00467530fe26c00780eae2"
+      "bytes": 40243,
+      "sha256": "ba6bb769ccc1f54d4a73628b32cffc478650c68aba7437826483a334caa62b24"
     },
     {
       "file": "learnradar/web_config.py",
@@ -806,6 +806,11 @@
       "file": "tests/test_page_persistence.py",
       "bytes": 4160,
       "sha256": "bb8d926aa1cf8651923a1ee6464d58151ee3cc962307380690ee5ebbca7dea39"
+    },
+    {
+      "file": "tests/test_project_display.py",
+      "bytes": 7739,
+      "sha256": "ff9a63d751900ecf2a755bc63ce34866c497febfab125e6392012057fe613d9a"
     },
     {
       "file": "tests/test_readme.py",

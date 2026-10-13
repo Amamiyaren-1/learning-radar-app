@@ -1,5 +1,5 @@
 /** Display identity and physical positions are independent. UI contract v1 only. */
-export type ArchiveRecord = {id:string; title:string; url:string; description:string; tags:string[]};
+export type ArchiveRecord = {id:string; title:string; url:string; description:string; tags:string[]; identity?:string; source?:string; humanTitle?:boolean};
 export let records: ArchiveRecord[] = [];
 export let archiveColumns: string[] = [];
 let groups: number[][] = [];

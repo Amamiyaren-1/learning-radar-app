@@ -483,7 +483,13 @@ def render_task_index(settings, queue, reports):
                     f'{escape(PHASES.get(task["phase"],task["phase"]))} · 请求 {task["model_requests"]}/4</div>')
     body.append('<h2>最新保存结果</h2>')
     for report in reports:
-        body.append(f'<div class="card" data-lr-role="report" data-run-id="{escape(report["run_id"])}"><a href="/report/{escape(report["run_id"])}">{escape(report["title"])}</a> · {escape(report_label(report["status"]))}</div>')
+        display_title = report.get('display_title') or report['title']
+        body.append(f'<div class="card" data-lr-role="report" data-run-id="{escape(report["run_id"])}"><a href="/report/{escape(report["run_id"])}">{escape(display_title)}</a> · {escape(report_label(report["status"]))}')
+        if report.get('repo_label'):
+            body.append('<p class="lr-identity">'+escape(report['repo_label'])+'</p><p>'+escape(report.get('display_summary',''))+'</p><p class="lr-meta">'+escape(report.get('display_note',''))+'</p>')
+        if display_title != report['title']:
+            body.append('<p class="lr-meta">本次报告原题：'+escape(report['title'])+'</p>')
+        body.append('</div>')
     if not reports:
         body.append('<p>尚无结果。提交后需启动独立执行进程。</p>')
     from .ui_projection import home_data
@@ -592,7 +598,12 @@ def build_handler(store_path: Path, *, settings=None, queue=None, gate, resource
                 return
             with Store(store_path) as store:
                 if path in ("/", "/index.html"):
-                    self._send(200, render_task_index(settings,queue,store.list_reports()) if queue else render_index(store.list_reports()))
+                    reports = store.list_reports()
+                    if queue:
+                        from .archive import project_catalog, reports_with_project_display
+                        projects = project_catalog(store, history_records(store, settings.topics))
+                        reports = reports_with_project_display(reports, projects)
+                    self._send(200, render_task_index(settings,queue,reports) if queue else render_index(reports))
                     return
                 if path=="/history":
                     query=parse_qs(urlsplit(self.path).query,keep_blank_values=True)

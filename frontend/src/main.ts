@@ -88,6 +88,11 @@ async function enhance(){
   if(!['home','projects','project','report','legacy_history'].includes(boot.page_kind))return;
   if(boot.page_kind==='home') business.querySelector('.card:has([data-lr-action=submit])')?.after(app);
   else if(boot.page_kind==='projects')business.querySelector('form[data-lr-action=search]')?.after(app);
+  else if(boot.page_kind==='report'){
+    const article=business.querySelector<HTMLElement>('article[data-lr-role=report-body]');
+    if(article)article.before(app);
+    else business.append(app); // diagnostics have no readable article
+  }
   else business.querySelector('h1')?.after(app);
   if(!boot.ui_resources?.available)return;
   app.hidden=false;

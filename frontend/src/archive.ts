@@ -15,9 +15,9 @@ const el=<K extends keyof HTMLElementTagNameMap>(tag:K,text='',className='')=>{c
 const safeLink=(value:unknown)=>{if(typeof value!=='string')return '/history';const u=new URL(value,location.origin);return u.origin===location.origin&&u.pathname.startsWith('/')?u.pathname+u.search:'/history';};
 function projectRecords(boot:any):ArchiveRecord[]{
   const data=boot.data;
-  if(boot.page_kind==='projects')return (data.projects||[]).map((r:any)=>({id:'repo:'+r.repo,title:r.repo||'未分类',url:safeLink(r.url),description:r.description,tags:[...new Set((r.tags||[]).map((t:any)=>t.label))] }));
+  if(boot.page_kind==='projects')return (data.projects||[]).map((r:any)=>({id:'repo:'+r.repo,title:r.display_title||r.repo||'未分类',identity:r.repo_label||r.repo,url:safeLink(r.url),description:r.display_summary||r.description,source:r.display_note,humanTitle:['published','draft'].includes(r.display_sources?.title?.kind),tags:[...new Set((r.tags||[]).map((t:any)=>t.label))] }));
   const reports=boot.page_kind==='report'?[data.report]:boot.page_kind==='project'?(data.projects||[]).flatMap((r:any)=>r.reports||[]):(data.reports||[]);
-  return reports.filter(Boolean).map((r:any)=>({id:'run:'+r.run_id,title:r.title||'保存的运行记录',url:safeLink(r.url),description:([r.date,r.status].filter(Boolean).join(' / ')),tags:[r.status||'保存记录']}));
+  return reports.filter(Boolean).map((r:any)=>({id:'run:'+r.run_id,title:(boot.page_kind==='home'?r.display_title:'')||r.title||'保存的运行记录',identity:boot.page_kind==='home'?(r.repo_label||r.repo):undefined,url:safeLink(r.url),description:([r.display_summary,r.date,r.status].filter(Boolean).join(' / ')),source:r.display_note,humanTitle:boot.page_kind==='home'&&['published','draft'].includes(r.display_sources?.title?.kind),tags:[r.status||'保存记录']}));
 }
 
 export async function mountArchive(app:HTMLElement,business:HTMLElement,boot:any,prefs:any,settings:HTMLDialogElement){
@@ -35,6 +35,7 @@ export async function mountArchive(app:HTMLElement,business:HTMLElement,boot:any
   const title=el('h2','','lr-file-title');info.append(title);
   const identity=el('p','','lr-file-identity');info.append(identity);
   const description=el('p','','lr-file-description');info.append(description);
+  const source=el('p','','lr-file-source lr-meta');source.hidden=true;info.append(source);
   const controls=el('div','','lr-archive-controls');const previous=el('button','上一份'),next=el('button','下一份');controls.append(previous,next);info.append(controls);
   const ticks=el('div','','lr-ticks');ticks.setAttribute('aria-label','当前分组档案刻度');info.append(ticks);
   const access=el('a','打开当前档案','lr-access');info.append(access);
@@ -55,11 +56,26 @@ export async function mountArchive(app:HTMLElement,business:HTMLElement,boot:any
   try{const saved=JSON.parse(sessionStorage.getItem('lr-selection')||'{}');for(const [k,v] of Object.entries(saved))if(typeof v==='string')memory.set(k,v);selected=Math.max(0,records.findIndex(r=>r.id===memory.get('全部档案')));}catch{}
   let frame=0;let latest=performance.now()/1000;let destroyed=false;
   const titleRoll=createRollingText(title,{text:'',animated:!prefs.reduced,duration:380});
+  let titleWrapped=false;
+  function fitTitle(animate=false){
+    const value=records[selected]?.title;if(!value)return;
+    const probe=el('span',value);probe.setAttribute('aria-hidden','true');
+    probe.style.cssText=`position:absolute;visibility:hidden;white-space:pre;font:${getComputedStyle(title).font}`;
+    const style=getComputedStyle(info),available=info.clientWidth-parseFloat(style.paddingLeft)-parseFloat(style.paddingRight);
+    info.append(probe);const wrapped=available>0&&probe.getBoundingClientRect().width>available;probe.remove();
+    title.dataset.titleWrap=String(wrapped);
+    if(animate||wrapped!==titleWrapped||wrapped){
+      titleRoll.update({text:value,animated:animate&&!prefs.reduced&&!wrapped});
+      if(!animate||wrapped||prefs.reduced)titleRoll.finish();
+    }
+    titleWrapped=wrapped;
+  }
+  const fontDone=()=>fitTitle();document.fonts?.addEventListener('loadingdone',fontDone);
   const counter=createRollingNumber(number,{value:selected+1,animated:!prefs.reduced,duration:420});
   const documentEffect=new DocumentDecryption();let mode:'archive'|'detail'=boot.page_kind==='report'?'detail':'archive';
   let observer:ResizeObserver|undefined;let changeHandler:(()=>void)|undefined;
   let openAction=0;
-  const dispose=()=>{if(destroyed)return;destroyed=true;intro?.finish();reader.dispose();cancelAnimationFrame(frame);observer?.disconnect();if(changeHandler)window.removeEventListener('lr-display-change',changeHandler);documentEffect.clear();scene?.dispose();titleRoll.destroy();counter.destroy();};
+  const dispose=()=>{if(destroyed)return;destroyed=true;intro?.finish();reader.dispose();cancelAnimationFrame(frame);observer?.disconnect();document.fonts?.removeEventListener('loadingdone',fontDone);if(changeHandler)window.removeEventListener('lr-display-change',changeHandler);documentEffect.clear();scene?.dispose();titleRoll.destroy();counter.destroy();};
   window.addEventListener('pagehide',event=>{documentEffect.clear();if(!(event as PageTransitionEvent).persisted)dispose();});
   function save(){try{sessionStorage.setItem('lr-selection',JSON.stringify(Object.fromEntries(memory)));}catch{}}
   function update(index:number,navigation?:ArchiveNavigation,audible=false){
@@ -67,8 +83,8 @@ export async function mountArchive(app:HTMLElement,business:HTMLElement,boot:any
     const changed=index!==selected;if(changed&&audible)sound.play('switch');
     openAction++;reader.cancel();access.removeAttribute('aria-busy');access.textContent='打开当前档案';
     selected=index;const r=records[index];memory.set(archiveColumns[lane],r.id);save();
-    scene?.select(selected,navigation);title.setAttribute('aria-label',r.title);titleRoll.update({text:r.title,animated:!prefs.reduced});counter.update({value:columnFiles(lane).indexOf(selected)+1,animated:!prefs.reduced});
-    identity.textContent=r.id.replace(/^(repo|run):/,'');description.textContent=r.description;access.href=boot.page_kind==='report'?'#lr-native-records':r.url;access.textContent=boot.page_kind==='report'?'阅读下方报告':'打开当前档案';root.dataset.selectedIdentity=r.id;
+    scene?.select(selected,navigation);title.classList.toggle('lr-human-title',!!r.humanTitle);title.setAttribute('aria-label',r.title);fitTitle(true);counter.update({value:columnFiles(lane).indexOf(selected)+1,animated:!prefs.reduced});
+    identity.textContent=r.identity||r.id.replace(/^(repo|run):/,'');description.textContent=r.description;source.textContent=r.source||'';source.hidden=!r.source;access.href=boot.page_kind==='report'?'#lr-native-records':r.url;access.textContent=boot.page_kind==='report'?'阅读下方报告':'打开当前档案';root.dataset.selectedIdentity=r.id;
     // Rebuild a bounded tick window when the current group or selection changes.
     ticks.replaceChildren();const files=columnFiles(lane);const at=files.indexOf(selected);const start=Math.max(0,Math.min(files.length-9,at-4));
     files.slice(start,start+9).forEach((value,j)=>{const tick=el('button',String(start+j+1));tick.type='button';tick.dataset.lrSound='handled';tick.setAttribute('aria-label',`选择 ${records[value].title}`);tick.setAttribute('aria-pressed',String(value===selected));tick.onclick=()=>update(value,undefined,true);ticks.append(tick);});
@@ -79,7 +95,7 @@ export async function mountArchive(app:HTMLElement,business:HTMLElement,boot:any
   group.onchange=()=>{
     reader.cancel();access.removeAttribute('aria-busy');mode='archive';scene?.setMode(mode);
     lane=Number(group.value);const files=columnFiles(lane);const remembered=files.find(i=>records[i].id===memory.get(archiveColumns[lane]));
-    if(!files.length){scene?.renderer.domElement.setAttribute('hidden','');title.setAttribute('aria-label','此分组没有档案');titleRoll.update({text:'此分组没有档案'});identity.textContent='';description.textContent='请选择其他分组。';ticks.replaceChildren();previous.disabled=next.disabled=true;access.hidden=true;return;}
+    if(!files.length){scene?.renderer.domElement.setAttribute('hidden','');title.setAttribute('aria-label','此分组没有档案');titleRoll.update({text:'此分组没有档案'});identity.textContent='';description.textContent='请选择其他分组。';source.hidden=true;ticks.replaceChildren();previous.disabled=next.disabled=true;access.hidden=true;return;}
     const index=remembered??files[0];scene?.renderer.domElement.removeAttribute('hidden');access.hidden=false;update(index,{cell:fileLocation(index,lane)},true);
   };
   update(selected);
@@ -107,7 +123,7 @@ export async function mountArchive(app:HTMLElement,business:HTMLElement,boot:any
       catch{intro?.finish();documentEffect.clear();root.dataset.scene='failed';if(reader.active)location.assign(reader.url);else{dispose();root.remove();app.append(el('p','三维展示中断；原生内容和操作仍可使用。','lr-notice'));}return;}
       frame=requestAnimationFrame(draw);
     };frame=requestAnimationFrame(draw);
-    observer=new ResizeObserver(()=>{if(!body.hidden)scene?.resize();documentEffect.refresh();});observer.observe(host);
+    observer=new ResizeObserver(()=>{if(!body.hidden)scene?.resize();documentEffect.refresh();fitTitle();});observer.observe(host);
     const displayChange=()=>{
       if(prefs.flat&&reader.active){location.assign(reader.url);return;}
       document.documentElement.classList.toggle('lr-reduced',!!prefs.reduced);scene?.setReduced(!!prefs.reduced);scene?.setQuality(qualityPresets[prefs.quality as 'original'|'balanced'|'performance']||qualityPresets.original);

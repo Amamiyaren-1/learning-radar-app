@@ -9,6 +9,9 @@
 .lr-file-number{font-size:clamp(64px,6vw,108px);line-height:1.1;font-weight:400}
 .lr-file-title{font:400 clamp(20px,1.7vw,30px)/1.4 var(--lr-mono);border:0;margin:0;padding:0;max-width:100%}
 .lr-file-title .rolling-number{max-width:100%;white-space:normal}
+.lr-file-title{width:100%;white-space:normal;overflow-wrap:anywhere}
+.lr-file-title.rn-root[data-title-wrap=true]{width:100%!important;white-space:normal}
+.lr-file-title.lr-human-title{font-family:var(--lr-font)}
 .lr-file-identity{font:400 12px/1.6 var(--lr-mono);color:var(--lr-muted);max-width:100%;margin:0}
 .lr-file-description{font-size:14px;line-height:1.7;max-width:100%;margin:0}
 .lr-archive-controls{display:flex;gap:8px;margin-top:auto;flex-wrap:wrap}

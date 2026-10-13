@@ -43,6 +43,8 @@ body{padding:0;max-width:none}
 @media(max-width:760px){#lr-business>h1{font-size:32px}.lr-nav{margin-bottom:24px}.lr-brand-cn{display:none}.lr-brand strong{font-size:20px}.lr-brand a{gap:12px}.lr-settings-trigger{margin-left:0}form[data-lr-action=search]{grid-template-columns:1fr}form[data-lr-action=search] button{width:100%}.lr-error-page{padding:16px}article[data-lr-role=report-body]{font-size:16px}}
 /* Direct/native report pages need the same bounded table scroll as GET panels. */
 article[data-lr-role=report-body] table{display:block;overflow-x:auto}
+.card[data-lr-role=project] h2.lr-project-title{font-family:var(--lr-font)}
+.lr-project-identity-title{font-family:var(--lr-mono)}
 .lr-topline>.lr-sound-toggle{flex-shrink:0}@media(max-width:760px){.lr-topline>span:nth-child(2){display:none}}
 /* Login: intro contour parameters rearrange ribs; labels and form stay fixed. */
 .lr-login-visual{display:none}

@@ -2,6 +2,33 @@
 from urllib.parse import urlencode
 
 
+def project_display_html(project):
+    from .web import escape
+    parts = ['<p class="lr-identity">'+escape(project.get('repo_label') or project['repo'] or '未分类')+'</p>',
+             '<p>'+escape(project.get('display_summary', project['description']))+'</p>',
+             '<p class="lr-meta">'+escape(project.get('display_note',''))+'</p>']
+    if project.get('display_missing'):
+        parts.append('<p class="lr-meta">中文缺项：'+escape('、'.join(project['display_missing']))+'；相应字段保留原资料。</p>')
+    parts.append('<details><summary>展示来源</summary>')
+    for field, label in (('title', '标题'), ('summary', '摘要')):
+        source = (project.get('display_sources') or {}).get(field) or {}
+        kind = {'published':'已发布保存报告','draft':'未发布拒绝草稿（内容未核验）'}.get(source.get('kind'),'原项目资料')
+        link = '<a href="'+escape(source['url'])+'">相关报告</a>' if source.get('url') else ''
+        parts.append('<p>'+escape(label+'：'+kind)+' '+link+'</p>')
+    parts.append('</details><details><summary>项目原文简介</summary><p>'+escape(project.get('original_summary',project['description']) or '原简介未记录')+'</p>')
+    original = project.get('original_summary_source') or {}
+    parts.append('<p class="lr-meta">'+escape(original.get('label') or '保存的项目简介（来源未记录）')+'</p>')
+    if original.get('url'):
+        parts.append('<p><a href="'+escape(original['url'])+'">项目原文来源</a></p>')
+    parts.append('</details>')
+    return ''.join(parts)
+
+
+def project_title_class(project):
+    source = (project.get('display_sources') or {}).get('title') or {}
+    return 'lr-project-title' if source.get('kind') in ('published','draft') else 'lr-project-identity-title'
+
+
 def render_projects(projects, query, demo=False):
     from .web import page, escape, demo_banner, report_label, notification_label, TASK_STATES, RUN_STATES
     from .feedback import ITEMS, CHOICES
@@ -16,18 +43,18 @@ def render_projects(projects, query, demo=False):
             repo = project['repo']
             labels = sorted({t['label'] for t in project['tags']})
             latest = project['reports'][0]
-            body.append('<div class="card" data-lr-role="project" data-repo="'+escape(repo)+'"><h2><a href="/history?'+escape(urlencode({'project':repo}))+'">'+escape(repo or '未分类')+'</a></h2>')
-            body.append('<p>'+escape(project['description'])+'</p><p>标签：'+escape('、'.join(labels) or '未分类')+'</p>')
+            body.append('<div class="card" data-lr-role="project" data-repo="'+escape(repo)+'"><h2 class="'+project_title_class(project)+'"><a href="/history?'+escape(urlencode({'project':repo}))+'">'+escape(project.get('display_title') or repo or '未分类')+'</a></h2>')
+            body.append(project_display_html(project)+'<p>标签：'+escape('、'.join(labels) or '未分类')+'</p>')
             body.append('<p>最新结果：'+escape(report_label(latest['report_status']))+' · '+escape(latest['date'])+'</p></div>')
         if not projects:
             body.append('<p>没有匹配项目。</p>')
     else:
         project = next((p for p in projects if p['repo'] == selected), None)
-        body.append('<p><a href="/history">← 全部项目</a></p><h2>'+escape(selected or '未分类')+'</h2>')
+        body.append('<p><a href="/history">← 全部项目</a></p><h2 class="'+project_title_class(project or {})+'">'+escape((project or {}).get('display_title') or selected or '未分类')+'</h2>')
         if project:
             if selected:
                 body.append('<a href="https://github.com/'+escape(selected)+'">项目仓库</a>')
-            body.append('<p>'+escape(project['description'])+'</p><h3>标签与来源</h3>')
+            body.append(project_display_html(project)+'<h3>标签与来源</h3>')
             if not project['tags']:
                 body.append('<p>未分类：没有可靠的保存标签。</p>')
             for tag in project['tags']:
