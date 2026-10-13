@@ -14,9 +14,10 @@ ROOT = Path(__file__).resolve().parents[1]
 DIRECTORIES = ('learnradar/', 'prompts/', 'tests/', 'frontend/src/', 'frontend/tests/', 'frontend/scripts/', 'frontend/public/', 'frontend/licenses/', 'frontend/templates/')
 FILES = {'.env.example', '.gitignore', 'README.md', 'config/settings.toml', 'config/topics.toml',
          'frontend/package.json', 'frontend/package-lock.json', 'frontend/tsconfig.json',
-         'scripts/lr.ps1', 'scripts/demo.ps1', 'scripts/ui_manifest.py', 'scripts/ui_fixture.py',
+         'scripts/lr.ps1', 'scripts/demo.ps1', 'scripts/start.ps1', 'scripts/ui_manifest.py', 'scripts/ui_fixture.py',
          'scripts/ui_integration.py', 'scripts/release_audit.py', 'scripts/public_export.py',
-         'scripts/public_smoke.py', 'scripts/offline_recheck.py', 'docs/FEEDBACK.md', 'docs/PUBLIC-SOURCE-GUIDE.md', 'docs/VIDEO-OUTLINE.md'}
+         'scripts/public_smoke.py', 'scripts/offline_recheck.py', 'scripts/build_release_artifact.py',
+         'docs/DEPLOY-ARTIFACT-PROPOSAL.md', 'docs/FEEDBACK.md', 'docs/PUBLIC-SOURCE-GUIDE.md', 'docs/VIDEO-OUTLINE.md'}
 DENY = {'frontend/licenses/novecento-status.md', 'frontend/licenses/novecento-webfonts.json',
         'frontend/licenses/NOVECENTO-WEBFONT-NOTICE.txt', 'frontend/licenses/resource-inventory.json'}
 

@@ -210,6 +210,26 @@ def analyze_example_content(text: str) -> dict[str, Any]:
     }
 
 
+def analyze_readme_entry(text: str, repo: str) -> dict[str, Any]:
+    """Signals in the retained README excerpt, never an installation result."""
+    result = analyze_example_content(text)
+    if result['example_signal']:
+        return result
+    # Colab tutorials can provide numbered setup/run steps and inline install
+    # commands without fenced code. Require a notebook in this same repository,
+    # multiple actual steps, setup prerequisites and an explicit cell-run action.
+    prefix = 'https://colab.research.google.com/github/' + repo.lower() + '/blob/'
+    notebooks = re.findall(r'https://colab\.research\.google\.com/github/[^\s)<>]+\.ipynb', text, re.I)
+    steps = len(re.findall(r'(?m)^\s*\d+[.)]\s+\S', text))
+    run_cells = re.search(r'run\s+(?:[^\n]{0,50})?(?:top\s+to\s+bottom|all\s+(?:the\s+)?cells)', text, re.I)
+    prerequisites = re.search(r'API\s+key|secret|prerequisite|前置条件|密钥', text, re.I)
+    if (any(url.lower().startswith(prefix) for url in notebooks)
+            and steps >= 2 and run_cells and prerequisites):
+        result['example_signal'] = True
+        result['signals'].append('同仓库Colab notebook链接与编号前置/运行步骤（未运行）')
+    return result
+
+
 GITHUB_BLOB = re.compile(
     r"https?://github\.com/(?P<owner>[^/]+)/(?P<repo>[^/]+)/(?:blob|tree)/[^/]+/(?P<path>[^\s)#?]+)",
     re.I,

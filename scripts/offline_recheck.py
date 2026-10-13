@@ -90,6 +90,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="对已保存的运行做离线结构复检（不调用模型）")
     parser.add_argument("run_id", help="data/runs 下的运行目录名")
     parser.add_argument("--data-dir", default="data", help="数据目录（默认 data）")
+    parser.add_argument("--out", type=Path, help="独立复核文件；默认沿用运行目录offline-recheck.json")
     args = parser.parse_args(argv)
 
     run_dir = Path(args.data_dir) / "runs" / args.run_id
@@ -192,7 +193,9 @@ def main(argv: list[str] | None = None) -> int:
             "若 conversions 非空，说明该旧产物缺少显式可执行状态，复检按最小状态补为 false 后判定，不把它当作已提供可执行动作。"
         ),
     }
-    (run_dir / "offline-recheck.json").write_text(
+    output = args.out or run_dir / "offline-recheck.json"
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
     )
     print(
@@ -210,7 +213,7 @@ def main(argv: list[str] | None = None) -> int:
             indent=2,
         )
     )
-    print(f"已写入 {run_dir / 'offline-recheck.json'}")
+    print(f"已写入 {output}")
     return 0 if summary["ok"] else 1
 
 

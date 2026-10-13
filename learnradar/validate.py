@@ -22,7 +22,7 @@ from typing import Any, Iterable
 
 from .evidence import Evidence, normalize_repo_name, quote_supported_by
 
-RULES_VERSION = "qa-6"
+RULES_VERSION = "qa-7"
 CONTENT_REVIEW_PENDING = "not_performed"
 CONTENT_REVIEW_MANUAL = "performed_manual"
 
@@ -273,6 +273,18 @@ def validate_report(
             _err(result, "learning_action.action 不能为空")
         entry = str(action.get("entry", ""))
         is_link = entry.startswith(("http://", "https://"))
+        if entry:
+            from urllib.parse import urlsplit
+            from .net import unrequestable_reason
+            try:
+                parts = urlsplit(entry)
+                valid_url = (is_link and bool(parts.hostname) and not parts.username
+                             and not parts.password and not unrequestable_reason(entry)
+                             and not re.search(r'[\s（）<>"`]', entry))
+            except ValueError:
+                valid_url = False
+            if not valid_url:
+                _err(result, 'learning_action.entry 只能是明确http(s) URL或空字符串；缺口说明放在action等文字字段')
         if executable is True:
             if not entry:
                 _err(result, "learning_action.entry 不能为空：提供了可执行动作就必须给出本次核验过的入口")

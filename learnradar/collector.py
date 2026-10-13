@@ -157,18 +157,28 @@ def collect_repository(
             collected.errors.append(f"读取发布记录失败：{exc}")
 
     if role == "target" and fetch_learning_entry:
-        entry = _collect_learning_entry(
-            client,
-            repo,
-            readme_text,
-            max_attempts=max(1, learning_entry_max_attempts),
-            ref=commit_sha,
-            max_files=max(0, example_file_max),
-            docs_followup_max=max(0, docs_followup_max),
-            entry_evidence_max=max(1, entry_evidence_max),
-            remaining_sources=max(0, max_sources - len(items)),
-            stamp=stamp,
-        )
+        from .readme import analyze_readme_entry
+        readme_source = next((item for item in items if item.kind == 'github_readme'), None)
+        readme_signals = analyze_readme_entry(readme_source.excerpt, full_name) if readme_source else {}
+        # Reuse an already-read and retained source, before following unrelated
+        # overview links. No new HTTP request or extra evidence slot is needed.
+        if readme_source and readme_signals.get('example_signal'):
+            entry = {'url': readme_source.url, 'verified': True, 'example_signal': True,
+                     'signals': readme_signals['signals'], 'evidence_id': readme_source.evidence_id,
+                     'source': 'retained_readme', 'error': '', 'attempts': [], 'example_files': []}
+        else:
+            entry = _collect_learning_entry(
+                client,
+                repo,
+                readme_text,
+                max_attempts=max(1, learning_entry_max_attempts),
+                ref=commit_sha,
+                max_files=max(0, example_file_max),
+                docs_followup_max=max(0, docs_followup_max),
+                entry_evidence_max=max(1, entry_evidence_max),
+                remaining_sources=max(0, max_sources - len(items)),
+                stamp=stamp,
+            )
         for record in entry.pop("pages", []) or []:
             collected.pages.append(record)
         for item in entry.pop("_evidence", []) or []:

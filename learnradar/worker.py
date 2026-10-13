@@ -167,7 +167,7 @@ def wait_for_task(settings,queue,task_id,*,poll_seconds=.2):
             time.sleep(poll_seconds)
 
 
-def run_worker(settings,queue,*,once=False,poll_seconds=1,demo_delay=1,scenario="success",on_ready=None):
+def run_worker(settings,queue,*,once=False,poll_seconds=1,demo_delay=1,scenario="success",on_ready=None,stop_requested=None):
     import time
     lock=WorkerLock(queue.directory)
     if not lock.acquire():
@@ -178,6 +178,8 @@ def run_worker(settings,queue,*,once=False,poll_seconds=1,demo_delay=1,scenario=
         if on_ready: on_ready()
         token=uuid.uuid4().hex
         while True:
+            if stop_requested and stop_requested():
+                return 0  # finish an in-flight task before reaching this point
             handled=work_once(settings,queue,token,demo_delay=demo_delay,scenario=scenario)
             if once:
                 return 0

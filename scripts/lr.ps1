@@ -8,6 +8,7 @@
 
 param(
     [switch]$DemoLauncher,
+    [switch]$RuntimeLauncher,
     [Parameter(ValueFromRemainingArguments = $true)]
     [string[]]$Args
 )
@@ -46,7 +47,7 @@ if (-not $python) {
 
 Push-Location $repoRoot
 try {
-    $module = if ($DemoLauncher) { "learnradar.demo_launcher" } else { "learnradar.cli" }
+    $module = if ($RuntimeLauncher) { "learnradar.runtime_launcher" } elseif ($DemoLauncher) { "learnradar.demo_launcher" } else { "learnradar.cli" }
     & $python -m $module @Args
     $code = $LASTEXITCODE
 } finally {

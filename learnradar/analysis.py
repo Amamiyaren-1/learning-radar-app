@@ -19,7 +19,7 @@ from .evidence import Evidence
 from .feedback import EMPTY_TEXT as NO_FEEDBACK_TEXT
 from .models import ModelAdapter, ModelError, ModelResponse
 
-PROMPT_VERSION = "analysis-10"
+PROMPT_VERSION = "analysis-12"
 
 SYSTEM_PROMPT = (
     "你是一名严格的技术分析助手，为一位置身中文环境的个人学习者做项目对比。"
@@ -77,7 +77,7 @@ def _learning_entry_block(target: dict[str, Any]) -> str:
     """把本次实际读取到的学习入口写进提示词；没读到示例信号就必须标为不可执行。"""
     entry = target.get("learning_entry") if isinstance(target, dict) else None
     if not isinstance(entry, dict) or not entry.get("url"):
-        return "本次没有取到可核验的学习入口：learning_action.entry 必须写成“暂不可执行”并说明原因。"
+        return '本次没有取到可核验的学习入口：executable=false，entry=""；缺口只写在action等文字字段，done_criteria允许为空。'
     url = str(entry["url"])
     if entry.get("verified") and entry.get("example_signal"):
         signals = "、".join(entry.get("signals") or []) or "检测到代码块与安装/运行片段"
@@ -94,11 +94,11 @@ def _learning_entry_block(target: dict[str, Any]) -> str:
         return (
             f"{url}（本次已实际读取，但没有检测到示例信号：{file_text}"
             f"{entry.get('error') or '本次未核验到可执行路径'}）："
-            "learning_action 必须写成“暂不可执行”并说明“本次未核验到可执行路径”，不得写成项目没有示例或教程质量问题。"
+            'learning_action.executable=false，entry仅保留上述URL或留空；action说明“本次未核验到可执行路径”，done_criteria允许为空。不得写成项目没有示例或教程质量问题。'
         )
     return (
         f"{url}（读取失败：{entry.get('error')}）：入口未被核验，"
-        "learning_action 必须写成“暂不可执行”并说明原因。"
+        'learning_action.executable=false，entry留空；缺口写在action，done_criteria允许为空。'
     )
 
 

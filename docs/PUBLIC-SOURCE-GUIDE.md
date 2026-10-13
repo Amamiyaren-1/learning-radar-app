@@ -8,6 +8,8 @@
 
 ## 运行与可选字体
 
+已有自己的正式账号/配置后可用scripts/start.ps1启动日常web/worker，-Action status/stop查看或请求停止，-WebOnly仅阅读；关闭浏览器不停止worker。未授权旧任务/通知先阻断，启动不创建任务或申请重试。使用自己的配置根目录，运行数据不进Git；Windows按PID+创建时间管理自身，当前任务完成后平稳退出。Linux仍用统一task_cli及经过实际部署评审的service，不能将Windows验证计为Linux/公网HTTPS通过。
+
 按README执行npm ci/build/test及scripts/demo.ps1。python scripts/public_smoke.py检查隔离fixture原生登录、一次broad发现、任务、发布报告、反馈和停止子进程；模型/GitHub/SMTP真实调用为0，不共享正式数据/账号。正式配置需自行填写忽略文件，使用者显式选择外部配置，不指向开发者机器；公网HTTPS等另行验收。
 
 没有商业NOVECENTO字体、含它的旧dist或历史blob。LR Novecento缺包时swap/系统回退，表单和报告可用。自行获得对应许可后在本机放入Normal400、DemiBold650（本次真实值，其它包须核实）、Bold700，文件名分别为frontend/public/fonts/NovecentoWide-Normal.woff2、NovecentoWide-DemiBold.woff2、NovecentoWide-Bold.woff2。公开候选.gitignore排除这些文件，不追加到公共Git/Release。不能转换Desktop OTF规避许可，自托管Webfont不自动允许字体再分发；通用MyFonts网页不替代对应EULA。
