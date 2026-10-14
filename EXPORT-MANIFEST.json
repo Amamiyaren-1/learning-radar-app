@@ -1,5 +1,5 @@
 {
-  "source_sha": "5429115bccefecd52b92be334b7b2a24aa5077d0",
+  "source_sha": "5b16121e3e5afcc5d165237c39c3d3f99d26c99a",
   "local_worktree_changes_included": false,
   "copied_files": [
     {
@@ -54,8 +54,8 @@
     },
     {
       "file": "docs/PUBLIC-SOURCE-GUIDE.md",
-      "bytes": 4711,
-      "sha256": "1679f97f33562c33f163cbfe475ed3d348ce13369745302c9e3ef767f2c7bade"
+      "bytes": 5465,
+      "sha256": "ca2544d76b743c0a0f172290d2738ad96c2471dd5d7d6dd30c416e1ece5b5df9"
     },
     {
       "file": "docs/VIDEO-OUTLINE.md",
@@ -434,8 +434,8 @@
     },
     {
       "file": "learnradar/analysis.py",
-      "bytes": 11217,
-      "sha256": "04d0d59f3524145df77fe1d5144b441c7bbf281c4f1f9e8c950711a2a81b7111"
+      "bytes": 14750,
+      "sha256": "540bbdf98b086427261c0f6eff5dc4a3fc5c53bc954533b9c6d0d083a3fb0a49"
     },
     {
       "file": "learnradar/archive.py",
@@ -479,8 +479,8 @@
     },
     {
       "file": "learnradar/cli.py",
-      "bytes": 87558,
-      "sha256": "67327060fd184568cb7021bb2512f979cd31d35a28121ef6bab10aa8a65b92ae"
+      "bytes": 90911,
+      "sha256": "3a294dfcc2c51807ce769cbd6db377fc26060a7f20971840892cbb96c0fee836"
     },
     {
       "file": "learnradar/cloud.py",
@@ -726,6 +726,11 @@
       "file": "tests/test_analysis_failures.py",
       "bytes": 4860,
       "sha256": "b6fbe15a5b1a577668413f7d3403c52c5dec933ee4c35838e219e426e89ef680"
+    },
+    {
+      "file": "tests/test_analysis_validation_repair.py",
+      "bytes": 15570,
+      "sha256": "d6e4f88eda1c2e88974034297709f8424c19b23e0022afb19ba75e72317602dd"
     },
     {
       "file": "tests/test_auth.py",

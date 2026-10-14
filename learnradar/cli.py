@@ -381,6 +381,14 @@ def _has_readme(evidence: list[Evidence], repo: str) -> bool:
 def _learning_entry_from_evidence(evidence: list[Evidence], repo: str) -> dict[str, Any]:
     """重放时从保存的证据还原学习入口状态（含示例信号）。"""
     wanted = normalize_repo_name(repo)
+    from .readme import analyze_readme_entry
+    for item in evidence:
+        if item.kind == "github_readme" and normalize_repo_name(item.owner) == wanted:
+            analysis = analyze_readme_entry(item.excerpt, wanted)
+            if item.url and analysis.get("example_signal"):
+                return {"url": item.url, "verified": True, "example_signal": True,
+                        "signals": analysis.get("signals") or [], "evidence_id": item.evidence_id,
+                        "source": "retained_readme", "error": "", "example_files": []}
     for item in evidence:
         if item.kind == "web_page" and normalize_repo_name(item.owner) == wanted:
             signal = "检测到示例信号" in (item.notes or "")
@@ -520,6 +528,12 @@ def run_replay_analysis(settings: Settings, args: argparse.Namespace, *, hooks=N
             feedback_text=_feedback_prompt_text(settings, [target_name, *comparator_names]),
             max_calls=max(1, min(settings.limit("analysis_max_calls", 2), budget.remaining)),
             sink=responses_seen,
+            report_validator=lambda draft: _validate_analysis_candidate(
+                settings, draft, evidence=evidence, target_name=target_name,
+                comparator_names=comparator_names, require_quotes=True,
+                require_verified_entry=bool(learning_entry.get("verified")),
+                verified_entry=learning_entry or None,
+            ).errors,
         )
     except (ModelError, ModelBudgetExceeded, AnalysisError, FetchError) as exc:
         failed_usage = _failure_usage_rows(
@@ -561,6 +575,12 @@ def run_replay_analysis(settings: Settings, args: argparse.Namespace, *, hooks=N
 
     for response in outcome.responses:
         usage_entries.append(_usage_entry("analysis", response, analysis_model, role="analysis"))
+    for error in outcome.failed_requests:
+        usage_entries.append(_failure_entry("analysis", analysis_model, error, role="analysis", calls=1))
+    _save_analysis_checks(runs_dir, outcome)
+    (runs_dir / "raw_model_output.txt").write_text(
+        "\n\n=====\n\n".join(response.text for response in outcome.responses), encoding="utf-8"
+    )
     _snapshot_usage(
         runs_dir, usage_entries, status="in-progress-analysis", budget=budget, audit=audit
     )
@@ -968,6 +988,39 @@ def _safe_title(report: Any, run_id: str) -> str:
     return f"[结构异常] {run_id}"
 
 
+def _validate_analysis_candidate(
+    settings: Settings, report: Any, *, evidence: list[Evidence], target_name: str,
+    comparator_names: list[str], require_quotes: bool = False,
+    require_verified_entry: bool = False, verified_entry: dict[str, Any] | None = None,
+) -> ValidationResult:
+    """纯预检与最终发布共用同一门槛；运行状态由程序生成，草稿不变。"""
+    from copy import deepcopy
+
+    draft = deepcopy(report)
+    verification = _generated_verification(evidence)
+    if isinstance(draft, dict):
+        draft["verification"] = verification
+    return validate_report(
+        draft, evidence=evidence, target_repo=target_name,
+        min_comparators=settings.limit("min_comparators", 2),
+        collected_repos=[target_name, *comparator_names], expected_verification=verification,
+        require_quotes=require_quotes, require_verified_entry=require_verified_entry,
+        verified_entry=verified_entry,
+    )
+
+
+def _save_analysis_checks(runs_dir: Path, outcome: Any) -> None:
+    """每次候选的检查与最终采用尝试单独落盘；不覆盖原始输出。"""
+    if not outcome.validation_checks:
+        return
+    (runs_dir / "analysis-validation.json").write_text(
+        json.dumps({"prompt_version": PROMPT_VERSION, "rules_version": RULES_VERSION,
+                    "checks": outcome.validation_checks, "selected_attempt": outcome.selected_attempt,
+                    "retry_kind": outcome.retry_kind, "retry_error": outcome.retry_error},
+                   ensure_ascii=False, indent=2), encoding="utf-8",
+    )
+
+
 def finalize_run(
     settings: Settings,
     *,
@@ -1015,13 +1068,9 @@ def finalize_run(
             report["model_claimed_verification"] = claimed
         report["verification"] = verification
 
-    validation = validate_report(
-        report,
-        evidence=evidence,
-        target_repo=target_name,
-        min_comparators=settings.limit("min_comparators", 2),
-        collected_repos=[target_name, *comparator_names],
-        expected_verification=verification,
+    validation = _validate_analysis_candidate(
+        settings, report, evidence=evidence, target_name=target_name,
+        comparator_names=comparator_names,
         require_quotes=require_quotes,
         require_verified_entry=require_verified_entry,
         verified_entry=verified_entry,
@@ -1689,6 +1738,12 @@ def run_recommendation(settings: Settings, args: argparse.Namespace, *, hooks=No
             feedback_text=_feedback_prompt_text(settings, [target_name, *comparator_names]),
             max_calls=max_calls,
             sink=responses_seen,
+            report_validator=lambda draft: _validate_analysis_candidate(
+                settings, draft, evidence=all_evidence, target_name=target_name,
+                comparator_names=comparator_names, require_quotes=True,
+                require_verified_entry=bool((collected_target.learning_entry or {}).get("verified")),
+                verified_entry=collected_target.learning_entry or None,
+            ).errors,
         )
     except (ModelError, ModelBudgetExceeded, AnalysisError, FetchError) as exc:
         # 失败也要把已经发生的调用、消耗和原始输出留下，便于核对与修复。
@@ -1745,6 +1800,9 @@ def run_recommendation(settings: Settings, args: argparse.Namespace, *, hooks=No
                 f"  - 注意：配置的模型是 {candidate.model_id}，接口回报的是 "
                 f"{entry.get('reported_model_id')}；已同时记录，请核对是否被替换"
             )
+    for error in outcome.failed_requests:
+        usage_entries.append(_failure_entry("analysis", candidate, error, role="analysis", calls=1))
+    _save_analysis_checks(runs_dir, outcome)
     (runs_dir / "raw_model_output.txt").write_text(
         "\n\n=====\n\n".join(response.text for response in outcome.responses), encoding="utf-8"
     )
