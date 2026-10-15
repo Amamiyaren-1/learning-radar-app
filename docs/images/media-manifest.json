@@ -18,19 +18,23 @@
   },
   {
     "file": "docs/images/fixture-reading.gif",
-    "bytes": 1900613,
-    "sha256": "fbdfb08e6bea185ba657c4994d35455addd41b531267a9eafd1c076e3423ae55",
-    "source_raw_frames": 68,
-    "encoded_frames": 38,
-    "duration_ms": 14340,
-    "source_span_ms": 12307,
+    "bytes": 8727738,
+    "sha256": "1338f6b4a42c530f723403fe2b12b141c19def07e0a9f298653f7f7199f340a6",
+    "source": "Owner-supplied MP4 showing synthetic fixture data; original remains outside Git and release archives",
+    "source_dimensions": [
+      1920,
+      1080
+    ],
+    "source_frame_rate": 60,
+    "encoded_frames": 139,
+    "frame_rate": 10,
+    "duration_ms": 13900,
     "speed": 1,
     "dimensions": [
-      1280,
-      748
+      960,
+      540
     ],
-    "editing": "Actual 1280x720 viewport plus 28px disclosure strip; variable frame sampling, shared 256-color palette without dithering; final idle wait shortened. No interpolation, retouching, scene edits, or historic-report imagery.",
-    "capture_max_gap_ms": 1355,
-    "all_encoded_frames_match_quantized_captures": true
+    "editing": "Full owner-supplied clip at original speed; downscaled to 960x540 and sampled to 10 fps. Shared 96-color palette without dithering. Audio and source metadata removed. No crop, new scene frames, retouching, added caption strip or UI changes.",
+    "exif_or_comment_metadata": false
   }
 ]

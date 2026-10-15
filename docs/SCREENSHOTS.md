@@ -10,29 +10,30 @@ result, email receipt or candidate installation.
 | GIF | Sequence | Encoding |
 | --- | --- | --- |
 | [Intro](images/fixture-intro.gif) | Original full-screen intro, glass reveal, return to archive array | 1120×654, 146 frames, 22.96 seconds, 2× playback, about 9.55 MiB |
-| [Reading](images/fixture-reading.gif) | Keyboard selection, open/extract action, frosted-to-clear reveal and saved fixture reading | 1280×748, 38 frames, 14.34 seconds, 1× playback, about 1.81 MiB |
+| [Reading](images/fixture-reading.gif) | Owner-supplied fixture video: archive selection, extraction, reveal, reading and return | 960×540, 139 frames, 13.90 seconds, 1× playback, 10 fps, about 8.32 MiB |
 
-Both were captured from the same desktop in-app browser at 1280×720. The source
-rendering, model, materials, lights, camera and motion were not changed for the
-recording. The GIFs add a separate 28px disclosure strip outside the page;
-the intro is then resized. They use a shared 256-color palette per sequence
-without dithering, retain actual captures, merge identical frames and shorten
-the final idle wait. They contain no audio, interpolated frames or retouching.
+The intro keeps its existing actual-page capture and encoding: 1280×720 source,
+170 captured frames over about 46 seconds, a separate 28px disclosure strip,
+1120×654 output, shared 256-color palette and 2× playback. Its variable-rate
+screenshot sampling has source gaps up to 2.44 seconds; the final idle wait is
+shortened. Its 146 encoded frames match the quantized actual captures.
 
-Capture is variable-rate screenshot sampling, not a smooth screen video:
-source-frame gaps reach 2.44 seconds during intro and 1.36 seconds during the
-reading interaction. Brief transitions can therefore appear stepped. The intro
-is accelerated, while reading keeps recorded timing. No claims about live
-generation or rendering frame rate follow from these GIFs.
+The reading GIF replaces the earlier screenshot-sampled take with a video
+supplied by the owner. It preserves the complete approximately 13.94-second
+clip at original speed (13.90 seconds after GIF frame-time quantization),
+including the return to the list. The 1920×1080 / 60 fps source is downscaled to
+960×540 / 10 fps with a shared 96-color palette without dithering. Audio and
+source-file metadata are removed. No crop, new caption strip, synthesized
+scene frames, retouching, or application UI changes are applied.
 
-The complete selected takes (170 intro frames / about 46 seconds and 68 reading
-frames / about 18 seconds) were visually reviewed, including material omitted
-from the shortened ending. Every encoded GIF frame was decoded and compared
-with its quantized source capture. No credentials, personal profile, real
-feedback, notification, terminal or private report is visible. Source captures
-remain outside Git and outside the release archive. See
-[media-manifest.json](images/media-manifest.json) for file hashes and encoding
-details. Static images below remain available for readability and reduced motion.
+The source clip shows synthetic fixture archives and a saved fixture report;
+it does not show live generation. The full interval and all 139 final GIF
+frames were reviewed. No credentials, personal profile, real feedback,
+notification, terminal or private report is visible. Original video and local
+conversion/review files remain outside Git and release archives. Intro and
+static images are unchanged. See [media-manifest.json](images/media-manifest.json)
+for file hashes and encoding details. Static alternatives below remain
+available for readability and reduced motion.
 
 The [historical excerpt](examples/historical-project.en.md) is a separate,
 rewritten public-project analysis from 2026-09-23, with its original storage

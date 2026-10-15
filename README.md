@@ -11,7 +11,7 @@
 ![fixture 开场进入阵列](docs/images/fixture-intro.gif)
 ![fixture 选中、抽取、解密与阅读](docs/images/fixture-reading.gif)
 
-实际页面录制，使用恢复后的原版视觉和隔离合成数据。GIF 无声、采样降帧，开场 2 倍速、阅读原速；未生成新报告。剪辑与帧审查说明见[图像索引](docs/SCREENSHOTS.md)。静态入口：[首页](docs/images/fixture-home.jpg) · [报告阅读](docs/images/fixture-report.jpg)。另有[历史分析脱敏节选](docs/examples/historical-project.zh.md)，与 GIF 的合成报告分开标注。
+实际页面演示使用恢复后的原版视觉和隔离合成数据。开场保留原录制，2 倍速；第二张由使用者提供的视频转为 GIF，整段原速、10 帧/秒。两张均无声，未生成新报告。剪辑与帧审查说明见[图像索引](docs/SCREENSHOTS.md)。静态入口：[首页](docs/images/fixture-home.jpg) · [报告阅读](docs/images/fixture-report.jpg)。另有[历史分析脱敏节选](docs/examples/historical-project.zh.md)，与 GIF 的合成报告分开标注。
 
 ## 前置条件
 

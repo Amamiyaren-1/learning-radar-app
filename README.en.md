@@ -11,7 +11,7 @@ Sign in → broad or focused discovery → queued execution and budgets → sour
 ![Fixture intro into the archive array](docs/images/fixture-intro.gif)
 ![Fixture selection, extraction, decryption and reading](docs/images/fixture-reading.gif)
 
-Recorded from actual pages with the restored original visuals and isolated synthetic data. GIFs are silent and frame-sampled: intro at 2× speed, reading at 1×. No new report is generated. See the [capture index](docs/SCREENSHOTS.md) for editing and frame-review details. Static alternatives: [home](docs/images/fixture-home.jpg) · [report](docs/images/fixture-report.jpg). A separate [deidentified historical analysis excerpt](docs/examples/historical-project.en.md) is labeled independently from the synthetic GIF report.
+Actual-page demonstrations use the restored original visuals and isolated synthetic data. The intro retains its existing capture at 2× speed; the second GIF converts an owner-supplied video in full at 1× speed and 10 fps. Both GIFs are silent. No new report is generated. See the [capture index](docs/SCREENSHOTS.md) for editing and frame-review details. Static alternatives: [home](docs/images/fixture-home.jpg) · [report](docs/images/fixture-report.jpg). A separate [deidentified historical analysis excerpt](docs/examples/historical-project.en.md) is labeled independently from the synthetic GIF report.
 
 ## Prerequisites
 

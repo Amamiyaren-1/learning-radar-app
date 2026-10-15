@@ -195,13 +195,13 @@
     },
     {
       "file": "README.en.md",
-      "bytes": 10421,
-      "sha256": "16317f16cd2ef1484abce367ea20cd2cbd7a6eab248caf3ceb6d4ad16d8c2971"
+      "bytes": 10505,
+      "sha256": "bd474914cded770f1021d7356f36634a64a17d7ae51d77b911ac4a7103b8c120"
     },
     {
       "file": "README.md",
-      "bytes": 9494,
-      "sha256": "28c4914738ba44371bf386047c543557fd5709edd0ad3ebf42e1cc4749b10231"
+      "bytes": 9560,
+      "sha256": "1399545e0129b8344cecfb10d1b8401265ad23b0f1ee749187aea6fca8d92c45"
     },
     {
       "file": "config/email.example.toml",
@@ -260,8 +260,8 @@
     },
     {
       "file": "docs/SCREENSHOTS.md",
-      "bytes": 3952,
-      "sha256": "e3a435b6e3120d7b95274aa06a4b0456773572169a482a8aae63a0accf6f5fd5"
+      "bytes": 4006,
+      "sha256": "42c03ff09d3e202fb6695286b8b227b021daebbc0bf820f0821f3091de645898"
     },
     {
       "file": "docs/SOURCE-SYNC.md",
@@ -310,8 +310,8 @@
     },
     {
       "file": "docs/images/fixture-reading.gif",
-      "bytes": 1900613,
-      "sha256": "fbdfb08e6bea185ba657c4994d35455addd41b531267a9eafd1c076e3423ae55"
+      "bytes": 8727738,
+      "sha256": "1338f6b4a42c530f723403fe2b12b141c19def07e0a9f298653f7f7199f340a6"
     },
     {
       "file": "docs/images/fixture-report.jpg",
@@ -325,8 +325,8 @@
     },
     {
       "file": "docs/images/media-manifest.json",
-      "bytes": 1353,
-      "sha256": "4a60d0d1ca71b495090b0ab35fc55cd4b52586d0467e2ea509642fafcb0647e5"
+      "bytes": 1492,
+      "sha256": "5c87b263f2b6015700c2349889afdc86bade00a08fea05c17957ac7487cd228a"
     },
     {
       "file": "docs/video/NARRATION.zh.md",
