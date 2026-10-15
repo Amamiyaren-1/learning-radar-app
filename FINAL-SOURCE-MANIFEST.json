@@ -5,12 +5,12 @@
   "note": "EXPORT-MANIFEST is historical provenance, not equality with this source. This file excludes itself; the external artifact manifest binds its hash and the committed source SHA.",
   "allowed_change_categories": [
     "English developer docs/comments and bilingual README",
-    "pending MIT proposal and third-party notices",
-    "original generic public geometry/loop and reachable-history resource exclusion",
-    "layered public optics and actual physical-material construction with fixture runtime audit",
+    "pending MIT proposal and precise third-party scope notices",
+    "owner-directed restoration of accepted original visuals; substitute geometry/contour withdrawn",
+    "commercial fonts excluded with existing fallback",
     "compatible Vite/esbuild security patches and dependency lock/notices",
     "scoped fake-adapter test precheck fixes and offline runner",
-    "review screenshots/video preparation and source/package tooling",
+    "actual restored-page screenshots/video preparation and source/package tooling",
     "reviewed-byte checkout attributes"
   ],
   "paths_different_from_export_baseline": [
@@ -68,18 +68,11 @@
     "frontend/licenses/npm/vite-LICENSE.md",
     "frontend/licenses/npm/webgpu_types-LICENSE",
     "frontend/licenses/reference-source.json",
+    "frontend/licenses/visual-baseline.json",
     "frontend/licenses/vite-LICENSE.md",
     "frontend/package-lock.json",
     "frontend/package.json",
-    "frontend/public/artwork/login-loop.svg",
-    "frontend/public/assets/archive-cassette.glb",
-    "frontend/scripts/make-public-assets.py",
-    "frontend/src/diagnostics.ts",
-    "frontend/src/reference/boot.ts",
-    "frontend/src/reference/brand.ts",
-    "frontend/src/reference/physical-material.ts",
-    "frontend/src/reference/scene.ts",
-    "frontend/tests/physical-material.test.mjs",
+    "frontend/tests/visual-baseline.test.mjs",
     "learnradar/__init__.py",
     "learnradar/analysis.py",
     "learnradar/browse.py",
@@ -168,8 +161,8 @@
     },
     {
       "file": "AGENTS.md",
-      "bytes": 1528,
-      "sha256": "2b3869385217a2d111897e03a8f979b5144e6591b14c8328dc08a3267d38dd00"
+      "bytes": 1934,
+      "sha256": "bdb313c6da90aac145902948408df133ad367b6e2d8c9c2561447db5540bdb13"
     },
     {
       "file": "CONTRIBUTING.md",
@@ -193,13 +186,13 @@
     },
     {
       "file": "README.en.md",
-      "bytes": 8365,
-      "sha256": "39ba478e811ce48afd1aa00e85864e9637df180c6a9d63173bcaec134093e94c"
+      "bytes": 8527,
+      "sha256": "c73468d53520199c41a80f99007b59db27e50a1a9516e19f02b5eee7c7d1767b"
     },
     {
       "file": "README.md",
-      "bytes": 7698,
-      "sha256": "ad93610eca33219b24b3eb6b3bafb69fda8a49f65570fec3d3bf820101514cff"
+      "bytes": 7814,
+      "sha256": "1aadb7094ad18fcaaf1d08b134c1fc354d5c775509ddcdb7a1d6d9467b43756c"
     },
     {
       "file": "config/email.example.toml",
@@ -233,8 +226,8 @@
     },
     {
       "file": "docs/DEVELOPER-GUIDE.md",
-      "bytes": 6496,
-      "sha256": "d47391a9be61696c3e79527f9783da568647c3bf2f36950d97496b7d96e6409d"
+      "bytes": 6385,
+      "sha256": "6d977d2f76156f8a2494d6e5fdfdb153a02e25cc153ec71f35b7b37708f40d87"
     },
     {
       "file": "docs/FEEDBACK.md",
@@ -243,68 +236,68 @@
     },
     {
       "file": "docs/PUBLIC-SOURCE-GUIDE.md",
-      "bytes": 1214,
-      "sha256": "42c5961d41c6a095952d89da4c9b822deaa1ca91d554eeaa08b0db5110b13459"
+      "bytes": 1327,
+      "sha256": "d0c0ec065e15732344800e75dc5468148d9c2d56aa9710682fd4bbc16d75af07"
     },
     {
       "file": "docs/PUBLIC-VISUALS.md",
-      "bytes": 4693,
-      "sha256": "feca75cc04d7b050a4f33b5af26ad040ab03c5f91808247ed2fc5707e99b6398"
+      "bytes": 4163,
+      "sha256": "9b968e4ce597f2266e9b4110d42c877fd527b6d09b09a29bbb1d6148f7e42aab"
     },
     {
       "file": "docs/RELEASE-NOTES.md",
-      "bytes": 1349,
-      "sha256": "f265436e53bd679976c84462805327b10dacf36303074f2ef5eaeda445b148ae"
+      "bytes": 1443,
+      "sha256": "039f61c7ebe1946d29fb6f100f0ce82e136ad812cdb6658a5acd09ec34739ac8"
     },
     {
       "file": "docs/SCREENSHOTS.md",
-      "bytes": 1751,
-      "sha256": "fb1ff00561a80b49846367dcbd7d482c5709d2e8e3fb0fe378af9d4838628756"
+      "bytes": 1814,
+      "sha256": "93964066cc21b1750d40716e947dc5cc1558572746e647778c8b49b92a4e3b62"
     },
     {
       "file": "docs/SOURCE-SYNC.md",
-      "bytes": 1878,
-      "sha256": "75b1d4f967909f3110a162c23fb3afd6e41427e61219f074de131cb711efed37"
+      "bytes": 2349,
+      "sha256": "6aa2e2931d0fad59a331fd6e457ba09be082658c11d1d355418a8b1baadccb10"
     },
     {
       "file": "docs/THIRD-PARTY.md",
-      "bytes": 5177,
-      "sha256": "b7fa1432b4b813243209c02b68d7a0798110460c887e6d5b126153a230b4942a"
+      "bytes": 5094,
+      "sha256": "e8dfa4629cb36e2ddf0490ea2a277a9b86089a14cea447c34d17b3c0eac53152"
     },
     {
       "file": "docs/VIDEO-OUTLINE.md",
-      "bytes": 2164,
-      "sha256": "cc70abb63972d620d8e5725ce93b31e4fb6a3bbc412314f5e0158fdbd9c96973"
+      "bytes": 2320,
+      "sha256": "0bf3f4d49b2a552df81d0dae9bcec5cf9dc1e90f26c13c58b2e072ec0cb21a80"
     },
     {
       "file": "docs/images/fixture-home.jpg",
-      "bytes": 96197,
-      "sha256": "97489a6dc219862b509e5fcf5319f1f42c2d3506566c081e1ce76b4ff2388367"
+      "bytes": 81499,
+      "sha256": "911db01ac215611bf2b1fe0859d9c73d89e6ce5dec5906be853618ae84edfff9"
     },
     {
       "file": "docs/images/fixture-login.jpg",
-      "bytes": 50869,
-      "sha256": "40c504a1efb2bb38694ae917358d4af41ac0ea176323716103a6ab141d420580"
+      "bytes": 43128,
+      "sha256": "551c5f7e27cccacb72f278c8f1787bb104682d2fca4296f21ae94a1545ba382f"
     },
     {
       "file": "docs/images/fixture-projects.jpg",
-      "bytes": 54649,
-      "sha256": "2b0b2f1ed2258cb6b24cf2086a69aebbd50df394345a2aacfa6b67207ce18f99"
+      "bytes": 59571,
+      "sha256": "6e219f47cff82c7a192ff2eedeb816e32219fbcbef1f9fec74456ad0ea7d07f1"
     },
     {
       "file": "docs/images/fixture-report.jpg",
-      "bytes": 48566,
-      "sha256": "58d18fd4b71b8cc0af22bdf4666910865a1ec7a0bff66a087b3177bb967c4c4a"
+      "bytes": 68931,
+      "sha256": "cf28e393ad36c95f0d6d5cfe5e58298a2b7c2cb8d5a1fdc19d95d4eb4541b9dc"
     },
     {
       "file": "docs/images/fixture-task.jpg",
-      "bytes": 51731,
-      "sha256": "c4726836e86fffe64da21cd0d8b256c2b8db569cd2cd6265cc4f544762a794cd"
+      "bytes": 55298,
+      "sha256": "2c8d449454f4fa15154f45a3c7cbd45e5672d2d3d03593fe0e9e4814aece9aa3"
     },
     {
       "file": "docs/video/NARRATION.zh.md",
-      "bytes": 2518,
-      "sha256": "c318de24efeed88421dd8113044897cedf7674d5e605c0eb3efbeaf6440cb7c6"
+      "bytes": 2554,
+      "sha256": "fd3de7372d8ca99bc4980ff165d0155df0e3b95dcdd2cabf0b89602399b78516"
     },
     {
       "file": "frontend/licenses/MiSans-license.pdf",
@@ -448,8 +441,8 @@
     },
     {
       "file": "frontend/licenses/reference-source.json",
-      "bytes": 3682,
-      "sha256": "490d9d84c44c83877ba2c353ade787665924bdbf1205f22c5c3537c6bd145d50"
+      "bytes": 3742,
+      "sha256": "f02ee361b8080cc0140cc9218d2c8a6ce21c18e473fba888a353467b238f596e"
     },
     {
       "file": "frontend/licenses/rolling-number.txt",
@@ -472,6 +465,11 @@
       "sha256": "527adf9d4c760f7367c2aeffed6a89afba8ba40ea1b0efbc8f56496ad30ea9cf"
     },
     {
+      "file": "frontend/licenses/visual-baseline.json",
+      "bytes": 939,
+      "sha256": "7b8a1929c9672dcc7201af1ec122b397fa42640420cfa8d41f314a20b2a6bb0e"
+    },
+    {
       "file": "frontend/licenses/vite-LICENSE.md",
       "bytes": 101176,
       "sha256": "a77a1c089806b39ad339535bdf3677f636c91d96693e8ad7b11fe733f650ea64"
@@ -488,13 +486,13 @@
     },
     {
       "file": "frontend/public/artwork/login-loop.svg",
-      "bytes": 10679,
-      "sha256": "8c2cc8afa6b5083ac15f22dd21657775a3eaba7707fedd61754968c2f07c2aef"
+      "bytes": 10678,
+      "sha256": "388744710e6995f4a05896faf4493808adee9616136a1cc1db3b0a074c6d081b"
     },
     {
       "file": "frontend/public/assets/archive-cassette.glb",
-      "bytes": 3022712,
-      "sha256": "92eadaa534bcd6de93b1c2a5316e2458fb4660ca8d3e955fd41b6d586616e2ba"
+      "bytes": 3565116,
+      "sha256": "dda42b9b3b471d11c69820a64084d254a64b27761287ab0e35dd8387ec0a0bed"
     },
     {
       "file": "frontend/public/assets/radar-mark.svg",
@@ -547,11 +545,6 @@
       "sha256": "a6b2eecf6551d62f32d0278c9b183a8407999e427ad97753710b9d4771955d47"
     },
     {
-      "file": "frontend/scripts/make-public-assets.py",
-      "bytes": 10868,
-      "sha256": "23d395662eb2561cc5a83a2790aac6c29dfbc5da16d992baa85c7e88e0b1c167"
-    },
-    {
       "file": "frontend/scripts/make-ui-sounds.py",
       "bytes": 958,
       "sha256": "5fc1ca56d404dd866f40e2d6d06d51de602dfed4b178f4b79e9b5be0a288e5e3"
@@ -573,8 +566,8 @@
     },
     {
       "file": "frontend/src/diagnostics.ts",
-      "bytes": 6147,
-      "sha256": "1fe67f28cb2f7401ab4d99413c0f5dec0c1740a7f735b5a51b6e5e8e6a6d5885"
+      "bytes": 5956,
+      "sha256": "8f676a296a27c992b5e4cae5deabe343566bc4f6f6abc83d0eb31b3939ec9820"
     },
     {
       "file": "frontend/src/enhancement.css",
@@ -658,13 +651,13 @@
     },
     {
       "file": "frontend/src/reference/boot.ts",
-      "bytes": 10303,
-      "sha256": "abfaabf02f7eaf811c2a074ed7afd10018e0b5b16b32b24a8b523e47f37ce068"
+      "bytes": 10105,
+      "sha256": "390be3f44b2d51ebb02d49ea5e99b9e47ed6e3582b80b5be2a84ece4ce2f5a16"
     },
     {
       "file": "frontend/src/reference/brand.ts",
-      "bytes": 537,
-      "sha256": "64c1cfedc0829b6dda5d5144ee99d146035f2527a45accaac04a2e00468c0fef"
+      "bytes": 653,
+      "sha256": "1c80c126ab92611d9497636d4fac4dc677a16f93d39cdf1c30cc94769e41aca7"
     },
     {
       "file": "frontend/src/reference/data.ts",
@@ -707,11 +700,6 @@
       "sha256": "24d0448cd8125f9b3e96fb6c42e69cbdf7bafbd76e686269a3a7ed0c96c87ab9"
     },
     {
-      "file": "frontend/src/reference/physical-material.ts",
-      "bytes": 1346,
-      "sha256": "739172b6e79040638e299be9d55cfd7eed8a80c03e38268d9b22fb55db6d0385"
-    },
-    {
       "file": "frontend/src/reference/quality-renderer.ts",
       "bytes": 2020,
       "sha256": "cf19bdc43b2bc453806196d3aee3cfcd464c0eb588754964c16edf69b5fd2918"
@@ -723,8 +711,8 @@
     },
     {
       "file": "frontend/src/reference/scene.ts",
-      "bytes": 55676,
-      "sha256": "7a267d4ad076772bda13526c22d596b4c70ed4dbe1856d4e6e0a6bfae2ac2677"
+      "bytes": 55077,
+      "sha256": "3fb19a93b316fcd273300106ac2832f2768fa00b5a9aa9ad7e9e367f0fc3f4e0"
     },
     {
       "file": "frontend/src/reference/ui-transitions.ts",
@@ -782,11 +770,6 @@
       "sha256": "8c853217c6b80b33426210ca037f87ac2b54f648053e23775706e9b1257971f9"
     },
     {
-      "file": "frontend/tests/physical-material.test.mjs",
-      "bytes": 4417,
-      "sha256": "6ae88bc56bfc87ab517d7717cff9cd6a4ded67a29629d19f68f18c94ea001f05"
-    },
-    {
       "file": "frontend/tests/quality.test.mjs",
       "bytes": 370,
       "sha256": "a38ee2ab19d1771ab07b45ea7f874bbc61d280d6f464683885d27c9860a7e128"
@@ -795,6 +778,11 @@
       "file": "frontend/tests/sound.test.mjs",
       "bytes": 2019,
       "sha256": "926594b87a433cb94f3e676b9d663afd542eac456ac39e273d5bc2de27ad8ce6"
+    },
+    {
+      "file": "frontend/tests/visual-baseline.test.mjs",
+      "bytes": 2222,
+      "sha256": "4288d989a05b3997fc96fa54f4b55e47ca39b50271ede35c135e7d64ca493016"
     },
     {
       "file": "frontend/tsconfig.json",
@@ -1058,8 +1046,8 @@
     },
     {
       "file": "scripts/source_manifest.py",
-      "bytes": 2673,
-      "sha256": "39156abb998fe53a5d289a2c2627a30baf5f40909db8b2c52e2d065b79d778e0"
+      "bytes": 2675,
+      "sha256": "61f03a5d28d78b027e1f7f2615bfe8ae13884a5a795437ba4513485153018e07"
     },
     {
       "file": "scripts/start.ps1",

@@ -1,3 +1,3 @@
-// Original generic mathematical loop for the public edition; no game logo.
-export const bootMarkContour='M295 72C295 40 270 18 240 18C210 18 180 45 155 72C130 99 100 126 70 126C40 126 15 104 15 72C15 40 40 18 70 18C100 18 130 45 155 72C180 99 210 126 240 126C270 126 295 104 295 72Z';
-export const logo=`<svg viewBox="0 0 310 185" aria-hidden="true"><path d="${bootMarkContour}" fill="none" stroke="currentColor" stroke-width="20"/><text x="20" y="174" font-family="LR Novecento" font-size="16" letter-spacing="22">RADAR</text></svg>`;
+// RhineLabUI animated contour, © 2026 LBEILC, MIT. Display branding adapted.
+export const bootMarkContour='M295 73C295 41 273 15 240 15C221 15 207 23 192 38C186 43 181 47 176 52C127 96 103 128 70 128C38 128 15 101 15 70C15 39 37 15 70 15C103 15 127 48 156 75C182 99 208 128 240 128C273 128 295 105 295 73Z';
+export const logo=`<svg viewBox="0 0 310 185" aria-hidden="true"><path d="${bootMarkContour}" fill="none" stroke="currentColor" stroke-width="26"/><path d="M44 70h50M69 45v50M219 70h44" fill="none" stroke="currentColor" stroke-width="15"/><text x="20" y="174" font-family="LR Novecento" font-size="16" letter-spacing="22">RADAR</text></svg>`;

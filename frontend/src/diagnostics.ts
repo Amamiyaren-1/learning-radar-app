@@ -43,11 +43,7 @@ export function sceneProbe(host:HTMLElement,scene:ArchiveScene,fixture:boolean,p
         model,corners,pulses:s.pulses,resources:performance.getEntriesByType('resource').filter(e=>e.name.includes('archive-cassette')).length,
       };
       traceRows.push(row);if(traceRows.length>3000)traceRows.shift();
-      if(now-Number(trace.dataset.updated||0)>200){
-        trace.textContent=JSON.stringify(traceRows);trace.dataset.updated=String(now);
-        // Latest runtime instances only, bounded and fixture/trace opt-in.
-        panel.dataset.materialAudit=JSON.stringify({selected:s.materials,array:s.arrayMaterials});
-      }
+      if(now-Number(trace.dataset.updated||0)>200){trace.textContent=JSON.stringify(traceRows);trace.dataset.updated=String(now);}
       panel.dataset.pose=JSON.stringify(row);
     }
     if(!now||!active)return;

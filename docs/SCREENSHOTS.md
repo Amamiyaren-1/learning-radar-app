@@ -1,15 +1,27 @@
 # Screenshot index
 
-All images contain isolated synthetic fixture data from the public edition. No real profile, credential, notification address, report, or private operational record is pictured. The recorded discovery uses fake collection/models/SMTP; its saved report is not a real recommendation or a successful candidate installation.
+These images are captured from the actual restored application, using isolated
+synthetic fixture data. They contain no private profile, credentials,
+notification address or real report. Fixture output is not a real search/model
+result, email receipt or candidate installation.
 
 | Image | Content | Capture |
 | --- | --- | --- |
-| [Sign-in](images/fixture-login.jpg) | Empty fixture sign-in before entering credentials | Default desktop in-app browser |
-| [Home](images/fixture-home.jpg) | Saved synthetic report and discovery controls | Desktop-layout browser check |
-| [Task](images/fixture-task.jpg) | Completed fixture, published report, fake delivery label | Default desktop in-app browser |
-| [Report](images/fixture-report.jpg) | Saved fixture report and original generic archive card | Desktop-layout browser check |
-| [Projects](images/fixture-projects.jpg) | Synthetic project history and filter form | Desktop-layout browser check |
+| [Sign-in](images/fixture-login.jpg) | Empty sign-in and restored original contour artwork | Desktop in-app browser, 1280×720 |
+| [Home](images/fixture-home.jpg) | Actual restored original archive model and fixture identity | Desktop in-app browser, balanced quality |
+| [Task](images/fixture-task.jpg) | Saved completed offline fixture task | Desktop in-app browser |
+| [Report](images/fixture-report.jpg) | Saved fixture report with the restored original archive | Desktop in-app browser, balanced quality |
+| [Projects](images/fixture-projects.jpg) | Synthetic project history and native filter form | Desktop in-app browser |
 
-The image set shows generic public geometry/loop and font fallback, not the private commercial-font edition. HTTP/native-form checks and browser visual evidence are separate. The in-app browser checks stable home/project/report content, synthetic submission/feedback, and intro replay/skip. This is not cross-browser navigation acceptance or a full visual/motion regression.
+The accepted original model, contour, materials, lights, camera, layout and
+motion are restored. Commercial Novecento binaries remain absent, so existing
+MiSans/system fallback can change Latin text appearance and wrapping. See
+PUBLIC-VISUALS.md for the exact baseline and resource-scope distinctions.
 
-Screenshots are captured from an independent fresh installation with the public-logo compatibility fix, before its final documentation/manifest commit. Final source installation separately rebuilds the same runtime code from committed HEAD; the local handoff records both evidence and the final SHA. Do not imply that a screenshot embeds a later commit's provenance.
+Captures use a fixed viewport clip; viewport and canvas dimensions are checked
+before and after capture. No image retouching or model redesign is applied.
+The local handoff records capture metadata and runtime resource hashes; the
+artifact manifest binds the final source SHA and actual built assets. README
+changes do not imply a new runtime build when its source/assets are identical.
+Browser evidence is separate from native-form/HTTP fixture checks and does not
+establish cross-browser, public HTTPS or deployment acceptance.

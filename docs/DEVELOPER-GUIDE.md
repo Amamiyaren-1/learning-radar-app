@@ -34,9 +34,7 @@ Keep TLS verification enabled. Use about 10-second connection and 25-second read
 
 ## Assets and fallbacks
 
-Public geometry is regenerated with `python frontend/scripts/make-public-assets.py`; login artwork with `node scripts/generate-login-loop.mjs` from `frontend/`. These read no source mesh or game artwork. Renderer material names are compatibility identifiers. Generic geometry, mathematical contour, and font fallback are deliberate public-edition differences; private visuals remain intact.
-
-The public boot sequence accepts a contour-only SVG without a second decorative path and hides the original branded symbols. Browser acceptance covers natural intro completion, replay, and skip cleanup with the generic logo.
+Preserve the accepted original GLB, contour and derived artwork; see PUBLIC-VISUALS.md. The substitute generator and substitute-specific tests are removed. Original scene/boot behavior is restored. `node scripts/generate-login-loop.mjs` from `frontend/` derives artwork from the accepted contour; do not change that contour as part of release preparation. Keep the upstream MIT notice and the separate underlying-rights distinctions. Commercial-font fallback is the remaining documented visual difference.
 
 MiSans is embedded unchanged with copyright/license. Commercial Novecento is absent. Missing script/model/WebGL must leave native navigation/report/forms available; fixture variants in `scripts/ui_fixture.py` exercise those failures. No new product features or broad redesign are implied by release preparation.
 

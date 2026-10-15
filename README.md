@@ -94,4 +94,4 @@ Copy-Item config\profile.example.toml config\profile.toml
 
 原创代码有 [MIT 待确认草稿](LICENSE-MIT.DRAFT.txt)，**所有者尚未授权生效**，根 `LICENSE` 记录状态。第三方按[逐项清单](docs/THIRD-PARTY.md)及原许可证处理。视觉代码改编自 [LBEILC/RhineLabUI](https://github.com/LBEILC/RhineLabUI)，保留 MIT 版权；原创程序配乐保留来源。MiSans 未修改，随应用保留 Xiaomi 版权和许可，不标 MIT，不单独作为字体产品分发。
 
-公开版用自生成通用档案卡和数学轮廓，排除权利未明的旧模型、品牌轮廓及其生成图。商业 Novecento 和旧含字体构建不进入源码、可达历史或包；MiSans/系统字体回退可用，私有版视觉不改。开发有 AI 辅助，不虚构手写比例或第三方权利。未来提交和开发文档用英文，中文界面/报告/提示词/测试数据保留。[视频脚本](docs/VIDEO-OUTLINE.md)提供镜头及中文旁白，发布后才补实际开源与视频地址。
+本地公开候选恢复已认可的原版模型、轮廓、材质、灯光与动效，不再使用通用替代视觉。[视觉基线与分发范围](docs/PUBLIC-VISUALS.md)区分上游作者 MIT 授权与原作标识/视觉权利。商业 Novecento 和旧含字体构建不进入源码、可达历史或包；MiSans/系统字体回退可用，私有版视觉不改。开发有 AI 辅助，不虚构手写比例或第三方权利。未来提交和开发文档用英文，中文界面/报告/提示词/测试数据保留。[视频脚本](docs/VIDEO-OUTLINE.md)提供镜头及中文旁白，发布后才补实际开源与视频地址。

@@ -32,7 +32,7 @@ def main():
         data={'kind':'reviewed-public-source','historical_public_baseline':BASE,
               'historical_private_export_source':baseline['source_sha'],
               'note':'EXPORT-MANIFEST is historical provenance, not equality with this source. This file excludes itself; the external artifact manifest binds its hash and the committed source SHA.',
-              'allowed_change_categories':['English developer docs/comments and bilingual README','pending MIT proposal and third-party notices','original generic public geometry/loop and reachable-history resource exclusion','layered public optics and actual physical-material construction with fixture runtime audit','compatible Vite/esbuild security patches and dependency lock/notices','scoped fake-adapter test precheck fixes and offline runner','review screenshots/video preparation and source/package tooling','reviewed-byte checkout attributes'],
+              'allowed_change_categories':['English developer docs/comments and bilingual README','pending MIT proposal and precise third-party scope notices','owner-directed restoration of accepted original visuals; substitute geometry/contour withdrawn','commercial fonts excluded with existing fallback','compatible Vite/esbuild security patches and dependency lock/notices','scoped fake-adapter test precheck fixes and offline runner','actual restored-page screenshots/video preparation and source/package tooling','reviewed-byte checkout attributes'],
               'paths_different_from_export_baseline':changed,'files':current}
         (ROOT/NAME).write_bytes((json.dumps(data,ensure_ascii=False,indent=2)+'\n').encode())
     else:

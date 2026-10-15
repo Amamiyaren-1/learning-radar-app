@@ -1,59 +1,52 @@
-# Public visual resources and review
+# Accepted visual baseline
 
-Publication is paused pending owner visual review. Existing README screenshots
-are historical review images, not approval of the current candidate. Do not
-replace them until the owner has viewed the actual repaired application.
+The owner has withdrawn the generic visual replacements from stage A and the
+later optical-model experiment. The accepted original frontend is the only
+visual baseline. This restoration does not authorize another redesign.
 
-## Replacement decisions
+## Restored resources and behavior
 
-| Resource | Evidence and decision | Required visual continuity |
+The archive GLB, brand contour and derived login artwork are restored from the
+accepted source. The archive model also matches the preserved independent
+candidate. Its SHA-256 is
+`dda42b9b3b471d11c69820a64084d254a64b27761287ab0e35dd8387ec0a0bed`.
+`frontend/licenses/visual-baseline.json` records the resource hashes.
+
+The original material loading, frosted/clear reveal, internal optics, studio
+lights, camera, layout and motion are retained. The generic generator,
+physical-material promotion helper and substitute-specific material tests are
+removed. Tests retain the original model hash, real GLTFLoader cover-class
+check and original reveal behavior; they do not require substitute layers.
+No TypeScript assertion is treated as evidence of a runtime material class.
+The original GLB's transmission/IOR extensions create its physical glass.
+
+Executable TypeScript and effective CSS are checked against the accepted
+frontend. English comments, public dependency/build fixes, license records and
+the commercial-font exclusion are preserved. The private checkout and formal
+services/data are not modified.
+
+## Precise distribution distinctions
+
+| Path | Evidence/scope | Minimum treatment or outstanding decision |
 | --- | --- | --- |
-| Original archive GLB | Upstream commit `12cc5e4013acb9408f753ff71de6b8492299b7c8` explicitly grants MIT for author-owned GLB work and separately excludes the underlying game visual designs. Use original generic geometry as a conservative distribution choice; do not claim all original modeling is unlicensed. | Keep the accepted envelope, thin frosted cover, transmissive rim, layered optics, thickness, rounded highlights, fine edges and hardware. |
-| Original brand contour | The source's recognizable game-related mark has separate third-party rights; MIT code permission does not settle those rights. Keep the public mathematical loop and original Learning Radar radar mark. | Keep the existing animation machinery and line rendering. The loop/radar symbol is an intentional visible brand difference. |
-| Generated login artwork | Generated sections inherit their source contour. Generate from the public loop rather than retaining sections of the old branded mark. | Preserve motion cadence and the annotation/line layout. |
-| Commercial Novecento fonts | No redistribution grant supplied for this public package. Continue excluding font binaries, purchase materials and old builds containing them. | Existing fallback stack remains. Latin widths, weight, wrapping and label texture differ from the licensed private reference; this is a separate typography difference, not evidence of a material failure. |
-| MiSans | Unchanged application embedding with its own license and notice. | Preserve Chinese interface/report/prompt text. |
-| Renderer, reveal, studio lights, audio | Existing MIT notices and original generated public interaction sounds. No need to remove material or lighting behavior. | Keep camera, layout, extraction, projected-height frost/clear shader, studio environment and quality presets. |
+| `frontend/public/fonts/NovecentoWide-{Normal,DemiBold,Bold}.woff2` (not included) | The supplied MyFonts webfont notice restricts use by parties without a license; no public redistribution grant was supplied. | Continue excluding binaries, purchase materials and old font-containing builds/history/packages. Keep the existing fallback stack; do not redesign typography or layout. |
+| `frontend/public/assets/archive-cassette.glb` | Upstream README at `12cc5e4013acb9408f753ff71de6b8492299b7c8` explicitly includes author-owned GLB work in MIT and separately excludes underlying game visual-design rights. | Restore the accepted resource for local preparation and retain attribution. The author's grant is established; it does not settle separate underlying rights. Record that distinction for the distribution decision, without replacing geometry. |
+| `frontend/src/reference/brand.ts`, `frontend/public/artwork/login-loop.svg` | MIT code/author-created work; upstream separately excludes game names, marks and their visual presentation. | Restore the accepted contour/artwork locally. Identify the separate mark/design scope before publication; do not infer a grant for third-party marks or silently redraw the symbol. |
+| `frontend/public/fonts/MiSans-{Regular,Demibold}.woff2` | Existing unmodified application embedding under MiSans's own license. | Retain the font license and Xiaomi notice. Do not label it MIT or distribute a standalone font product. |
+| `frontend/public/audio/{click,switch,open,back}.wav` | Existing generated tones/noise, documented in audio-source.md; upstream game-film samples are excluded by its grant. | Retain the already prepared generated sounds. No new audio redesign is part of this restoration. |
 
-The new geometry uses three parallel rounded optical cartridges, routed
-substrate, recessed channels, registration grooves, amber inlays and four
-fasteners. It does not reuse source vertices, source lettering, textures or
-brand geometry. `make-public-assets.py` reads only Python standard-library
-inputs and produces a deterministic GLB. Material names are an interface to the
-existing renderer, not a claim that the old shape was copied.
+The Latin font fallback can change glyph shape, apparent case, weight, width,
+wrapping and canvas label text. It is the documented remaining visual
+difference from the private licensed-font installation. No commercial font is
+copied to make screenshots appear identical.
 
-## Actual materials
+## Acceptance and screenshots
 
-`physical-material.ts` clones an existing `MeshPhysicalMaterial`, preserving
-glTF extension inputs. For a standard glTF PBR material it creates a new
-`MeshPhysicalMaterial` and copies the common PBR base. A TypeScript assertion
-is never used as construction. Unsupported non-PBR materials fail explicitly.
-
-The GLB declares `KHR_materials_transmission`, `KHR_materials_volume`,
-`KHR_materials_ior` and `KHR_materials_clearcoat`. The cover is a closed thin
-volume with rolled edges. Interior optical layers use the existing opaque
-capture/compositing strategy because WebGL transmission is not recursive.
-The selected cover still uses `CardAppearance`'s projected-height reveal.
-At full clarity its transmission reaches 0.985, thickness 0.018 and attenuation
-distance 8; frost roughness remains controlled by the existing shader.
-
-Run `python scripts/make-public-assets.py`, `npm test` and `npm run build` from
-`frontend` (set `LEARNRADAR_PYTHON` if `python` is not the desired interpreter).
-The tests parse the actual GLB with Three's GLTFLoader, check runtime class,
-normal validity and required layers, and exercise the shared reveal uniforms
-at clarity 0, 0.5 and 1. The opt-in fixture `?ui_probe` panel includes actual
-selected and array material snapshots in its measured stats. It is never
-enabled on non-fixture pages.
-
-## Visual comparison protocol
-
-Use an isolated source-only copy of the accepted private frontend for local
-reference, never its formal database/config/service. Keep that copy and its
-commercial fonts outside the public repository/package. Use the same fixture
-seed, browser, viewport, balanced preset, refined lighting, selected identity
-and settled page state for both sides. Compare home, selected archive and
-report reading; retain full-page source captures and unmodified crops with
-capture metadata. Record font/brand/internal-shape differences separately.
-
-Browser inspection and automated checks do not substitute for the owner's
-visual approval. No real model, project collection or SMTP is needed.
+Build the restored frontend and use isolated fixture data only. Capture the
+actual pages at a recorded viewport and quality preset. Check viewport/canvas
+dimensions before and after capture; do not use a full-page capture if it
+temporarily changes vh-based scene height. README screenshots are refreshed
+from these actual restored pages, without image retouching or model redesign.
+Fixture success never proves real collection, model calls, SMTP, project
+installation or deployment. Publication remains subject to an explicit later
+instruction and the outstanding license/target/resource decisions.

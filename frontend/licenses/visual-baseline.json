@@ -1,0 +1,25 @@
+{
+  "kind": "owner-accepted-original-visual-baseline",
+  "accepted_source": "3ab3e289f8ff45f0709fb73c22883fd23350f1b6",
+  "resources": [
+    {
+      "file": "frontend/public/assets/archive-cassette.glb",
+      "sha256": "dda42b9b3b471d11c69820a64084d254a64b27761287ab0e35dd8387ec0a0bed"
+    },
+    {
+      "file": "frontend/src/reference/brand.ts",
+      "sha256": "1c80c126ab92611d9497636d4fac4dc677a16f93d39cdf1c30cc94769e41aca7"
+    },
+    {
+      "file": "frontend/public/artwork/login-loop.svg",
+      "sha256": "388744710e6995f4a05896faf4493808adee9616136a1cc1db3b0a074c6d081b"
+    }
+  ],
+  "allowed_differences": [
+    "English developer comments",
+    "commercial fonts excluded with existing fallback",
+    "public build/dependency fixes and notices"
+  ],
+  "substitute_geometry_or_contour_authorized": false,
+  "note": "Hashes describe restored local preparation; they do not grant underlying third-party marks/design rights."
+}
