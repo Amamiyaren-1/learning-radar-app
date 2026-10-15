@@ -4,6 +4,6 @@ The public line has independent sanitized export history, never private developm
 
 Use README.md or README.en.md for installation; DEVELOPER-GUIDE.md for architecture, fixture checks, authentication, budgets, and networking; THIRD-PARTY.md for exact material treatment. SOURCE-SYNC.md protects public English docs, licenses, assets, and history during future updates.
 
-The Chinese product interface, report/prompt templates, and test fixtures remain unchanged. Public developer prose/comments are English. The accepted original model/contour/rendering behavior is restored; generic replacements are withdrawn. Commercial-font fallback remains a documented difference. See PUBLIC-VISUALS.md for exact hashes and resource scope. Original-code MIT is still a proposal, not an effective license.
+The product interface, report/prompt templates, and test fixtures remain Chinese. Prompts refer to the current confirmed profile rather than a fixed personal assumption. Public developer prose/comments are English. The accepted original model/contour/rendering behavior is preserved. Commercial-font fallback remains a documented difference. See PUBLIC-VISUALS.md for exact hashes and resource scope. Original-code MIT is still a proposal, not an effective license.
 
 No real business calls are implied by fixture acceptance. Structural success does not establish semantic correctness or actual project execution. Public HTTPS and Linux deployment require separate acceptance. Publication needs explicit owner/repository, license, and final SHA authorization.

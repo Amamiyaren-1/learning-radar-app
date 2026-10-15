@@ -8,8 +8,10 @@ Sign in → broad or focused discovery → queued execution and budgets → sour
 
 > Screenshots and demos use **synthetic fixtures, not actually tested projects**. They do not prove real search/model success, mail receipt, or candidate installation. This is a local review candidate, not published or deployed.
 
-![Fixture home](docs/images/fixture-home.jpg)
-![Fixture report](docs/images/fixture-report.jpg)
+![Fixture intro into the archive array](docs/images/fixture-intro.gif)
+![Fixture selection, extraction, decryption and reading](docs/images/fixture-reading.gif)
+
+Recorded from actual pages with the restored original visuals and isolated synthetic data. GIFs are silent and frame-sampled: intro at 2× speed, reading at 1×. No new report is generated. See the [capture index](docs/SCREENSHOTS.md) for editing and frame-review details. Static alternatives: [home](docs/images/fixture-home.jpg) · [report](docs/images/fixture-report.jpg). A separate [deidentified historical analysis excerpt](docs/examples/historical-project.en.md) is labeled independently from the synthetic GIF report.
 
 ## Prerequisites
 
@@ -47,6 +49,14 @@ Closing the browser does not stop the worker. Stop manages only recorded PIDs/cr
 
 A prebuilt local review archive includes source and `frontend/dist`: skip npm steps and run smoke/demo directly. It is not a published Release; version/hashes are in `ARTIFACT-MANIFEST.json`.
 
+## Customize your user profile
+
+Copy `config/profile.example.toml` to local `config/profile.toml` (Git-ignored). Edit background, existing skills, devices, daily time and language preferences under `[identity]`, goals under `[goals]`, and available services, cloud, GPU and OS conditions under `[resources]`. Keep unknown information explicitly unspecified. Review the entire profile before setting the top-level `confirmed_by_user` to `true` and updating its date. The template does not represent a fixed personal background or preference.
+
+The profile informs initial screening and analysis. In real mode, profile information and relevant project feedback may enter analysis prompts and be sent to the model provider configured by the user in `config/settings.toml`. Review the contents and the provider's data policy before enabling real requests. Keep real profiles, feedback, complete runtime prompts, materials and reports local in ignored paths; do not commit or package them publicly.
+
+Describe resource conditions only, such as access to a model service or lack of a GPU. Never put API keys, tokens, SMTP passwords or other authentication values in the profile. Store secrets in ignored `.env` or environment variables, using the configured model `api_key_env` and mail `password_env`. Confirming a profile does not itself authorize external requests.
+
 ## Configure real use yourself
 
 Real mode is separate. Missing production accounts deny private pages instead of substituting fixture credentials.
@@ -69,7 +79,7 @@ After preparing your own account/profile, `scripts/start.ps1` manages daily serv
 
 New tasks default to broad: 3 directions, up to 10 candidates each, up to 30 merged. Explicit focused tasks, old tasks, and unchanged weekly runs retain single-direction scope. Defaults allow 3 manual tasks daily and **4 underlying model requests per task**. Analysis and JSON/truncation/field repairs share **2 analysis attempts**. Failures/uncertain consumption are durable; missing pricing means unknown cost. `worker --once` may handle a notice first and does not select a task.
 
-Task completed, report published/rejected, and mail sent/failed/unknown are independent. Passing structure does not guarantee semantics, quality, novelty, or executable projects; candidate code is not automatically run. SMTP acceptance does not prove receipt; unknown delivery must not be blindly resent. One historical saved-evidence replay passed after a second, field-repair attempt. It verified only that repair and did not install the candidate. This public-installation acceptance uses fixtures with zero real business external requests.
+Task completed, report published/rejected, and mail sent/failed/unknown are independent. Passing structure does not guarantee semantics, quality, novelty, or executable projects; candidate code is not automatically run. SMTP acceptance does not prove receipt; unknown delivery must not be blindly resent. Saved-evidence replay verifies processing of selected materials, not candidate installation. Public-installation acceptance uses fixtures without real business external requests.
 
 Loopback HTTP is explicit development mode. HTTPS cookie policy comes from configuration, not arbitrary forwarding headers. This round does not validate Linux/systemd/Caddy, public TLS/Secure cookies, physical phones, or OS background transitions. Single-user scope excludes registration, recovery, OAuth, chat, and multi-user teams.
 

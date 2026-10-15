@@ -16,7 +16,7 @@ Native forms → authentication/Origin/CSRF → TaskQueue → one WorkerLock own
 
 The same pipeline serves web, task CLI, legacy CLI, weekly, and replay. SQLite transactions reserve work and durable requests; the kernel lock owns execution. Budgets are counted at actual HTTP boundaries, including failures/uncertain consumption. Defaults: four task requests and two shared analysis/repair attempts. No automatic model switching, synthetic quote insertion, or weakening publication gates.
 
-Normal analysis and saved-evidence replay share the publication precheck. JSON, empty-output, truncation, and validation repair compete for the same remaining attempt. Retain every response, usage, per-attempt checks, and selected attempt. On failure keep a rejected parseable draft; original reports and validation are unchanged. A historical repair success is one observation, not a population success rate or project execution proof.
+Normal analysis and saved-evidence replay share the publication precheck. JSON, empty-output, truncation, and validation repair compete for the same remaining attempt. Retain every response, usage, per-attempt checks, and selected attempt. On failure keep a rejected parseable draft; original reports and validation are unchanged. Successful structural repair is not a population success rate or project execution proof.
 
 `task completed`, report publication, and notification delivery are separate. SMTP unknown stays uncertain; receipt is not inferred from acceptance. Feedback is verbatim user speech linked to repo/run, not evidence or long-term preference learning. See FEEDBACK.md.
 

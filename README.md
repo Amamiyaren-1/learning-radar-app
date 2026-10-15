@@ -8,8 +8,10 @@
 
 > 截图和演示均为 **fixture 合成数据，未实测**，不代表真实搜索、真实模型、邮件送达或候选项目安装成功。当前是本地待审阅版本，尚未公开或部署。
 
-![fixture 首页](docs/images/fixture-home.jpg)
-![fixture 报告阅读](docs/images/fixture-report.jpg)
+![fixture 开场进入阵列](docs/images/fixture-intro.gif)
+![fixture 选中、抽取、解密与阅读](docs/images/fixture-reading.gif)
+
+实际页面录制，使用恢复后的原版视觉和隔离合成数据。GIF 无声、采样降帧，开场 2 倍速、阅读原速；未生成新报告。剪辑与帧审查说明见[图像索引](docs/SCREENSHOTS.md)。静态入口：[首页](docs/images/fixture-home.jpg) · [报告阅读](docs/images/fixture-report.jpg)。另有[历史分析脱敏节选](docs/examples/historical-project.zh.md)，与 GIF 的合成报告分开标注。
 
 ## 前置条件
 
@@ -47,6 +49,14 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\demo.ps1 -Action s
 
 预构建评审包包含源码及 `frontend/dist`：可跳过 npm 命令，直接运行 smoke 和演示启动器。它尚未作为正式 Release 发布，版本和文件哈希见包内 `ARTIFACT-MANIFEST.json`。
 
+## 自定义用户画像
+
+复制 `config/profile.example.toml` 为本地 `config/profile.toml`（已被 Git 忽略）。修改 `[identity]` 中的背景、已有技能、设备、每天可用时间和语言偏好，`[goals]` 中的目标，以及 `[resources]` 中可用的服务、云资源、GPU 和系统条件；不确定的内容保留“未知/未提供”。核对完整内容后，再将顶层 `confirmed_by_user` 设为 `true`，并更新日期。示例不代表任何固定个人背景或偏好。
+
+画像用于项目初筛和后续分析。真实模式下，画像及相关项目反馈可能组成分析提示词，发送至使用者在 `config/settings.toml` 中配置的模型提供商；启用真实请求前请审阅这些内容与提供商的数据政策。真实画像、反馈、完整运行提示词、材料和报告应留在本地忽略目录，不应提交或打包公开。
+
+画像只填写资源条件，例如“有可用的模型服务”或“没有 GPU”，不要填写真实 API Key、Token、SMTP 密码或其他认证值。密钥填写在忽略的 `.env` 或环境变量中，变量名以模型的 `api_key_env` 和邮件的 `password_env` 为准。不要把画像确认等同于外发授权。
+
 ## 自己配置真实模式
 
 真实模式与 fixture 分开。没有正式账号时拒绝私人页面，不使用 fixture 常量替代登录。
@@ -69,7 +79,7 @@ Copy-Item config\profile.example.toml config\profile.toml
 
 默认新任务 broad：3 方向、每方向最多 10、合并最多 30。显式 focused、旧任务和未明确切换的 weekly 保持原单方向。默认每日 3 个手动任务、每任务最多 **4 次底层模型请求**；分析及 JSON/截断/字段修复共用 **2 次分析机会**。失败和不确定消费持久记账，缺价格显示“费用未知”。`worker --once` 可能先处理通知，并非指定任务开关。
 
-任务 completed、报告 published/rejected、邮件 sent/failed/unknown 是独立状态。结构通过不保证语义、推荐质量、创新性或项目可运行；程序不会自动执行候选代码。SMTP 接受不等于本人收件，unknown 不能盲目重发。历史一次保存证据重放在第二次字段修复后通过，只验证那次修复，没有安装候选。本轮公开安装验收仅 fixture，真实业务外发为 0。
+任务 completed、报告 published/rejected、邮件 sent/failed/unknown 是独立状态。结构通过不保证语义、推荐质量、创新性或项目可运行；程序不会自动执行候选代码。SMTP 接受不等于收件人收到，unknown 不能盲目重发。保存证据重放只验证选定材料的处理，不证明候选安装成功。公开安装验收使用 fixture，不外发真实业务请求。
 
 回环 HTTP 仅为显式开发模式；HTTPS Cookie 策略来自配置，不信任任意转发头。新版 Linux/systemd/Caddy、公网 TLS/Secure Cookie、实体手机及系统后台切换尚未本轮验收。保持单用户，不提供注册、找回、OAuth、聊天或多用户团队。
 

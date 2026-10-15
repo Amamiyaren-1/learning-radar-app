@@ -11,6 +11,8 @@
     "compatible Vite/esbuild security patches and dependency lock/notices",
     "scoped fake-adapter test precheck fixes and offline runner",
     "actual restored-page screenshots/video preparation and source/package tooling",
+    "privacy-reviewed actual-page fixture GIFs and deidentified historical technical excerpts",
+    "profile customization/disclosure guidance and removal of fixed personal prompt assumptions",
     "reviewed-byte checkout attributes"
   ],
   "paths_different_from_export_baseline": [
@@ -25,6 +27,7 @@
     "README.en.md",
     "README.md",
     "config/email.example.toml",
+    "config/profile.example.toml",
     "config/settings.toml",
     "config/topics.toml",
     "docs/DEPLOY-ARTIFACT-PROPOSAL.md",
@@ -37,11 +40,16 @@
     "docs/SOURCE-SYNC.md",
     "docs/THIRD-PARTY.md",
     "docs/VIDEO-OUTLINE.md",
+    "docs/examples/historical-project.en.md",
+    "docs/examples/historical-project.zh.md",
     "docs/images/fixture-home.jpg",
+    "docs/images/fixture-intro.gif",
     "docs/images/fixture-login.jpg",
     "docs/images/fixture-projects.jpg",
+    "docs/images/fixture-reading.gif",
     "docs/images/fixture-report.jpg",
     "docs/images/fixture-task.jpg",
+    "docs/images/media-manifest.json",
     "docs/video/NARRATION.zh.md",
     "frontend/licenses/audio-source.md",
     "frontend/licenses/dependencies.json",
@@ -101,6 +109,7 @@
     "learnradar/validate.py",
     "learnradar/web.py",
     "learnradar/worker.py",
+    "prompts/analysis.md",
     "scripts/build_release_artifact.py",
     "scripts/lr.ps1",
     "scripts/offline_recheck.py",
@@ -186,13 +195,13 @@
     },
     {
       "file": "README.en.md",
-      "bytes": 8527,
-      "sha256": "c73468d53520199c41a80f99007b59db27e50a1a9516e19f02b5eee7c7d1767b"
+      "bytes": 10421,
+      "sha256": "16317f16cd2ef1484abce367ea20cd2cbd7a6eab248caf3ceb6d4ad16d8c2971"
     },
     {
       "file": "README.md",
-      "bytes": 7814,
-      "sha256": "1aadb7094ad18fcaaf1d08b134c1fc354d5c775509ddcdb7a1d6d9467b43756c"
+      "bytes": 9494,
+      "sha256": "28c4914738ba44371bf386047c543557fd5709edd0ad3ebf42e1cc4749b10231"
     },
     {
       "file": "config/email.example.toml",
@@ -201,8 +210,8 @@
     },
     {
       "file": "config/profile.example.toml",
-      "bytes": 875,
-      "sha256": "255c0bea51d2d70af725866395430901bd309346e26dc640913b0290203484a3"
+      "bytes": 1049,
+      "sha256": "50c9e437bd672ec4b0f670e0d7218606ced344a3de24c57ede59e535e1e2ed86"
     },
     {
       "file": "config/settings.toml",
@@ -226,8 +235,8 @@
     },
     {
       "file": "docs/DEVELOPER-GUIDE.md",
-      "bytes": 6385,
-      "sha256": "6d977d2f76156f8a2494d6e5fdfdb153a02e25cc153ec71f35b7b37708f40d87"
+      "bytes": 6369,
+      "sha256": "bb9bf7ed51553e78a6d8d1ae43e57060ac65b86aa4559ee796ada80e7a9df88d"
     },
     {
       "file": "docs/FEEDBACK.md",
@@ -236,13 +245,13 @@
     },
     {
       "file": "docs/PUBLIC-SOURCE-GUIDE.md",
-      "bytes": 1327,
-      "sha256": "d0c0ec065e15732344800e75dc5468148d9c2d56aa9710682fd4bbc16d75af07"
+      "bytes": 1370,
+      "sha256": "8eb982b58fa4099afb4437b79d3ece9c8d0dd167e18d5fb9dc71f59ecc040ed9"
     },
     {
       "file": "docs/PUBLIC-VISUALS.md",
-      "bytes": 4163,
-      "sha256": "9b968e4ce597f2266e9b4110d42c877fd527b6d09b09a29bbb1d6148f7e42aab"
+      "bytes": 4135,
+      "sha256": "9607a497b5ad6f3ca6aacf292bb4f6bccf4bd6cc7987295530106a9e5934d7db"
     },
     {
       "file": "docs/RELEASE-NOTES.md",
@@ -251,8 +260,8 @@
     },
     {
       "file": "docs/SCREENSHOTS.md",
-      "bytes": 1814,
-      "sha256": "93964066cc21b1750d40716e947dc5cc1558572746e647778c8b49b92a4e3b62"
+      "bytes": 3952,
+      "sha256": "e3a435b6e3120d7b95274aa06a4b0456773572169a482a8aae63a0accf6f5fd5"
     },
     {
       "file": "docs/SOURCE-SYNC.md",
@@ -261,18 +270,33 @@
     },
     {
       "file": "docs/THIRD-PARTY.md",
-      "bytes": 5094,
-      "sha256": "e8dfa4629cb36e2ddf0490ea2a277a9b86089a14cea447c34d17b3c0eac53152"
+      "bytes": 4924,
+      "sha256": "92e018c083d399c2fce1a9c061e48eebccc8047aaf1e6610cf4a3a0508100d9e"
     },
     {
       "file": "docs/VIDEO-OUTLINE.md",
-      "bytes": 2320,
-      "sha256": "0bf3f4d49b2a552df81d0dae9bcec5cf9dc1e90f26c13c58b2e072ec0cb21a80"
+      "bytes": 2437,
+      "sha256": "fb942d794d2107954e15e7ca91d3c100385d4a6db4deb0db40341460df34d264"
+    },
+    {
+      "file": "docs/examples/historical-project.en.md",
+      "bytes": 1883,
+      "sha256": "d2f099b954cb2a9eb0bb3e5cb83cee434e52cf19315b3f45cd4157725d09bfcb"
+    },
+    {
+      "file": "docs/examples/historical-project.zh.md",
+      "bytes": 1684,
+      "sha256": "14afb9da8b5f22b304b22552258d0ca0f572bc4e6e55a53c861d5860a689265f"
     },
     {
       "file": "docs/images/fixture-home.jpg",
       "bytes": 81499,
       "sha256": "911db01ac215611bf2b1fe0859d9c73d89e6ce5dec5906be853618ae84edfff9"
+    },
+    {
+      "file": "docs/images/fixture-intro.gif",
+      "bytes": 10012746,
+      "sha256": "68e861c023b77861c8d8952032826aa0b79784f8c5e0cff3d904fe18f9a66b31"
     },
     {
       "file": "docs/images/fixture-login.jpg",
@@ -285,6 +309,11 @@
       "sha256": "6e219f47cff82c7a192ff2eedeb816e32219fbcbef1f9fec74456ad0ea7d07f1"
     },
     {
+      "file": "docs/images/fixture-reading.gif",
+      "bytes": 1900613,
+      "sha256": "fbdfb08e6bea185ba657c4994d35455addd41b531267a9eafd1c076e3423ae55"
+    },
+    {
       "file": "docs/images/fixture-report.jpg",
       "bytes": 68931,
       "sha256": "cf28e393ad36c95f0d6d5cfe5e58298a2b7c2cb8d5a1fdc19d95d4eb4541b9dc"
@@ -295,9 +324,14 @@
       "sha256": "2c8d449454f4fa15154f45a3c7cbd45e5672d2d3d03593fe0e9e4814aece9aa3"
     },
     {
+      "file": "docs/images/media-manifest.json",
+      "bytes": 1353,
+      "sha256": "4a60d0d1ca71b495090b0ab35fc55cd4b52586d0467e2ea509642fafcb0647e5"
+    },
+    {
       "file": "docs/video/NARRATION.zh.md",
-      "bytes": 2554,
-      "sha256": "fd3de7372d8ca99bc4980ff165d0155df0e3b95dcdd2cabf0b89602399b78516"
+      "bytes": 2536,
+      "sha256": "20ae58e5590aa72ea652216765ae1ead4fa7a0002dcdd5dce31d42d9a6380388"
     },
     {
       "file": "frontend/licenses/MiSans-license.pdf",
@@ -1001,8 +1035,8 @@
     },
     {
       "file": "prompts/analysis.md",
-      "bytes": 16873,
-      "sha256": "92e88a862350e10265871596682c9bce8721bb9e05182b87f206ae6c772f58b5"
+      "bytes": 16939,
+      "sha256": "4f3806bd587b654e52a08f3c11b3888cc85c70e125a35e243cd27010b985e8c7"
     },
     {
       "file": "scripts/build_release_artifact.py",
@@ -1046,8 +1080,8 @@
     },
     {
       "file": "scripts/source_manifest.py",
-      "bytes": 2675,
-      "sha256": "61f03a5d28d78b027e1f7f2615bfe8ae13884a5a795437ba4513485153018e07"
+      "bytes": 2859,
+      "sha256": "78650a7ad06247e5e02550a172c9139dea41a609152b8e47cde9f5377bc6de2a"
     },
     {
       "file": "scripts/start.ps1",

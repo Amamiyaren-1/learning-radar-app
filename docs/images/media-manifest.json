@@ -1,0 +1,36 @@
+[
+  {
+    "file": "docs/images/fixture-intro.gif",
+    "bytes": 10012746,
+    "sha256": "68e861c023b77861c8d8952032826aa0b79784f8c5e0cff3d904fe18f9a66b31",
+    "source_raw_frames": 170,
+    "encoded_frames": 146,
+    "duration_ms": 22960,
+    "source_span_ms": 41971,
+    "speed": 2,
+    "dimensions": [
+      1120,
+      654
+    ],
+    "editing": "Actual 1280x720 viewport plus 28px disclosure strip; intro resized to 1120x654; variable frame sampling, shared 256-color palette without dithering; final idle wait shortened. No interpolation, retouching, scene edits, or historic-report imagery.",
+    "capture_max_gap_ms": 2435,
+    "all_encoded_frames_match_quantized_captures": true
+  },
+  {
+    "file": "docs/images/fixture-reading.gif",
+    "bytes": 1900613,
+    "sha256": "fbdfb08e6bea185ba657c4994d35455addd41b531267a9eafd1c076e3423ae55",
+    "source_raw_frames": 68,
+    "encoded_frames": 38,
+    "duration_ms": 14340,
+    "source_span_ms": 12307,
+    "speed": 1,
+    "dimensions": [
+      1280,
+      748
+    ],
+    "editing": "Actual 1280x720 viewport plus 28px disclosure strip; variable frame sampling, shared 256-color palette without dithering; final idle wait shortened. No interpolation, retouching, scene edits, or historic-report imagery.",
+    "capture_max_gap_ms": 1355,
+    "all_encoded_frames_match_quantized_captures": true
+  }
+]

@@ -1,8 +1,8 @@
 # Accepted visual baseline
 
-The owner has withdrawn the generic visual replacements from stage A and the
-later optical-model experiment. The accepted original frontend is the only
-visual baseline. This restoration does not authorize another redesign.
+The accepted original frontend is the only visual baseline. Preserve it during
+release preparation and future synchronization; do not introduce substitute
+geometry, contours or visual redesigns.
 
 ## Restored resources and behavior
 

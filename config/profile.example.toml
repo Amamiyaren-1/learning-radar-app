@@ -6,6 +6,7 @@ source = "人工合成公开示例；未实测，不代表任何个人档案"
 [identity]
 role = "演示用户"
 background = "未知/未提供"
+skills = "未知/未提供；填写已有技能及熟悉程度，不据此推断语言偏好"
 assistance = "离线fixture演示，不代表实际安装或学习能力"
 language_preference = "未知/未提供"
 devices = "未知/未提供"
@@ -17,6 +18,7 @@ values = "仅用于演示"
 outcome_habit = "示例，不推断个人偏好"
 deliverable_expectation = "fixture报告与来源示例"
 [resources]
+# Resource conditions only. Put actual credentials in ignored .env/environment.
 available_api = "未配置，不能假定存在任何凭据"
 other_providers = "未配置"
 cloud = "未知/未提供"
