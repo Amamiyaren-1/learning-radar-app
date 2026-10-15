@@ -72,6 +72,7 @@
     "frontend/public/artwork/login-loop.svg",
     "frontend/public/assets/archive-cassette.glb",
     "frontend/scripts/make-public-assets.py",
+    "frontend/src/reference/boot.ts",
     "frontend/src/reference/brand.ts",
     "learnradar/__init__.py",
     "learnradar/analysis.py",
@@ -226,8 +227,8 @@
     },
     {
       "file": "docs/DEVELOPER-GUIDE.md",
-      "bytes": 6270,
-      "sha256": "ff4515557c9595cd190278501cd35df4d98aba0fa6f933771bc9efaa7bc556b5"
+      "bytes": 6496,
+      "sha256": "d47391a9be61696c3e79527f9783da568647c3bf2f36950d97496b7d96e6409d"
     },
     {
       "file": "docs/FEEDBACK.md",
@@ -246,8 +247,8 @@
     },
     {
       "file": "docs/SCREENSHOTS.md",
-      "bytes": 1827,
-      "sha256": "ffa8c5409101744fccbcfcb8f260c1ee218000504c57dc0ad08e6f48f484f9ad"
+      "bytes": 1751,
+      "sha256": "fb1ff00561a80b49846367dcbd7d482c5709d2e8e3fb0fe378af9d4838628756"
     },
     {
       "file": "docs/SOURCE-SYNC.md",
@@ -266,28 +267,28 @@
     },
     {
       "file": "docs/images/fixture-home.jpg",
-      "bytes": 16432,
-      "sha256": "ec7d093276ab33e125b3771dbb1b4b4496f6db849d4aa61486a4f4509f293cf9"
+      "bytes": 96197,
+      "sha256": "97489a6dc219862b509e5fcf5319f1f42c2d3506566c081e1ce76b4ff2388367"
     },
     {
       "file": "docs/images/fixture-login.jpg",
-      "bytes": 18865,
-      "sha256": "72a2615d89d3f6c04f8d704344f4e3213f9d9db44b2cd4dd4753514606cee236"
+      "bytes": 50869,
+      "sha256": "40c504a1efb2bb38694ae917358d4af41ac0ea176323716103a6ab141d420580"
     },
     {
       "file": "docs/images/fixture-projects.jpg",
-      "bytes": 68562,
-      "sha256": "81c8164831ff95a7225662b4e92e700db7df531d5afae04ddf5f3e32d39706af"
+      "bytes": 54649,
+      "sha256": "2b0b2f1ed2258cb6b24cf2086a69aebbd50df394345a2aacfa6b67207ce18f99"
     },
     {
       "file": "docs/images/fixture-report.jpg",
-      "bytes": 44716,
-      "sha256": "ab08d29106fa6897f87b909e53ddee95c49a5a46a6d29809b9a2ea5b4fe68595"
+      "bytes": 48566,
+      "sha256": "58d18fd4b71b8cc0af22bdf4666910865a1ec7a0bff66a087b3177bb967c4c4a"
     },
     {
       "file": "docs/images/fixture-task.jpg",
-      "bytes": 20607,
-      "sha256": "93aab5183dd0724d908006f8310dda25a7051fb69f88a81a2013317e49f1983c"
+      "bytes": 51731,
+      "sha256": "c4726836e86fffe64da21cd0d8b256c2b8db569cd2cd6265cc4f544762a794cd"
     },
     {
       "file": "docs/video/NARRATION.zh.md",
@@ -646,8 +647,8 @@
     },
     {
       "file": "frontend/src/reference/boot.ts",
-      "bytes": 10105,
-      "sha256": "390be3f44b2d51ebb02d49ea5e99b9e47ed6e3582b80b5be2a84ece4ce2f5a16"
+      "bytes": 10303,
+      "sha256": "abfaabf02f7eaf811c2a074ed7afd10018e0b5b16b32b24a8b523e47f37ce068"
     },
     {
       "file": "frontend/src/reference/brand.ts",

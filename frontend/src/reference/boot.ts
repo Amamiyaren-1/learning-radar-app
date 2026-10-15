@@ -58,9 +58,12 @@ export class BootSequence {
     [this.plus, this.minus].forEach((p) => {
       p.setAttribute("stroke", "currentColor");
       p.setAttribute("stroke-width", "15");
+      // The public mathematical loop omits the original branded symbols.
+      p.setAttribute("visibility", "hidden");
       mark.insertBefore(p, symbols);
     });
-    symbols.remove();
+    // Generic public logos may contain only the contour and its text label.
+    symbols?.remove();
     this.letters = mark.querySelector("text")!;
     this.letters.setAttribute("text-anchor", "start");
     this.letters.setAttribute("x", "20");
