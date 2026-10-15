@@ -1,5 +1,10 @@
 # Maintaining the private and public lines
 
+Preserve the public layered optical asset, real physical-material construction
+and frost/clear reveal behavior described in PUBLIC-VISUALS.md. Re-run the actual
+GLTFLoader material tests after model/rendering syncs. Visual approval is pending;
+README images must remain unchanged until the owner approves the actual pages.
+
 Keep private development and the independent public main history. Never merge a private branch, mirror refs, clone the old private remote as public source, or restart public history for routine updates.
 
 For each sync: fix an exact private source SHA, choose explicit general-code/test paths, review diffs against public HEAD, preserve public docs/licenses/assets, run isolated checks and privacy/history/package audit, then commit in English on public main. Record private-source SHA → allowed paths/public adjustments → checks → public SHA in a local nonpublic handoff. No private audit logs or conversation context enter public docs.

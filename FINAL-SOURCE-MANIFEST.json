@@ -7,6 +7,7 @@
     "English developer docs/comments and bilingual README",
     "pending MIT proposal and third-party notices",
     "original generic public geometry/loop and reachable-history resource exclusion",
+    "layered public optics and actual physical-material construction with fixture runtime audit",
     "compatible Vite/esbuild security patches and dependency lock/notices",
     "scoped fake-adapter test precheck fixes and offline runner",
     "review screenshots/video preparation and source/package tooling",
@@ -30,6 +31,7 @@
     "docs/DEVELOPER-GUIDE.md",
     "docs/FEEDBACK.md",
     "docs/PUBLIC-SOURCE-GUIDE.md",
+    "docs/PUBLIC-VISUALS.md",
     "docs/RELEASE-NOTES.md",
     "docs/SCREENSHOTS.md",
     "docs/SOURCE-SYNC.md",
@@ -72,8 +74,12 @@
     "frontend/public/artwork/login-loop.svg",
     "frontend/public/assets/archive-cassette.glb",
     "frontend/scripts/make-public-assets.py",
+    "frontend/src/diagnostics.ts",
     "frontend/src/reference/boot.ts",
     "frontend/src/reference/brand.ts",
+    "frontend/src/reference/physical-material.ts",
+    "frontend/src/reference/scene.ts",
+    "frontend/tests/physical-material.test.mjs",
     "learnradar/__init__.py",
     "learnradar/analysis.py",
     "learnradar/browse.py",
@@ -162,8 +168,8 @@
     },
     {
       "file": "AGENTS.md",
-      "bytes": 1304,
-      "sha256": "bb5c04d03a97d0b1490e7fc9c613dd218c6328e677430b9d8f60d912296c95db"
+      "bytes": 1528,
+      "sha256": "2b3869385217a2d111897e03a8f979b5144e6591b14c8328dc08a3267d38dd00"
     },
     {
       "file": "CONTRIBUTING.md",
@@ -241,6 +247,11 @@
       "sha256": "42c5961d41c6a095952d89da4c9b822deaa1ca91d554eeaa08b0db5110b13459"
     },
     {
+      "file": "docs/PUBLIC-VISUALS.md",
+      "bytes": 4693,
+      "sha256": "feca75cc04d7b050a4f33b5af26ad040ab03c5f91808247ed2fc5707e99b6398"
+    },
+    {
       "file": "docs/RELEASE-NOTES.md",
       "bytes": 1349,
       "sha256": "f265436e53bd679976c84462805327b10dacf36303074f2ef5eaeda445b148ae"
@@ -252,13 +263,13 @@
     },
     {
       "file": "docs/SOURCE-SYNC.md",
-      "bytes": 1554,
-      "sha256": "dc0de19f1713c8478e856a9bef7fae7703f686236d89a1795d73cc8e0112fcb8"
+      "bytes": 1878,
+      "sha256": "75b1d4f967909f3110a162c23fb3afd6e41427e61219f074de131cb711efed37"
     },
     {
       "file": "docs/THIRD-PARTY.md",
-      "bytes": 4396,
-      "sha256": "32b83a20cadbda6209e312cbbea738b57d4713e839c1be410e139584644e45f2"
+      "bytes": 5177,
+      "sha256": "b7fa1432b4b813243209c02b68d7a0798110460c887e6d5b126153a230b4942a"
     },
     {
       "file": "docs/VIDEO-OUTLINE.md",
@@ -482,8 +493,8 @@
     },
     {
       "file": "frontend/public/assets/archive-cassette.glb",
-      "bytes": 5932,
-      "sha256": "5e68c13f7bf9b1e34975245dcf02d57e91679bf36b0a4a8bbc36094ba1a04fc5"
+      "bytes": 3022712,
+      "sha256": "92eadaa534bcd6de93b1c2a5316e2458fb4660ca8d3e955fd41b6d586616e2ba"
     },
     {
       "file": "frontend/public/assets/radar-mark.svg",
@@ -537,8 +548,8 @@
     },
     {
       "file": "frontend/scripts/make-public-assets.py",
-      "bytes": 2935,
-      "sha256": "e4362cbbbf5f7418eafc17cde63230683282a920557985103ef79ccf86a4bc05"
+      "bytes": 10868,
+      "sha256": "23d395662eb2561cc5a83a2790aac6c29dfbc5da16d992baa85c7e88e0b1c167"
     },
     {
       "file": "frontend/scripts/make-ui-sounds.py",
@@ -562,8 +573,8 @@
     },
     {
       "file": "frontend/src/diagnostics.ts",
-      "bytes": 5956,
-      "sha256": "8f676a296a27c992b5e4cae5deabe343566bc4f6f6abc83d0eb31b3939ec9820"
+      "bytes": 6147,
+      "sha256": "1fe67f28cb2f7401ab4d99413c0f5dec0c1740a7f735b5a51b6e5e8e6a6d5885"
     },
     {
       "file": "frontend/src/enhancement.css",
@@ -696,6 +707,11 @@
       "sha256": "24d0448cd8125f9b3e96fb6c42e69cbdf7bafbd76e686269a3a7ed0c96c87ab9"
     },
     {
+      "file": "frontend/src/reference/physical-material.ts",
+      "bytes": 1346,
+      "sha256": "739172b6e79040638e299be9d55cfd7eed8a80c03e38268d9b22fb55db6d0385"
+    },
+    {
       "file": "frontend/src/reference/quality-renderer.ts",
       "bytes": 2020,
       "sha256": "cf19bdc43b2bc453806196d3aee3cfcd464c0eb588754964c16edf69b5fd2918"
@@ -707,8 +723,8 @@
     },
     {
       "file": "frontend/src/reference/scene.ts",
-      "bytes": 55077,
-      "sha256": "3fb19a93b316fcd273300106ac2832f2768fa00b5a9aa9ad7e9e367f0fc3f4e0"
+      "bytes": 55676,
+      "sha256": "7a267d4ad076772bda13526c22d596b4c70ed4dbe1856d4e6e0a6bfae2ac2677"
     },
     {
       "file": "frontend/src/reference/ui-transitions.ts",
@@ -764,6 +780,11 @@
       "file": "frontend/tests/navigation.test.mjs",
       "bytes": 1408,
       "sha256": "8c853217c6b80b33426210ca037f87ac2b54f648053e23775706e9b1257971f9"
+    },
+    {
+      "file": "frontend/tests/physical-material.test.mjs",
+      "bytes": 4417,
+      "sha256": "6ae88bc56bfc87ab517d7717cff9cd6a4ded67a29629d19f68f18c94ea001f05"
     },
     {
       "file": "frontend/tests/quality.test.mjs",
@@ -1037,8 +1058,8 @@
     },
     {
       "file": "scripts/source_manifest.py",
-      "bytes": 2580,
-      "sha256": "b7d820d3b58ca8feedf3f43b9539629ca786eca2e5a067f1b8b711ffc75f6daa"
+      "bytes": 2673,
+      "sha256": "39156abb998fe53a5d289a2c2627a30baf5f40909db8b2c52e2d065b79d778e0"
     },
     {
       "file": "scripts/start.ps1",

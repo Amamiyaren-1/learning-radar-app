@@ -1,5 +1,9 @@
 # Public development scope
 
+Public visual approval is pending. Preserve the layered optical asset and real
+MeshPhysicalMaterial construction/reveal contracts; see docs/PUBLIC-VISUALS.md.
+Do not update README images before the owner's visual approval.
+
 Use isolated fixture accounts/data and offline adapters. Real models, project collection, and SMTP require explicit authorization. Preserve native authentication/CSRF, durable queues/budgets, quality gates, stable identities, and Chinese product behavior.
 
 Commit titles and bodies must be English: `type(scope): short English summary`, aiming for 50–72 characters where useful. Include reasons and meaningful verification in the body. Explain progress to the owner in Chinese. Use confirmed public Git identities; preserve export attribution and honest chronology.

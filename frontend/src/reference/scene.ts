@@ -11,6 +11,7 @@ import { normalizeQuality, type RenderQuality } from "./render-quality";
 import { applyTextureQuality, resizeQuality } from "./quality-renderer";
 import { CardAppearance } from "./appearance";
 import { configureInternalOptics } from "./internal-optics";
+import { physicalMaterial, materialSnapshot } from "./physical-material";
 import { DecryptionController } from "./decryption";
 import { fileLocation, rebaseRows, archiveColumns } from "./data";
 import {
@@ -241,9 +242,10 @@ export class ArchiveScene {
         .clone()
         .applyMatrix4(mesh.matrixWorld)
         .scale(1, 1, 1);
-      const source = mesh.material as THREE.MeshStandardMaterial;
+      if (Array.isArray(mesh.material)) throw new TypeError('Archive primitives require one PBR material');
+      const source = mesh.material;
       const name = source.name.replace(/\.\d+$/, "");
-      const mat = source.clone() as THREE.MeshPhysicalMaterial;
+      const mat = physicalMaterial(source);
       mat.envMapIntensity = 0.6;
       if (name === "Frosted_Polymer") {
         mat.color.set("#fffdfa");
@@ -354,7 +356,7 @@ export class ArchiveScene {
       }
       this.appearance.register(name, mat, arrayMat);
       // Distant fasteners use four six-sided caps. The extracted model retains
-      // all original 2136 triangles; only densely occluded pool hardware is LOD.
+      // its detailed geometry; only densely occluded pool hardware is LOD.
       let arrayGeometry=geom;
       if(name==='Titanium_Fasteners'){
         geom.computeBoundingBox();const box=geom.boundingBox!;const mid=box.getCenter(new THREE.Vector3());const caps:THREE.BufferGeometry[]=[];
@@ -1289,6 +1291,14 @@ export class ArchiveScene {
       gpuTimerAvailable:!!this.gpuTimer,gpuMS:this.gpuMS,
       footprint:{...this.footprint},recycled:this.recycled,recycleVisible:this.recycleVisible,
       meshes:this.instances.map(i=>({name:(i.material as THREE.Material).name,triangles:(i.geometry.index?.count??i.geometry.attributes.position.count)/3,count:i.count})),
+      materials: this.model.children.filter((o): o is THREE.Mesh => o instanceof THREE.Mesh)
+        .filter(o => o.userData.surface).map(o => ({
+          surface: o.userData.surface,
+          ...materialSnapshot(o.material as THREE.Material),
+          clarity: o.userData.glassClarity?.value ?? null,
+          appearance: o.userData.appearance?.value ?? null,
+        })),
+      arrayMaterials: this.instances.map(o => materialSnapshot(o.material as THREE.Material)),
       archiveCount: this.positions.length,
       renderedInstances:this.instances[0]?.count,
       returningFiles: this.outgoing.length,
