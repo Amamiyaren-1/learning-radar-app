@@ -1,4 +1,4 @@
-"""SQLite 存储测试：去重主键、报告与用量读回。"""
+"""Test SQLite deduplication and report/usage readback."""
 
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ class StoreTests(unittest.TestCase):
             with Store(path) as store:
                 store.start_run("run-1", kind="test", started_at="2026-09-21T00:00:00Z", snapshot={})
                 store.save_evidence("run-1", [evidence])
-                store.save_evidence("run-1", [evidence])  # 重复写入不应报错
+                store.save_evidence("run-1", [evidence])  # Repeated insertion must not fail.
                 store.save_report(
                     "run-1",
                     report_id="run-1",

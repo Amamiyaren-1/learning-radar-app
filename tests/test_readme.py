@@ -1,4 +1,4 @@
-"""README 章节取证与学习入口识别的单元测试（离线）。"""
+"""Offline tests for README section evidence and learning-entry detection."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from learnradar.readme import (
     split_sections,
 )
 
-HEADER = "这是一个项目的自我介绍。\n" * 130  # 约 2340 字符，超过旧实现的 1800 字符截断点
+HEADER = "这是一个项目的自我介绍。\n" * 130  # About 2340 characters, exceeding the old 1800-character cutoff.
 README = (
     HEADER
     + "\n## Installation\n\n```bash\npip install demo\n```\n"

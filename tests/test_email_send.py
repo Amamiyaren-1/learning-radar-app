@@ -1,4 +1,4 @@
-"""email-send：给已保存的运行手动发信；不分析、不占周期；已发送不重发。"""
+"""Manual email-send uses saved runs without analysis/cycle consumption or resending sent mail."""
 from __future__ import annotations
 
 import argparse
@@ -64,9 +64,9 @@ class EmailSendTests(WeeklyTestCase):
             run_id, status=status, finished_at="2026-09-27T21:52:05+00:00", notes=""
         )
 
-    # --- 已发布：发推荐邮件（复用现有渲染与隐私过滤）
+    # --- Published: recommendation mail with existing rendering/privacy filters
     def test_published_run_gets_the_recommendation_email(self) -> None:
-        FakeSMTP.mode = "auth_error"          # weekly 那次发信失败，留下 failed 邮件行
+        FakeSMTP.mode = "auth_error"          # The weekly delivery failure leaves a failed mail row.
         code, _output, _adapter = self.run_weekly(["a/one", "a/two", "a/three"])
         self.assertNotEqual(code, 0)
         before = self.store.latest_email_for_run(RUN_ID)
@@ -117,7 +117,7 @@ class EmailSendTests(WeeklyTestCase):
         self.assertEqual(code2, 0, output2)
         self.assertEqual(self.store.latest_email_for_run(RUN_ID)["status"], "sent")
 
-    # --- 被拒 / 没有报告：只发不含草稿的失败通知
+    # --- Rejected/missing report: failure notice without draft content
     def test_rejected_run_sends_failure_notice_without_draft(self) -> None:
         draft = "草稿里的亮点：持久执行（不应出现在邮件里）"
         payload = {

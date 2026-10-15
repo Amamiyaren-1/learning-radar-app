@@ -1,4 +1,4 @@
-"""反馈闭环（存储与提示词）：绑定项目与运行、重复提交不新增、只取对应项目、不影响选点。"""
+"""Feedback binds project/run, updates existing rows, reuses only relevant text, and does not affect selection."""
 
 from __future__ import annotations
 
@@ -170,7 +170,7 @@ class FeedbackIsNotAPreferenceTests(unittest.TestCase):
 
 
 class FeedbackInAnalysisPromptTests(unittest.TestCase):
-    """假模型：确认送给分析模型的提示词里，带的是本次相关项目的反馈原话。"""
+    """Fake model verifies relevant projects' verbatim feedback is included in analysis prompts."""
 
     def test_prompt_carries_only_requested_projects(self) -> None:
         tmp = tempfile.TemporaryDirectory()
@@ -224,7 +224,7 @@ TARGET = "example-offline/target"
 
 
 class FeedbackReportAppendixTests(unittest.TestCase):
-    """报告附录里的反馈必须标明“用户原话”，并且只在有反馈时出现。"""
+    """Feedback appears only when present and is marked as verbatim user speech."""
 
     def setUp(self) -> None:
         self.report = json.loads((FIXTURES / "offline_analysis.json").read_text(encoding="utf-8"))

@@ -1,4 +1,4 @@
-"""选点测试：语言不参与排序；初筛结论与理由决定选点；无合适项目就不推荐。"""
+"""Selection follows screening decisions/reasons, ignores language ranking, and can decline all candidates."""
 
 from __future__ import annotations
 
@@ -44,7 +44,7 @@ class SelectionTests(unittest.TestCase):
         )
 
     def test_language_does_not_decide_when_fit_differs(self) -> None:
-        """陌生语言（TypeScript/Java）只要初筛判定更适配，就应该胜过 Python 候选。"""
+        """A better-fitting TypeScript/Java candidate must outrank Python despite unfamiliar language."""
         items = [
             repo("a/py", "Python", "2026-09-21T00:00:00Z"),
             repo("b/ts", "TypeScript", "2026-09-20T00:00:00Z"),
@@ -139,7 +139,7 @@ class SelectionTests(unittest.TestCase):
         self.assertIn("没有可用候选", note)
 
     def test_language_alone_never_excludes(self) -> None:
-        """只有陌生语言的候选时仍需可被选中。"""
+        """Candidates remain selectable when every language is unfamiliar."""
         items = [repo("a/haskell", "Haskell", "2026-09-21T00:00:00Z")]
         screen = screening(("a/haskell", "keep", "medium", "领域相关，语言陌生但门槛可控"))
         picked, _ = self.pick(items, screen)

@@ -1,4 +1,4 @@
-"""收集器集成测试：README 按章节取证、学习入口被实际读取（全程离线，假客户端）。"""
+"""Offline fake-client integration covers section evidence and actual entry-page reads."""
 
 from __future__ import annotations
 

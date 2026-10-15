@@ -1,74 +1,97 @@
-# Learning Radar（个人学习助手）
+# Learning Radar
 
-面向希望找到可动手实验的单用户学习者，从公开材料发现AI/Agent与生成式软件工程项目，结合本人确认的学习档案做有来源的对照，保存报告、用量和相关项目反馈。默认池偏AI/Agent，不代表整个GitHub；反馈只复用到相关项目与对照，不改长期档案。
+[English](README.en.md) · [开发指南](docs/DEVELOPER-GUIDE.md) · [许可与素材](docs/THIRD-PARTY.md)
 
-当前源码已接入Python原生网页、同源TypeScript/Vite/Three.js增强、持久队列、认证、预算和发布门槛。现有云端旧版周报已经运行，本次新集成版本尚未部署。这里准备本地公开候选，不推送、部署或发布视频。
+给单用户学习者的项目发现与阅读工作台。从公开材料寻找值得了解的 AI/Agent 与生成式软件工程项目，结合你确认的学习档案，保存带来源的对照报告、用量和项目反馈。默认搜索池偏 AI/Agent，不代表覆盖整个 GitHub。
 
-## 从零运行离线演示
+登录 → 广泛发现或指定方向 → 队列执行与预算记录 → 有来源的报告或拒绝草稿 → 项目中心 → 反馈。Python 保留原生表单、认证和 CSRF；TypeScript/Vite/Three.js 提供同源视觉增强。无 JavaScript 仍可登录、阅读和反馈。
 
-需要Python 3.11+、Node 22.18+或24+、npm和Git。后端使用标准库，前端使用Vite、Three.js及锁定依赖，整个项目不是零依赖。Python和Node须在PATH，也可设置LEARNRADAR_PYTHON为Python可执行文件。
+> 截图和演示均为 **fixture 合成数据，未实测**，不代表真实搜索、真实模型、邮件送达或候选项目安装成功。当前是本地待审阅版本，尚未公开或部署。
 
-在源码目录执行：
+![fixture 首页](docs/images/fixture-home.jpg)
+![fixture 报告阅读](docs/images/fixture-report.jpg)
+
+## 前置条件
+
+- Python **3.11+**：后端仅标准库，无第三方 pip 依赖。本轮 Windows 验证为 3.13.7，其他版本未逐一实测。
+- Node **22.18+ 或 24+**、npm、Git。测试使用原生 TypeScript 去类型支持；本轮为 Node 24.21.0、npm 11.19.0。
+- 源码安装必须构建前端，前端有 npm 依赖，项目整体不是零依赖。Windows 演示用 PowerShell；Linux/systemd/公网 HTTPS 需另行部署验收。
+
+## 从源码运行离线演示
+
+解压源码包或进入源码克隆目录，执行：
 
 ```powershell
+# python 不在 PATH 或指向 Windows 商店别名时，改为实际解释器绝对路径
+$env:LEARNRADAR_PYTHON = (Get-Command python -ErrorAction Stop).Source
+& $env:LEARNRADAR_PYTHON --version
 Push-Location frontend
 npm ci
 npm run build
 npm test
 Pop-Location
-python scripts/public_smoke.py
+& $env:LEARNRADAR_PYTHON scripts/public_smoke.py
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\demo.ps1 -OpenBrowser
-# 只停止本启动器网页和worker，保留数据与额度
+```
+
+首次 `npm ci` 下载依赖，完整缓存可用 `npm ci --offline`。[代理说明](docs/DEVELOPER-GUIDE.md#network-access)只使用进程环境，不改全局配置。构建同步原生内联主题和资源清单，不需要商业字体。
+
+启动器打印回环地址和 fixture 登录说明。演示账号仅由 `--demo` 的隔离库提供，本机查看 `learnradar/auth.py` 的 `FIXTURE_USERNAME` / `FIXTURE_PASSWORD`，不把它当正式默认密码。登录后提交一次发现，阅读报告并保存反馈。演示使用 `data/demo-2-1` 和离线适配器，不需要模型、GitHub 或 SMTP 凭据。
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\demo.ps1 -Action status
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\demo.ps1 -Action stop
 ```
 
-首次npm ci需要包仓库；完整缓存可用npm ci --offline。构建同步原生内联主题和资源白名单；缺商业字体仍可构建和阅读，无须加载屏。离线演示使用独立data/demo-2-1、合成fixture账号和假外部适配器；登录方式见本机演示启动说明及fixture账号常量，不能用于正式认证。打开启动器打印的回环地址，登录→发现→任务→报告→反馈。关浏览器不停止worker，报告带fixture/未实测标记，假邮件不是实际收件。
+关浏览器不停止 worker。停止命令仅管理记录的 PID 与创建时间，保留演示数据和额度。`public_smoke.py` 自动检查登录 → broad 发现 → completed/published → 阅读 → 反馈，并停止自己的子进程。
 
-public_smoke.py自动检查原生HTTP闭环并停止子进程，不读取私人配置或调用真实模型/GitHub/SMTP。必要离线检查：
+预构建评审包包含源码及 `frontend/dist`：可跳过 npm 命令，直接运行 smoke 和演示启动器。它尚未作为正式 Release 发布，版本和文件哈希见包内 `ARTIFACT-MANIFEST.json`。
 
-```powershell
-python -m unittest tests.test_evidence_text tests.test_validate tests.test_offline_recheck tests.test_ui_backend tests.test_web
-python scripts/public_smoke.py
-```
+## 自己配置真实模式
 
-## 本人实际使用配置
-
-只在本人机器配置忽略文件，先确认外发档案的范围和费用：
+真实模式与 fixture 分开。没有正式账号时拒绝私人页面，不使用 fixture 常量替代登录。
 
 ```powershell
 Copy-Item .env.example .env
 Copy-Item config\profile.example.toml config\profile.toml
-# 本机编辑.env、settings.toml、profile.toml；确认后设confirmed_by_user=true
-python -m learnradar.auth_cli init --data-dir .\data
-# 密码仅在交互终端隐藏输入，不接受密码命令参数
-python -m learnradar.task_cli web --data-dir .\data --web-mode loopback --port 0
-# 独立终端；先核对队列和待通知，外发须使用者明确授权
-python -m learnradar.task_cli worker --data-dir .\data
+# 本机编辑 .env、config/settings.toml、profile.toml；审阅后才设 confirmed_by_user=true
+& $env:LEARNRADAR_PYTHON -m learnradar.auth_cli init --data-dir .\data
+& $env:LEARNRADAR_PYTHON -m learnradar.task_cli web --data-dir .\data --web-mode loopback --port 0
+# 独立终端：先检查队列和待通知，确认允许外发再启动
+& $env:LEARNRADAR_PYTHON -m learnradar.task_cli worker --data-dir .\data
 ```
 
-模型角色由config/settings.toml选择，密钥变量见.env.example；业务模型与编码助手提供方独立。模板不含有效凭据，不指向开发者机器。通知自行复制config/email.example.toml到忽略的email.toml并设置密码环境变量。HTTPS代理另配config/web.example.toml，须验Secure Cookie、Origin和单执行者交接；不能公网暴露回环开发模式。正式停止用各终端Ctrl+C，不按历史PID停止其它进程。
+密码仅在本机终端隐藏输入。模型角色、端点和价格来自 `config/settings.toml`；默认 screening/analysis 都使用该文件声明的 `LEARNRADAR_FALLBACK_API_KEY`，以实际 `api_key_env` 为准。提供方须支持实际 model ID；编码助手账号不等于业务模型凭据。GitHub 只读 Token 可选，用于提高公开读取限额。邮件通知可选：自行复制 `email.example.toml` 到忽略的 `email.toml` 并配置 SMTP；不配置通知时不要启用发送。
 
-## 数据流与边界
+本人账号/档案准备后可用 `scripts/start.ps1` 管理日常服务，`-WebOnly` 只读，`-Action status/stop` 检查/停止自身服务。启动不提交任务，旧任务/通知先人工审阅。独立 web/worker 终端用 Ctrl+C 停止。配置、SQLite、报告、反馈、材料和日志留在忽略目录，不提交。
 
-原生表单/CSRF→持久队列→独立worker→受限公开读取/模型适配→结构及引文门槛→发布报告或拒绝草稿→通知→相关项目反馈。增强层只展示和同源GET读取，原生POST、稳定run/repo/task身份及303由Python决定；无JS仍可认证、阅读和反馈。
+## 预算、费用和限制
 
-默认新任务broad为3方向、每方向最多10、合并最多30；显式focused、旧任务及未明确切换的weekly保留原范围。默认每日3个手动任务、每任务4次底层模型请求，实际以配置为准。失败/重试及不确定消费持久记账；价格缺失写费用未知。worker --once可能先处理通知重试，不是指定task开关。
+默认新任务 broad：3 方向、每方向最多 10、合并最多 30。显式 focused、旧任务和未明确切换的 weekly 保持原单方向。默认每日 3 个手动任务、每任务最多 **4 次底层模型请求**；分析及 JSON/截断/字段修复共用 **2 次分析机会**。失败和不确定消费持久记账，缺价格显示“费用未知”。`worker --once` 可能先处理通知，并非指定任务开关。
 
-task completed、report published/rejected、email sent/failed/unknown独立。SMTP接受不等于本人收件，unknown不能盲目重发。引文匹配不证明语义正确或项目已安装；区分事实、推断、未实测，不执行候选代码。单用户定位，不扩展聊天、注册/找回、OAuth或多Agent产品团队。
+任务 completed、报告 published/rejected、邮件 sent/failed/unknown 是独立状态。结构通过不保证语义、推荐质量、创新性或项目可运行；程序不会自动执行候选代码。SMTP 接受不等于本人收件，unknown 不能盲目重发。历史一次保存证据重放在第二次字段修复后通过，只验证那次修复，没有安装候选。本轮公开安装验收仅 fixture，真实业务外发为 0。
+
+回环 HTTP 仅为显式开发模式；HTTPS Cookie 策略来自配置，不信任任意转发头。新版 Linux/systemd/Caddy、公网 TLS/Secure Cookie、实体手机及系统后台切换尚未本轮验收。保持单用户，不提供注册、找回、OAuth、聊天或多用户团队。
+
+## 测试与结构
+
+```powershell
+& $env:LEARNRADAR_PYTHON scripts/offline_tests.py
+& $env:LEARNRADAR_PYTHON scripts/public_smoke.py
+```
 
 | 路径 | 作用 |
 | --- | --- |
-| learnradar/net.py、sources_github.py | 公网读取、内网/元数据拦截、取证 |
-| task_cli.py、tasks.py、worker.py | 统一入口、持久队列/预算、独立执行 |
-| models.py、analysis.py、evidence.py、validate.py | 模型适配、分析、来源和质量门槛 |
-| web.py、auth*.py、archive*.py | 原生页面、认证、项目/报告身份 |
-| frontend/ | Vite/Three.js、同源资源和原生回退 |
-| config/、prompts/、tests/ | 空凭据/合成档案模板、提示词、离线回归 |
-| scripts/public_export.py、release_audit.py | 新历史公开候选及脱敏扫描 |
-| data/、logs/ | 私人产物，禁止公开Git |
+| `learnradar/net.py`, `collector.py`, `sources_github.py` | 公网读取、内网拦截、取证 |
+| `tasks.py`, `worker.py`, `task_cli.py` | 队列、内核锁、预算、统一执行 |
+| `models.py`, `analysis.py`, `validate.py`, `report.py` | 模型、有限修复、质量门槛、报告 |
+| `web.py`, `auth*.py`, `archive*.py` | 原生页面、认证、报告与项目身份 |
+| `frontend/` | 同源视觉增强、资源清单、失败回退 |
+| `config/`, `prompts/`, `tests/` | 空凭据/合成档案模板、中文提示词、离线回归 |
+| `data/`, `logs/` | 忽略的私人运行产物 |
 
-## 来源、隐私与发布
+## 许可与致谢
 
-公开候选排除密钥、个人档案/反馈/报告、账号初始化、SQLite/WAL、日志/截图、原私有Git历史和商业NOVECENTO字节；旧个人化示例整份替换为人工合成模板。账号精确输入用技术字体，当前品牌体验保持。
+原创代码有 [MIT 待确认草稿](LICENSE-MIT.DRAFT.txt)，**所有者尚未授权生效**，根 `LICENSE` 记录状态。第三方按[逐项清单](docs/THIRD-PARTY.md)及原许可证处理。视觉代码改编自 [LBEILC/RhineLabUI](https://github.com/LBEILC/RhineLabUI)，保留 MIT 版权；原创程序配乐保留来源。MiSans 未修改，随应用保留 Xiaomi 版权和许可，不标 MIT，不单独作为字体产品分发。
 
-界面复用LBEILC/[RhineLabUI](https://github.com/LBEILC/RhineLabUI)，保留版权和MIT正文。作者可授权GLB/原创配乐与原作第三方权利区分；MiSans、商业字体和依赖独立许可，不称全仓MIT。原创代码公开许可证待所有者确认。[公开说明](docs/PUBLIC-SOURCE-GUIDE.md)包括依据、可选合法字体和扫描边界；另见[反馈规则](docs/FEEDBACK.md)与[视频脚本](docs/VIDEO-OUTLINE.md)。视频只用保存结果，隐藏私人信息，标注复用与AI辅助，不重复生成。
+公开版用自生成通用档案卡和数学轮廓，排除权利未明的旧模型、品牌轮廓及其生成图。商业 Novecento 和旧含字体构建不进入源码、可达历史或包；MiSans/系统字体回退可用，私有版视觉不改。开发有 AI 辅助，不虚构手写比例或第三方权利。未来提交和开发文档用英文，中文界面/报告/提示词/测试数据保留。[视频脚本](docs/VIDEO-OUTLINE.md)提供镜头及中文旁白，发布后才补实际开源与视频地址。

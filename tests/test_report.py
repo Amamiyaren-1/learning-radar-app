@@ -1,4 +1,4 @@
-"""报告渲染测试：结构检查与内容复核分开显示、结论带依据摘录与定位。"""
+"""Report rendering separates structural checks from content review and includes evidence locators."""
 
 from __future__ import annotations
 
@@ -141,7 +141,7 @@ class ReportRenderingTests(unittest.TestCase):
         self.assertIn("初筛输出不合法", rendered)
 
     def test_environment_text_comes_from_conditions_only(self) -> None:
-        # 架构上不再有独立的 environment/hardware/external_cost 自由文本
+        # Separate environment/hardware/external_cost free-text fields no longer exist.
         self.assertNotIn("environment", self.report["difficulty"])
         self.assertNotIn("hardware", self.report["difficulty"])
         self.assertNotIn("external_cost", self.report["difficulty"])

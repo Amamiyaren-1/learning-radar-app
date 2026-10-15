@@ -1,4 +1,4 @@
-"""推荐流程的最小输入/回调/结果契约；CLI 与网页任务共用一个实现。"""
+"""Minimal recommendation inputs, callbacks, and results shared by CLI and web tasks."""
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
@@ -25,7 +25,7 @@ class RunHooks:
 
 
 def classify_recommendation_result(run_status: str, report_status: str) -> str | None:
-    """从保存结果判断处理终态；None 表示尚无可确认的终态。"""
+    """Read terminal processing state from saved results; None means no confirmed terminal state."""
     if report_status or run_status in {
         "all-candidates-in-cooldown", "no-suitable-candidate", "insufficient-comparators", "screening-ok"
     }:
@@ -46,7 +46,7 @@ def execute_recommendation(settings, request: RecommendationInput, hooks: RunHoo
     vars(args).update(request.options)
     args.run_id=request.run_id
     code=engine(settings,args,hooks=hooks)
-    # 状态来自数据库/保存产物，不由退出码或终端输出推测。
+    # Read states from persisted records/artifacts rather than exit codes or console output.
     with Store(settings.data_dir / "learning-radar.sqlite") as store:
         result=collect_outcome(store, settings, request.run_id)
     result["exit_code"]=code

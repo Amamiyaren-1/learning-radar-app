@@ -1,4 +1,4 @@
-"""邮件渲染与发送分类：只读已保存结果，假 SMTP，不联网、不调用模型。"""
+"""Render/classify mail from saved results with fake SMTP and no network/model calls."""
 
 from __future__ import annotations
 
@@ -135,7 +135,7 @@ class RenderingTests(unittest.TestCase):
 
 
 class FakeSMTP:
-    """最小 SMTP 替身：记录调用，按脚本抛错。"""
+    """Minimal scripted SMTP double that records calls and raises configured errors."""
 
     mode = "ok"          # ok | connect_error | auth_error | disconnect | data_error
     instances: list["FakeSMTP"] = []

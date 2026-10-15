@@ -1,7 +1,5 @@
-"""CLI 收尾编排测试：结构失败安全失败、先落盘后渲染、终态明确。
-
-覆盖 A.1 评审第 5 条：坏结构不能让用量与终态丢失。
-"""
+"""Test safe CLI finalization, persist-before-render ordering, and explicit terminal states.
+Malformed structure must not lose usage or terminal state."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""有界发布校验修复：不填造证据，不消除门槛，不覆盖旧运行。"""
+"""Bound publication-check repairs without fabricated evidence, relaxed gates, or overwritten source runs."""
 from copy import deepcopy
 import dataclasses
 import io
@@ -276,7 +276,7 @@ class ValidationRepairTests(unittest.TestCase):
         task, settings = self.run_persistent_normal_task(4)
         self.assertEqual(task["status"], "completed")
         self.assertEqual(task["report"]["status"], "published")
-        self.assertEqual(task["model_requests"], 3)  # 初筛1 + 分析1 + 修复1
+        self.assertEqual(task["model_requests"], 3)  # One screening request, one analysis request, and one repair request.
         self.assertFalse(task["uncertain"])
         run = settings.data_dir / "runs" / task["run_id"]
         usage = json.loads((run / "usage.json").read_text(encoding="utf-8"))

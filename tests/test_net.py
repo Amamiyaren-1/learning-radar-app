@@ -1,8 +1,5 @@
-"""网络读取的安全边界与重定向策略测试。
-
-全部离线：主机名使用可解析不需要 DNS 的字面 IP（93.184.216.34/35），
-真实 opener 被替换成记录型假 opener，不会发出任何网络请求。
-"""
+"""Offline network-safety and redirect tests.
+Literal public IPs require no DNS; fake openers record requests without actual connections."""
 
 from __future__ import annotations
 
@@ -50,7 +47,7 @@ class FakeResponse:
 
 
 class RecordingOpener:
-    """按脚本顺序返回响应，并记录每一次请求的方法、URL、凭据与正文。"""
+    """Script responses and record request methods, URLs, credentials, and bodies."""
 
     def __init__(self, script: list[tuple[int, dict[str, str]]]) -> None:
         self.script = list(script)

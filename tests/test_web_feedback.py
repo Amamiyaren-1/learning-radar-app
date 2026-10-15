@@ -1,4 +1,4 @@
-"""页面反馈闭环：提交→落盘→重新打开可见；未发布预览可反馈；损坏运行只显示诊断。"""
+"""HTTP feedback persists and reads back; rejected drafts accept feedback while damaged payloads show diagnostics only."""
 
 from __future__ import annotations
 
@@ -95,7 +95,7 @@ class PageFeedbackTests(unittest.TestCase):
             },
         )
 
-    # --- 已发布
+    # --- Published
     def test_published_report_saves_and_reopens_feedback(self) -> None:
         self.seed("run-1", "published", markdown="# 示例报告\n\n正文一段。")
         status, html = self.get("/report/run-1")
@@ -148,7 +148,7 @@ class PageFeedbackTests(unittest.TestCase):
         self.assertNotIn("<script>", html)
         self.assertIn("&lt;script&gt;", html)
 
-    # --- 未发布预览 / 损坏运行
+    # --- Rejected draft / damaged payload
     def test_rejected_preview_keeps_status_and_accepts_feedback(self) -> None:
         self.seed(
             "run-2",

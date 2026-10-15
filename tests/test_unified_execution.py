@@ -1,4 +1,4 @@
-"""统一入口行为验收：隔离库、假模型/SMTP、实际竞争进程与持久结果。"""
+"""Unified entry tests with isolated data, fake models/SMTP, competing processes, and persisted results."""
 import contextlib
 import dataclasses
 import io

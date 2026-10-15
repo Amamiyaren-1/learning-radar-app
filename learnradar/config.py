@@ -1,10 +1,8 @@
-"""配置加载：模型名称、推理参数、价格、限额、模型角色全部来自配置文件，代码里不写死。
+"""Load model names, parameters, prices, limits, and roles from configuration.
 
-模型角色（role）把"业务流程里的位置"和"具体供应商/模型"解耦：
-[models] 下除了数组 candidate 以外的每个字符串键就是一个角色，
-例如 screening = "flash"、analysis = "pro"，值为候选名。
-业务流程只按角色取模型，替换模型只需改配置。
-"""
+String keys under models, apart from candidate, define roles mapped to candidate names.
+For example screening=flash and analysis=pro decouple workflow positions from providers.
+Business code resolves roles; changing a model requires configuration changes only."""
 
 from __future__ import annotations
 
@@ -20,11 +18,11 @@ KNOWN_ROLES = ("screening", "analysis")
 
 
 class ConfigError(RuntimeError):
-    """配置缺失或非法。"""
+    """Missing or invalid configuration."""
 
 
 def load_dotenv(path: Path, *, override: bool = False) -> dict[str, str]:
-    """极简 .env 解析：只支持 KEY=VALUE 与 # 注释。默认不覆盖已存在的环境变量。"""
+    """Minimal KEY=VALUE/# .env parser; existing environment values win by default."""
     loaded: dict[str, str] = {}
     if not path.exists():
         return loaded
@@ -75,7 +73,7 @@ class CandidateModel:
         return bool(self.pricing_input_per_mtok or self.pricing_output_per_mtok)
 
     def cost(self, input_tokens: int | None, output_tokens: int | None) -> float | None:
-        """按配置单价估算费用；单价未知时返回 None（显示“费用未知”，不显示 0）。"""
+        """Estimate configured pricing; unknown prices return None instead of displaying zero cost."""
         if not self.pricing_known():
             return None
         cost = 0.0
@@ -112,7 +110,7 @@ class Settings:
         return directory if directory.is_absolute() else (self.root / directory)
 
     def model_for(self, role: str) -> CandidateModel:
-        """按角色取模型；角色未配置或指向不存在的候选时明确报错，不做静默替换。"""
+        """Resolve a configured role; missing roles/candidates raise errors without silent substitution."""
         name = self.roles.get(role)
         if not name:
             raise ConfigError(
@@ -127,7 +125,7 @@ class Settings:
 
     @property
     def analysis(self) -> CandidateModel:
-        """向后兼容：analysis 角色的模型。"""
+        """Backward-compatible analysis-role model accessor."""
         return self.model_for("analysis")
 
     def role_of(self, candidate_name: str) -> list[str]:
@@ -252,7 +250,7 @@ def load_settings(root: Path | None = None, *, local_overrides: bool = True) -> 
 
 
 def load_profile(settings: Settings) -> tuple[dict[str, Any], bool, Path]:
-    """返回 (档案, 是否为示例占位, 路径)。真实档案缺失时回退示例并标记未确认。"""
+    """Return profile, placeholder flag, and path; missing real profiles fall back to an unconfirmed example."""
     if settings.profile_path.exists():
         return tomllib.loads(settings.profile_path.read_text(encoding="utf-8")), False, settings.profile_path
     return (

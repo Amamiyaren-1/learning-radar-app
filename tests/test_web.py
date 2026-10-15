@@ -1,4 +1,4 @@
-"""本地页面渲染测试：Markdown 子集 -> HTML，确保表格/链接/代码能正确渲染且转义。"""
+"""Markdown-to-HTML tests verify tables, links, code, and escaping."""
 
 from __future__ import annotations
 

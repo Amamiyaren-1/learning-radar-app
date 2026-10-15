@@ -1,10 +1,10 @@
 ﻿# learning-radar 命令封装：解决本机 python 不在 PATH 的问题。
-# 用法示例：
+# Resolve LEARNRADAR_PYTHON, then working PATH Python; skip Store aliases.
 #   .\scripts\lr.ps1 verify-models
 #   .\scripts\lr.ps1 run --topic tool-calling --candidate owner/name
 #
-# 解释器选择顺序：LEARNRADAR_PYTHON 环境变量 -> PATH 里的 python/python3。
-# 每个候选都会先做一次真实的版本探测，Windows 应用商店的 python.exe 别名会被跳过。
+# Resolve LEARNRADAR_PYTHON, then working PATH Python; skip Store aliases.
+# Resolve LEARNRADAR_PYTHON, then working PATH Python; skip Store aliases.
 
 param(
     [switch]$DemoLauncher,

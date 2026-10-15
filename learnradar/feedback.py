@@ -1,10 +1,9 @@
-"""反馈：取值、展示文本与提示词块的唯一来源（规则见 docs/FEEDBACK.md）。
+"""Single source for feedback values, display text, and prompt blocks; see docs/FEEDBACK.md.
 
-- 反馈是**用户原话**，不是证据，也不是模型判断；
-- 绑定到具体项目与运行；同一份报告重复提交是更新，不新增记录；
-- “不想进一步了解”不构成排除名单、语言偏好或长期兴趣规则；“读懂了”不代表认可项目；
-- 不做跨项目偏好推断，也不为反馈增加分析模型。
-"""
+Feedback is verbatim user speech, not evidence or model judgment.
+Bind it to a project/run; repeated submissions update the same report record.
+Disinterest does not create exclusion or preference rules; comprehension does not mean endorsement.
+Do not infer cross-project preferences or add a feedback model."""
 
 from __future__ import annotations
 
@@ -35,7 +34,7 @@ PROMPT_RULES = (
 
 
 def clean_answers(raw: dict[str, Any]) -> dict[str, str]:
-    """只接受已知选项；没选或非法值都记为空字符串，保留“未填写”这一原始状态。"""
+    """Accept known options only; absent/invalid choices remain empty, preserving the unanswered state."""
     allowed = {code for code, _ in CHOICES}
     answers: dict[str, str] = {}
     for key, _label in ITEMS:
@@ -60,7 +59,7 @@ def summary_line(row: dict[str, Any]) -> str:
 
 
 def prompt_text_for_repos(store: Any, repos: Iterable[str]) -> str:
-    """取这些项目已有的反馈（同一项目取最近一次），拼成提示词里的“用户原话”块。"""
+    """Build a verbatim feedback prompt block from the latest feedback for each relevant project."""
     rows = store.feedback_for_repos(list(repos))
     if not rows:
         return EMPTY_TEXT
@@ -77,5 +76,5 @@ def prompt_text_for_repos(store: Any, repos: Iterable[str]) -> str:
 
 
 def report_rows(store: Any, repos: Iterable[str]) -> list[dict[str, Any]]:
-    """报告附录用的行：与提示词同源，避免两处口径不一致。"""
+    """Build report appendix lines from the same source as the prompt to avoid inconsistent wording."""
     return store.feedback_for_repos(list(repos))

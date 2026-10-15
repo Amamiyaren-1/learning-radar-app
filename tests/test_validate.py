@@ -1,4 +1,4 @@
-"""质量门槛测试：结构可核对、对照归属与去重、数值绑定、伪造热度、评分/时长。"""
+"""Test inspectable structure, comparator ownership/deduplication, numeric binding, scores, and durations."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from learnradar.validate import validate_report
 TARGET = "owner/target"
 COLLECTED = [TARGET, "other/mature", "other/second"]
 
-# 真实运行保存的 learning_action 原样字段；其余报告/材料使用通用离线夹具。
+# Regression action fields are supplied verbatim; all other evidence/report data is generic fixture data.
 SAVED_LEARNING_ACTION = {
     "executable": False,
     "action": "本次没有可执行动作：已核验学习入口（MCP Quickstart）需要 OpenAI API 密钥和 Docker，而用户只有 DeepSeek API，兼容路径未核验；建议先按 README 安装 cognee[gliner] 并运行 cognee-cli demo，但该路径未作为已核验入口。",
@@ -360,7 +360,7 @@ class ValidateReportTests(unittest.TestCase):
         self.assertTrue(any("缺少关键条件" in item for item in result.errors), msg=result.errors)
 
     def test_matching_quote_does_not_prove_the_conclusion(self) -> None:
-        # 用户指出的要点：引文能匹配只证明“材料里这么写”，不能证明结论成立。
+        # Matching a quote proves what the excerpt says, not that the conclusion follows.
         report = copy.deepcopy(self.report)
         report["difficulty"]["conditions"][1] = {
             "condition": "os_support",
@@ -388,7 +388,7 @@ class ValidateReportTests(unittest.TestCase):
         self.assertTrue(any("没有检测到示例信号" in item for item in result.warnings), msg=result.warnings)
 
     def test_not_executable_keeps_readme_link_and_empty_criteria(self) -> None:
-        """关键反例：状态为不可执行、有合法 README URL、完成标准为空，应当作为观察报告放行。"""
+        """A non-executable action with a valid README URL and empty completion criteria may be an observation report."""
         report = copy.deepcopy(self.report)
         report["learning_action"] = {
             "executable": False,
@@ -571,7 +571,7 @@ class ValidateReportTests(unittest.TestCase):
         self.assertTrue(any("quote 缺失" in item for item in result.errors), msg=result.errors)
 
     def test_repo_metadata_sentence_binds_each_value_to_its_field(self) -> None:
-        """通用 fixture：白名单元数据自然表达不依赖引文的字段顺序。"""
+        """Metadata whitelist fixture accepts natural expressions regardless of quote field order."""
         self.evidence[0].extra.update(language="Python", license="BSD", pushed_at="2026-01-02T03:04:05Z")
         self.evidence[0].excerpt = "最后推送 2026-01-02T03:04:05Z；语言=Python；许可证=BSD。"
         report = copy.deepcopy(self.report)
@@ -581,7 +581,7 @@ class ValidateReportTests(unittest.TestCase):
         )
         result = self.check(report, require_quotes=True)
         self.assertTrue(result.ok, result.errors)
-        # 字段顺序、日期精度不影响结论；字段值不匹配及附加判断仍拒绝。
+        # Field order/date precision do not change claims; mismatched values or extra judgments are rejected.
         for text in (
             "仓库元数据显示最近推送在 2026-01-02，许可证为 BSD，语言为 Python。",
             "仓库元数据显示语言为 Python，许可证为 BSD，最后推送在 2026-01-02T03:04:05Z。",

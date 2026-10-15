@@ -1,4 +1,4 @@
-"""实际 HTTP 与独立子进程验收；只用本机回环、隔离数据、假模型和假 SMTP。"""
+"""Actual HTTP/subprocess acceptance using loopback, isolated data, and fake models/SMTP."""
 import json
 import os
 import re
@@ -211,7 +211,7 @@ class ProcessTests(unittest.TestCase):
         before=self.queue.get(weekly["task_id"])
         with self.queue.store() as store:
             cycle_before=store.get_cycle("fixture-http-cancel-cycle")
-        self.start_web()  # 只启动隔离网页；不启动分析执行进程。
+        self.start_web()  # Start only an isolated web server, without an analysis worker.
         path="/task/"+weekly["task_id"]
         self.assertIn("定时周报任务",self.get("/"))
         detail=self.get(path)

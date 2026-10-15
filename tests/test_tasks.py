@@ -1,4 +1,4 @@
-"""2.1 行为回归：隔离库、并发事务、持久请求边界、假模型和假 SMTP。"""
+"""Isolated transaction/concurrency/budget tests with fake models and SMTP."""
 import contextlib
 import dataclasses
 import io
@@ -145,7 +145,7 @@ class QueueTests(unittest.TestCase):
         self.assertEqual(cancelled["model_requests"],0)
         self.submit("fixture-cancel-boundary-new")
         started=self.claim()
-        TaskBudget(self.queue,started["task_id"]).consume()  # 只保存隔离测试请求账，不发送请求。
+        TaskBudget(self.queue,started["task_id"]).consume()  # Persist isolated request accounting without sending a request.
         before=self.queue.get(started["task_id"])
         with self.assertRaisesRegex(TaskError,"只能取消尚未执行且没有模型请求"):
             self.queue.cancel(started["task_id"])

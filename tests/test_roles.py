@@ -1,4 +1,4 @@
-"""模型角色配置测试：业务流程只认角色，换模型只改配置。"""
+"""Roles decouple workflow from providers; model changes require configuration only."""
 
 from __future__ import annotations
 
@@ -38,7 +38,7 @@ class RoleConfigTests(unittest.TestCase):
             settings.model_for("screening")
 
     def test_replacing_the_analysis_model_needs_config_only(self) -> None:
-        """把 analysis 换成另一个候选（这里用离线夹具代替 Pro）不需要改任何代码。"""
+        """Replacing analysis with an offline candidate requires no source changes."""
         original = (REPO_ROOT / "config" / "settings.toml").read_text(encoding="utf-8")
         swapped = original.replace('analysis = "pro"', 'analysis = "offline"')
         self.assertNotEqual(original, swapped)
@@ -49,7 +49,7 @@ class RoleConfigTests(unittest.TestCase):
             settings = load_settings(root)
             self.assertTrue(settings.model_for("analysis").is_fixture)
             self.assertEqual(settings.model_for("analysis").model_id, "offline-fixture-v1")
-            # screening 角色不受影响
+            # The screening role is unaffected.
             self.assertEqual(settings.model_for("screening").model_id, "deepseek-flash")
 
     def test_missing_roles_section_is_a_config_error(self) -> None:

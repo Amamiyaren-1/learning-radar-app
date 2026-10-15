@@ -1,12 +1,9 @@
-"""云端每周任务与邮件相关命令（systemd timer 调用；跑完即退出）。
+"""Weekly and mail commands for a terminating systemd invocation.
 
-- weekly：一个周期一次分析 + 一封邮件；同一周期（含失败）不重复分析；
-- email-preview：只读已保存结果打印邮件，不分析、不发送、不写库；
-- email-retry：重发已保存的邮件内容，不重新分析；
-- cycles / backup：人工恢复与一致性备份。
-
-CLI 只做参数解析与转发，实现在这里；`cmd_run` 等仍复用 learnradar.cli 的实现。
-"""
+weekly performs one analysis and one notification per cycle, including failed cycles.
+email-preview reads saved content without analysis, delivery, or writes.
+email-retry resends saved mail without analysis; cycles/backup support manual recovery.
+CLI parsing delegates here while reusing learnradar.cli execution."""
 
 from __future__ import annotations
 
@@ -53,7 +50,7 @@ from .notify import (
 from .store import Store, backup_database
 from .validate import ValidationResult
 
-# 与 learnradar.cli 的退出码保持一致
+# Keep exit codes aligned with learnradar.cli.
 EXIT_OK = 0
 EXIT_USAGE = 1
 EXIT_GATE_FAILED = 2
@@ -64,7 +61,7 @@ def _print(message: str = "") -> None:
 
 
 def _latest_run_id(store: Store) -> str:
-    """最近一次运行：优先有报告的，其次只有运行记录的。"""
+    """Find the latest run, preferring one with a report over a run-only record."""
     row = store.conn.execute(
         "SELECT run_id FROM reports ORDER BY created_at DESC, rowid DESC LIMIT 1"
     ).fetchone()
@@ -76,7 +73,7 @@ def _latest_run_id(store: Store) -> str:
     return str(row["run_id"]) if row else ""
 
 
-# 脱敏：只看类别，不回显路径与疑似凭据
+# Redact paths and possible credentials; report categories only.
 _SECRET_LIKE = re.compile(
     r"sk-[A-Za-z0-9_\-]{8,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}"
     r"|(?i:bearer)\s+\S+|(?i:password|passwd|token|api[_-]?key)\s*[:=]\s*\S+"
@@ -85,7 +82,7 @@ _PATH_LIKE = re.compile(r"(?:[A-Za-z]:\\[^\s:;]*|/(?:home|srv|var|opt|tmp|Users)
 
 
 def sanitize_text(text: str, settings: Settings) -> str:
-    """把绝对路径与疑似凭据替换掉，保留能定位问题的信息。"""
+    """Replace absolute paths and credential candidates while retaining useful diagnostics."""
     cleaned = str(text or "")
     for raw, replacement in (
         (str(settings.data_dir), "<数据目录>"),
@@ -114,11 +111,9 @@ def _validation_result(summary: dict[str, Any]) -> ValidationResult:
 
 
 def sanitized_markdown(outcome: dict[str, Any]) -> str:
-    """对外可发送的 Markdown：只从允许字段渲染。
-
-    排除的内容：用户反馈（报告附录 E）、真实档案、原始提示词、审计与运行元信息（附录 B）。
-    保留的内容：项目一句话、亮点、价值、缺口、结论、来源（附录 A）与核验状态（附录 C）。
-    """
+    """Render outbound Markdown from allowed fields only.
+Exclude feedback, private profiles, raw prompts, audit, and run metadata.
+Retain project summary, strengths, value, gaps, conclusion, sources, and verification state."""
     payload = outcome.get("payload") or {}
     if not payload:
         return ""
@@ -132,12 +127,12 @@ def sanitized_markdown(outcome: dict[str, Any]) -> str:
             feedback_rows=None,
             include_run_meta=False,
         )
-    except Exception:  # 渲染失败就不带附件，绝不退回原报告文件
+    except Exception:  # On rendering failure, omit the attachment; never fall back to the original report file.
         return ""
 
 
 def write_email_attachment(settings: Settings, outcome: dict[str, Any]) -> tuple[str, str]:
-    """把对外版本落盘（供 email-retry 重发），返回 (路径, 文本)。"""
+    """Persist the outbound version for email-retry; return its path and text."""
     text = sanitized_markdown(outcome)
     if not text.strip():
         return "", ""
@@ -161,11 +156,9 @@ def _handle_unexpected_error(
     run_id: str,
     exc: BaseException,
 ) -> int:
-    """周期占位之后出现未捕获异常：落下脱敏诊断、标成 failed、不发邮件、不自动重跑。
-
-    标 failed（而不是 interrupted）是因为我们在这里亲眼看到了异常；interrupted 只用于
-    “另一个进程已经不在了、但周期还是 running”的情况。failed 可以由 --force-redo 人工恢复。
-    """
+    """After reserving a cycle, persist redacted unexpected failures without sending or rerunning.
+Use failed for an observed exception; interrupted describes another missing process.
+Manual --force-redo can recover a failed cycle."""
     summary = sanitize_error(exc, settings)
     run_dir = settings.data_dir / "runs" / run_id
     try:
@@ -173,7 +166,7 @@ def _handle_unexpected_error(
         detail = sanitize_text(
             "".join(traceback.format_exception(type(exc), exc, exc.__traceback__)), settings
         )
-        exc.__traceback__ = None  # 及时释放帧引用：cmd_run 里未关闭的 SQLite 连接会随之回收
+        exc.__traceback__ = None  # Release frame references so unclosed cmd_run SQLite connections can be collected.
         (run_dir / "weekly-error.txt").write_text(
             f"时间：{now_iso()}\n周期：{cycle_id}\n运行：{run_id}\n"
             "（下面的路径与疑似凭据已脱敏）\n\n"
@@ -229,7 +222,7 @@ def _handle_unexpected_error(
     return EXIT_GATE_FAILED
 
 def cmd_weekly(settings: Settings, args: argparse.Namespace) -> int:
-    """提交唯一周期任务并同步等到处理/通知终态（systemd oneshot）。"""
+    """Submit one cycle task and synchronously await execution/notification terminal states."""
     from .cli import _find_topic
     from .submission import queue_for, fixture_options
     from .tasks import TaskError
@@ -244,7 +237,7 @@ def cmd_weekly(settings: Settings, args: argparse.Namespace) -> int:
         _print(f"# Learning Radar 周任务（周期 {cycle_id}）")
         _print(f"  计划：每周 {schedule.weekday} {schedule.at}（{schedule.timezone}）；归属周期：{cycle_id}；最近一次计划时刻 {anchor.isoformat(timespec='minutes')}")
         queue=queue_for(settings)
-        # 旧版本的锁若仍存在，不推测持有者已停止，也不与旧入口各跑一次。
+        # An existing legacy lock does not imply a dead owner; do not run both entry points.
         legacy_lock=settings.data_dir/"locks"/"weekly.lock"
         if legacy_lock.exists():
             _print("旧 weekly 锁仍存在：未创建分析；请确认旧执行者状态后人工处理，未返回执行成功。")
@@ -287,7 +280,7 @@ def _finish_weekly(
     code: int,
     *, config_loader=None, sender=None, before_send=None,
 ) -> int:
-    """收尾：写周期状态 → 渲染并保存待发邮件 → 发送一次（不自动重试）。"""
+    """Finalize cycle state, persist rendered mail, and send once without automatic retry."""
     outcome = collect_outcome(store, settings, run_id, cycle_id=cycle_id)
     cycle_status, email_kind = classify_cycle(
         outcome["run_status"], outcome["report_status"], outcome["decision"]
@@ -368,13 +361,13 @@ def _finish_weekly(
     if status != "sent":
         return EXIT_GATE_FAILED
     if email["kind"] == "failure":
-        # 失败通知可以发送成功，但进程仍然报“需要处理”，避免被当成正常一周
+        # A sent failure notice still requires attention; do not report the weekly run as successful.
         return EXIT_GATE_FAILED
     return EXIT_OK if cycle_status == CYCLE_COMPLETED else EXIT_GATE_FAILED
 
 
 def cmd_email_preview(settings: Settings, args: argparse.Namespace) -> int:
-    """只读已保存结果，打印将要发送的邮件（不分析、不发送、不写库）。"""
+    """Print saved outbound content without analysis, delivery, or database writes."""
     store = Store(settings.data_dir / "learning-radar.sqlite")
     try:
         run_id = args.run_id or ""
@@ -428,7 +421,7 @@ def cmd_email_preview(settings: Settings, args: argparse.Namespace) -> int:
 
 
 def cmd_email_test(settings: Settings, args: argparse.Namespace) -> int:
-    """只测 SMTP：不发报告内容、不调用模型、不占周期、不改报告状态。"""
+    """Test SMTP only, without report content, model calls, cycle consumption, or report-state changes."""
     try:
         config = load_email_config(settings, require_secret=True)
     except ConfigError as exc:
@@ -479,16 +472,14 @@ def cmd_email_test(settings: Settings, args: argparse.Namespace) -> int:
         store.close()
 
 def cmd_email_retry(settings: Settings, args: argparse.Namespace) -> int:
-    """重发已保存的邮件：不重新分析、不调用模型。"""
+    """Resend stored mail without reanalyzing or calling a model."""
     return _send_saved_or_new(settings, args, retry=True)
 
 
 def cmd_email_send(settings: Settings, args: argparse.Namespace) -> int:
-    """给一个已保存的运行手动发送邮件：不启动分析、不占 weekly 周期。
-
-    复用现有的邮件渲染（含隐私过滤：附件只由允许对外发送的字段渲染）、SMTP 配置、
-    `emails` 表与 email-retry。已发布报告发推荐邮件；被拒/渲染失败只发不含草稿的失败通知。
-    """
+    """Manually send a saved run without analysis or consuming a weekly cycle.
+Reuse privacy-filtered rendering, SMTP configuration, emails persistence, and retry handling.
+Rejected/render-failed reports receive failure notices without draft content."""
     return _send_saved_or_new(settings, args, retry=False)
 
 
@@ -496,7 +487,7 @@ def _send_saved_or_new(
     settings: Settings, args: argparse.Namespace, *, retry: bool,
     config_loader=None, sender=None, before_send=None,
 ) -> int:
-    """两个入口共用：retry=True 只重发已保存邮件；retry=False 从已保存运行现渲染一封。"""
+    """Shared sender: retry=True uses stored content; otherwise render one saved run."""
     store = Store(settings.data_dir / "learning-radar.sqlite")
     try:
         outcome: dict[str, Any] = {}
@@ -541,11 +532,11 @@ def _send_saved_or_new(
             return EXIT_USAGE
 
         if not retry:
-            # 从已保存的结构化结果现渲染：已发布→推荐邮件；被拒/渲染失败→不含草稿的失败通知
+            # Render saved payload: published recommendation or a failure notice without draft content.
             email = build_email(outcome, config)
             attachment_path = ""
             if email["kind"] == KIND_REPORT:
-                # 只有推荐邮件带附件；失败/状态邮件不生成、也不留附件文件
+                # Only recommendations have attachments; failure/status notices create none.
                 attachment_path, attachment_text = write_email_attachment(settings, outcome)
                 email = build_email(outcome, config, attachment_text=attachment_text)
             subject = email["subject"]
@@ -612,7 +603,7 @@ def _send_saved_or_new(
 
 
 def _find_saved_email(store: Store, args: argparse.Namespace) -> dict[str, Any] | None:
-    """按 --email-id / --run-id / --cycle 找一封已保存的邮件。"""
+    """Find stored mail by --email-id, --run-id, or --cycle."""
     if getattr(args, "email_id", ""):
         return store.get_email(args.email_id)
     if getattr(args, "run_id", ""):
@@ -623,7 +614,7 @@ def _find_saved_email(store: Store, args: argparse.Namespace) -> dict[str, Any] 
 
 
 def _cycle_usage_summary(settings: Settings, cycle_id: str) -> tuple[bool, str]:
-    """该周期有没有已经落盘的模型用量。有调用记录时要先人工确认，不自动改状态。"""
+    """Check persisted model usage; recorded calls require manual review before state changes."""
     run_root = settings.data_dir / "runs"
     found: list[str] = []
     total_calls = 0
@@ -642,7 +633,7 @@ def _cycle_usage_summary(settings: Settings, cycle_id: str) -> tuple[bool, str]:
 
 
 def cmd_cycle_recover(settings: Settings, args: argparse.Namespace) -> int:
-    """一次性恢复：把卡在 running 的周期明确记为 interrupted（先做条件检查 + 一致性备份）。"""
+    """Recover a stuck running cycle as interrupted after checks and a consistent backup."""
     cycle_id = args.cycle
     store = Store(settings.data_dir / "learning-radar.sqlite")
     try:

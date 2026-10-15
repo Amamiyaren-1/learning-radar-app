@@ -1,8 +1,6 @@
-"""证据与可追溯性。
-
-每一条证据都保留：URL、获取时间、标题、所属仓库（owner）、定位（commit SHA / 文件路径 /
-实际使用的接口 / 章节行号）、内容哈希和必要摘录。不保存整篇原文。
-"""
+"""Evidence and provenance.
+Retain URL, retrieval time, title, repository owner, commit/path/interface/section locator, hash, and excerpts.
+This evidence record does not contain the full original page."""
 
 from __future__ import annotations
 
@@ -85,7 +83,7 @@ class Evidence:
         return "\n".join(lines)
 
     def numbers(self) -> set[int]:
-        """该证据里出现的、可核对的数值（星数）。"""
+        """A verifiable numeric value present in this evidence, such as star count."""
         found: set[int] = set()
         stars = self.extra.get("stars")
         if isinstance(stars, int):
@@ -104,18 +102,16 @@ def normalize_whitespace(text: str) -> str:
     return re.sub(r"\n{3,}", "\n\n", text).strip()
 
 
-# 强调/行内代码标记直接删除，不要替换成空格：原文 “**Python 3.10–3.14**.” 若把 `*` 换成空格，
-# 会变成 “Python 3.10–3.14 .”，与逐字抄下来的 “Python 3.10–3.14.” 对不上（已真实发生的假阴性）。
+# Remove emphasis/inline-code markers without spaces: **Python 3.10-3.14**.
+# Inserting a space before the period would cause a false-negative literal quote match.
 _MARKDOWN_STRIP = re.compile(r"[*`]")
 _MARKDOWN_SPACE = ("_", ">", "#", "[", "]", "(", ")", "|")
 _INLINE_LINK = re.compile(r"\[([^\]\n]+)\]\((https?://[^\s)]+)\)")
 
 
 def matchable(text: str) -> str:
-    """把文本规范化成可以互相匹配的形式：折叠空白、去掉 Markdown 记号、ASCII 小写。
-
-    只做格式归一：要求仍是连续原文；不改变“引文匹配 ≠ 引文支持结论”这条限制。
-    """
+    """Normalize whitespace, Markdown markers, and ASCII case for contiguous quote matching.
+A matching quote does not establish that it supports the conclusion."""
     text = normalize_whitespace(text or "")
     text = _MARKDOWN_STRIP.sub("", text)
     for token in _MARKDOWN_SPACE:
@@ -125,7 +121,7 @@ def matchable(text: str) -> str:
 
 
 def quote_supported_by(quote: str, items: Iterable[Evidence]) -> tuple[bool, str]:
-    """判断一条引文是否能在所引证据的摘录里匹配到（返回 (是否匹配, 说明)）。"""
+    """Return whether a quote matches an evidence excerpt, plus an explanation."""
     normalized = matchable(quote)
     if len(normalized) < 8:
         return False, "引文过短，无法核对"
@@ -148,7 +144,7 @@ INNER_TAG = re.compile(r"(?s)<[^>]+>")
 
 
 def strip_html(raw: str) -> str:
-    """把网页转成文本，但保留代码块与链接：抽取过程丢代码会让"有无示例"被误判。"""
+    """Extract page text while preserving code blocks and links needed for example detection."""
     text = raw or ""
     text = CODE_BLOCK_HTML.sub(
         lambda m: "\n```\n" + html.unescape(INNER_TAG.sub("", m.group(1))).strip() + "\n```\n",
@@ -245,7 +241,7 @@ def readme_evidence(
     locator_extra: str = "",
     notes_extra: str = "",
 ) -> Evidence:
-    """README 证据。excerpt 由调用方按章节挑选后传入；不传时退化为整篇截断。"""
+    """README evidence uses caller-selected excerpts, falling back to whole-document truncation."""
     owner = normalize_repo_name(repo.get("full_name"))
     path = readme_meta.get("path") or "README"
     html_url = readme_meta.get("html_url") or f"{repo.get('html_url')}#readme"
@@ -352,7 +348,7 @@ def example_file_evidence(
     retrieved_at: str,
     route: str = "",
 ) -> Evidence:
-    """示例目录里的具体文件：保留路径、commit 与一小段摘录，便于定位。"""
+    """Preserve concrete example file paths, commit IDs, and short locating excerpts."""
     owner = normalize_repo_name(repo.get("full_name"))
     return Evidence(
         evidence_id=evidence_id(KIND_EXAMPLE_FILE, html_url),
@@ -380,7 +376,7 @@ WEB_KEYWORDS = (
 
 
 def select_web_excerpt(text: str, *, head_chars: int = 500, window: int = 420, budget: int = 1400) -> str:
-    # 长网页只取开头会把安装步骤/机制段落丢掉：这里改成"开头 + 关键词附近窗口"，预算不变
+    # Preserve installation/mechanism text with head plus keyword windows within the same budget.
     body = normalize_whitespace(text)
     if len(body) <= budget:
         return body

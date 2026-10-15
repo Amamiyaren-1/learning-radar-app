@@ -1,4 +1,4 @@
-"""模型适配层的重定向策略测试（离线，假 opener）。"""
+"""Offline fake-opener tests for model redirect policy."""
 
 from __future__ import annotations
 

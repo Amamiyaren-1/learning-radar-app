@@ -1,4 +1,4 @@
-"""实际 PowerShell 一键启动/去重/停止，仅隔离演示和回环。"""
+"""Exercise actual PowerShell start, deduplication, and stop with isolated loopback fixtures."""
 import json
 import os
 from pathlib import Path
@@ -60,7 +60,7 @@ class LauncherTests(unittest.TestCase):
         request=urllib.request.Request(state["url"]+"/tasks",data=urlencode({"topic":"agent-memory","submission_key":key,"csrf_token":auth_helpers.csrf(opener,state["url"])}).encode(),headers={"Origin":state["url"]})
         with opener.open(request,timeout=5) as response: identifier=response.url.rsplit("/",1)[1]
         self.wait(lambda:self.queue.get(identifier)["phase"]=="analysis")
-        # 不再进行网页请求，脚本早已返回；独立 worker 继续执行。
+        # The launcher has returned and no web requests occur; the independent worker continues.
         self.wait(lambda:self.queue.get(identifier)["status"]=="completed")
         task=self.queue.get(identifier)
         self.assertEqual(task["model_requests"],2);self.assertEqual(task["email"]["status"],"sent")

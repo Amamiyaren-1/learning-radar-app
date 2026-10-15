@@ -1,4 +1,4 @@
-"""CLI 阶段编排测试（离线）：初筛阶段记录用量与失败原因，不换模型。"""
+"""Offline CLI stages retain screening usage/failures without switching models."""
 
 from __future__ import annotations
 

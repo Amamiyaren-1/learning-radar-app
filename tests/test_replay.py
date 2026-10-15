@@ -1,4 +1,4 @@
-"""重放助手测试：从已保存的证据还原分析输入，不重新联网。"""
+"""Restore replay inputs from saved evidence without network access."""
 
 from __future__ import annotations
 
@@ -70,7 +70,7 @@ class ReplayInputTests(unittest.TestCase):
         self.assertEqual(cli.cmd_replay_analysis(self.settings, args), cli.EXIT_USAGE)
 
     def test_replay_builds_payload_without_network(self) -> None:
-        """重放只读 evidence.json：把夹具证据写成运行目录后应能解析出目标与对照。"""
+        """Recover target/comparators from evidence.json in an isolated fixture run directory."""
         run_dir = Path(self.tmp.name) / "runs" / "fake-run"
         run_dir.mkdir(parents=True)
         (run_dir / "evidence.json").write_text(
@@ -123,9 +123,14 @@ class ReplayInputTests(unittest.TestCase):
 
 
 class ReplayEndToEndTests(unittest.TestCase):
-    """重放整条路径（假模型、不联网）：回归“未定义 runs_dir / model_budget”导致的崩溃。"""
+    """Fake-model offline replay regression for undefined runs_dir/model_budget failures."""
 
     def setUp(self) -> None:
+        # Only fake-adapter replay tests bypass the credential-presence precheck.
+        credentials = mock.patch('learnradar.config.CandidateModel.api_key',
+                                 return_value='offline-test-placeholder')
+        credentials.start()
+        self.addCleanup(credentials.stop)
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         base = load_settings()

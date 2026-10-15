@@ -1,4 +1,4 @@
-"""回归：收集器返回的页面必须由调用方落盘（正文 + 记录，失败也留记录）。"""
+"""Collector pages are persisted by the caller, including failed fetch records."""
 
 from __future__ import annotations
 
@@ -50,7 +50,7 @@ class PagePersistenceTests(unittest.TestCase):
             self.assertIn("retrieved_at", manifest[0])
             self.assertTrue(Path(manifest[0]["saved_text"]).exists())
             self.assertIn("npm install demo", Path(manifest[0]["saved_text"]).read_text(encoding="utf-8"))
-            # 失败也要有记录，且没有正文文件
+            # Failures retain fetch records without body files.
             self.assertFalse(manifest[1]["ok"])
             self.assertEqual(manifest[1]["error"], "HTTP 404")
             self.assertNotIn("saved_text", manifest[1])

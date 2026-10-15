@@ -1,4 +1,4 @@
-"""Windows 演示启动器：只管理自己记录的 PID + 内核创建时间，不按端口/进程名停止。"""
+"""Windows demo launcher owning only its recorded PID and kernel creation time."""
 import argparse
 import ctypes
 from ctypes import wintypes
@@ -109,7 +109,7 @@ def main(argv=None):
             if "web" in alive: print(state["url"])
             print(f"日志：{folder}")
             return 0
-        TaskQueue(directory,demo=True)  # 模式检查，不提交任务；保留已有数据库与额度。
+        TaskQueue(directory,demo=True)  # Check mode without submitting tasks; retain existing database and budgets.
         state["processes"]=list(alive.values())
         save(path,state)
         for role in ("web","worker"):
@@ -126,7 +126,7 @@ def main(argv=None):
             if not value: raise TaskError(f"{role} 启动后立即退出；日志：{log}")
             kernel,handle,birth=value;kernel.CloseHandle(handle)
             state["processes"].append({"role":role,"pid":process.pid,"birth":birth,"log":str(log)})
-            save(path,state)  # 每个新进程立即记录，启动器退出不会失去所有权信息。
+            save(path,state)  # Record each new process immediately so ownership survives launcher exit.
             deadline=time.monotonic()+15
             if role=="web":
                 while time.monotonic()<deadline:
@@ -157,7 +157,7 @@ def main(argv=None):
     except (TaskError,OSError,ValueError,KeyError) as exc:
         for process in created:
             if process.poll() is None:
-                process.terminate();process.wait(timeout=10)  # Popen 自己的内核句柄，绝不按端口/进程名停止。
+                process.terminate();process.wait(timeout=10)  # Use Popen's kernel handle; never stop processes by port or executable name.
         print(f"演示启动器未完成：{exc}\n日志与所有权记录：{folder}；数据与额度未删除或重置。")
         return 1
     finally: lock.release()

@@ -16,6 +16,7 @@ def main():
     if subprocess.check_output(['git','status','--porcelain'],cwd=candidate).strip():parser.error('candidate must be clean; preserve existing changes')
     sha=subprocess.check_output(['git','rev-parse','HEAD'],cwd=candidate).decode().strip()
     export=json.loads((candidate/'EXPORT-MANIFEST.json').read_text(encoding='utf-8'))
+    final=json.loads((candidate/'FINAL-SOURCE-MANIFEST.json').read_text(encoding='utf-8'))
     resources=json.loads((candidate/'frontend/dist/manifest.json').read_text(encoding='utf-8'))
     rows=[]
     def add(name,expected=None):
@@ -29,11 +30,15 @@ def main():
         data=file.read_bytes();row={'file':name,'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()}
         if expected and any(row[key]!=expected[key] for key in ('bytes','sha256')):raise ValueError('source changed after export: '+name)
         rows.append(row)
-    for row in export['copied_files']:add(row['file'],row)
-    add('EXPORT-MANIFEST.json')
+    tracked=set(subprocess.check_output(['git','ls-files','-z'],cwd=candidate).decode().rstrip('\0').split('\0'))
+    declared={row['file'] for row in final['files']}|{'FINAL-SOURCE-MANIFEST.json'}
+    if tracked!=declared:raise ValueError('final source manifest does not match tracked files')
+    for row in final['files']:add(row['file'],row)
+    add('FINAL-SOURCE-MANIFEST.json')
     for name in resources['files']:add('frontend/dist/'+name)
     add('frontend/dist/manifest.json')
-    info={'kind':'local-review-artifact','public_source_sha':sha,'private_source_ref':export['source_sha'],
+    info={'kind':'local-review-artifact','public_source_sha':sha,'historical_export_source_ref':export['source_sha'],
+          'final_source_manifest':final,
           'frontend_manifest':resources,'files':rows,'commercial_fonts_included':False,
           'private_data_or_git_history_included':False,'deployed':False,
           'note':'Sanitized source plus actual same-version frontend build. Production config/data remain external; commercial fonts use fallback. No cloud/timer changes.'}

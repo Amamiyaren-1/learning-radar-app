@@ -1,11 +1,7 @@
-"""候选初筛阶段（角色 screening）。
-
-职责最小化：只对已发现的候选做保留/排除判断，并保留排除理由；不确定的候选一律保留。
-关键约束：
-- 只调用配置里 screening 角色指向的模型，失败就记录失败原因，不会换别的模型试；
-- 输出结构化 JSON，程序负责核对"每个输入候选都有结论"，缺失的按不确定保留；
-- 这一阶段的结论只是选点依据，不能当作证据（报告里要写明）。
-"""
+"""Screen discovered candidates with the configured screening role.
+Preserve exclusion reasons and retain uncertain candidates.
+Do not switch models on failure; align structured decisions to every input candidate.
+Missing decisions remain uncertain. Screening is selection guidance, not report evidence."""
 
 from __future__ import annotations
 
@@ -57,14 +53,14 @@ class ScreeningOutcome:
         return [item for item in self.entries if item["decision"] == "exclude"]
 
     def ranking(self) -> list[dict[str, Any]]:
-        """按选点规则排好序的候选视图（decision -> fit），用于打印与留档。"""
+        """Sort a candidate view by decision then fit for display and persistence."""
         fit_order = {"high": 0, "medium": 1, "low": 2, "unknown": 3}
         rows = list(self.entries)
         rows.sort(key=lambda item: (item.get("decision") != "keep", fit_order.get(str(item.get("fit")), 3)))
         return rows
 
     def decision_for(self, repo: str) -> str:
-        """目标项目的初筛结论；不在候选清单里就明确写出来，不假装筛过。"""
+        """State explicitly when the target was not screened; never imply otherwise."""
         for item in self.entries:
             if str(item.get("repo", "")).lower() == str(repo).lower():
                 return str(item.get("decision"))
@@ -86,7 +82,7 @@ class ScreeningOutcome:
         return head + ("；" + "；".join(details) if details else "")
 
     def prompt_note(self) -> str:
-        """给分析模型看的说明：明确这不是证据。"""
+        """Explain screening to analysis while explicitly marking it as non-evidence."""
         lines = [
             "以下是初筛阶段（screening 角色）的结论，只用于说明为什么选中这个项目。",
             "它不是证据：不能作为任何事实结论的 evidence_ids，也不能替代下面的证据清单。",
@@ -166,7 +162,7 @@ def _normalize(
     candidates: list[dict[str, Any]],
     payload: dict[str, Any],
 ) -> tuple[list[dict[str, Any]], list[str]]:
-    """把模型输出对齐到候选清单：缺失的按不确定保留，未知仓库忽略并记警告。"""
+    """Align model output to candidates; retain missing decisions as uncertain and warn on unknown repos."""
     wanted = [str(item.get("full_name")) for item in candidates]
     decisions: dict[str, dict[str, Any]] = {}
     warnings: list[str] = []
@@ -235,7 +231,7 @@ def run_screening(
     max_calls: int,
     sink: list[ModelResponse] | None = None,
 ) -> ScreeningOutcome:
-    """调用一次（必要时用一次修复调用）；失败就如实返回 failed，保留全部候选。"""
+    """Call once with at most one repair; record failure and retain all candidates if unsuccessful."""
     if not candidates:
         return ScreeningOutcome(entries=[], failed=False, error="没有候选可筛")
     prompt = build_prompt(

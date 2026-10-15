@@ -31,7 +31,7 @@
     "src/brand.ts": "81f226311c30e10288b88e8b8f2ea73cec0a919fe2598424e3c6e59c998498d4",
     "src/inspection-overlay.ts": "690193b23fe5b6b96336b2130caff90c5fdfa839fe01e9ea2645344e6f34ea3d"
   },
-  "note": "Source snapshot hashes include historical viewer files, now removed from this frontend. Current shipped resources are in resource-inventory.json.",
+  "note": "Historical source snapshot hashes, not current files. Original archive mesh and branded loop are excluded from reachable release history; current replacements are original generic assets. See docs/THIRD-PARTY.md.",
   "license_verification": {
     "checked_at": "2026-10-13",
     "commit": "12cc5e4013acb9408f753ff71de6b8492299b7c8",

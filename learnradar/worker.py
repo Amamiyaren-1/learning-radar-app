@@ -1,4 +1,4 @@
-"""独立于网页生命周期的执行进程；网页、CLI、weekly、replay 共用系统锁与持久预算。"""
+"""Worker independent of web lifecycle; web, CLI, weekly, and replay share kernel locks and durable budgets."""
 import argparse
 import uuid
 
@@ -12,7 +12,7 @@ from .tasks import QuotaWait, TaskBudget, WorkerLock
 def notify_task(settings, queue, task, services=None, *, retry=False):
     args=argparse.Namespace(run_id=task["run_id"],email_id=None,cycle=task.get("cycle_id") or None,force=False)
     def before_send(store,email_id):
-        # 进程可能在 SMTP 服务器接受后消失，必须预先保存不确定状态。
+        # Persist uncertainty before SMTP: the process can disappear after server acceptance.
         store.update_email(email_id,status="unknown",error="发送尝试已开始，结果尚未确认",now=now_iso(),counted_attempt=False)
     try:
         _send_saved_or_new(settings,args,retry=retry,
@@ -26,7 +26,7 @@ def notify_task(settings, queue, task, services=None, *, retry=False):
         with queue.store() as store:
             email=store.latest_email_for_run(task["run_id"])
             if email:
-                # before_send 已持久化 unknown，异常时不得改成可自动重发。
+                # before_send persists unknown; an exception must not enable automatic resend.
                 if email["status"]!="unknown":
                     store.update_email(email["email_id"],status="failed",error=sanitize_error(exc,settings),now=now_iso(),counted_attempt=False)
             else:
@@ -47,7 +47,7 @@ def task_exit_code(task):
         email=task.get("email") or {}
         if email.get("status")!="sent" or email.get("kind")=="failure":
             return 2
-        return 0  # 明确失败的通知单独重试成功后，不沿用原发送失败退出码。
+        return 0  # Successful separate retry of known-failed mail does not inherit its original failure exit code.
     return task["exit_code"] if task["exit_code"] is not None else 2
 
 
@@ -69,7 +69,7 @@ def work_once(settings,queue,token,*,demo_delay=1,scenario="success"):
     options=task["input"]
     services=DemoServices(settings,task["run_id"],delay=options.get("_fixture_delay",demo_delay),scenario=options.get("_fixture_scenario",scenario)) if queue.demo else None
     if services and task["kind"]=="replay_analysis":
-        # 演示重放仍只读所选隔离运行的证据；假响应里的项目名对应原材料。
+        # Demo replay reads only the selected isolated evidence and aligns synthetic repo names.
         from .cli import _load_evidence_for_run, _repos_in_evidence
         evidence,_=_load_evidence_for_run(settings,options["run"],settings.data_dir/"runs"/options["run"])
         owners=_repos_in_evidence(evidence)
@@ -95,7 +95,7 @@ def work_once(settings,queue,token,*,demo_delay=1,scenario="success"):
                 model=settings.models[options["model"]] if role=="analysis" and options.get("model") else settings.model_for(role)
                 if model.is_fixture:
                     if role=="analysis" and options.get("model"):
-                        continue  # CLI 显式指定原有 offline 候选；不做静默回退。
+                        continue  # CLI explicitly selects the existing offline candidate without silent fallback.
                     raise ConfigError("正式队列不接受假模型；请显式使用 --demo 和隔离数据目录")
                 if model.follow_redirects:
                     raise ConfigError("统一队列模型请求必须关闭重定向，请配置最终端点；每次持久记账只能发送一次请求")
@@ -113,7 +113,7 @@ def work_once(settings,queue,token,*,demo_delay=1,scenario="success"):
                 store.start_run(task["run_id"],kind=task["kind"],started_at=now_iso(),snapshot={"task_id":identifier})
             store.conn.execute("UPDATE runs SET status=?,finished_at=?,notes=? WHERE run_id=? AND status='running'",
                 (status,now_iso(),sanitize_error(exc,settings),task["run_id"]))
-            store.conn.commit()  # 通知读取运行终态；任务仍处于处理中，直到通知结束。
+            store.conn.commit()  # Notifications read terminal run state; the task stays processing until notification completes.
             if task["cycle_id"]:
                 if interrupted:
                     store.save_cycle(task["cycle_id"],status="interrupted",run_id=task["run_id"],finished_at=now_iso(),notes="执行中断；未自动重跑或重发")
@@ -147,7 +147,7 @@ def work_once(settings,queue,token,*,demo_delay=1,scenario="success"):
 
 
 def wait_for_task(settings,queue,task_id,*,poll_seconds=.2):
-    """同步入口可执行队列或等待已有 worker；只有目标任务终态才返回。"""
+    """Synchronous entry executes queued work or waits for a worker until the target task is terminal."""
     import time
     while True:
         task=queue.get(task_id)

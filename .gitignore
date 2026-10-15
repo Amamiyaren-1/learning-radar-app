@@ -1,19 +1,19 @@
 # ---------------------------------------------------------------------------
-# 凭据与本地私密配置（绝不进 Git）
+# Private runtime/configuration or generated local files: never public.
 # ---------------------------------------------------------------------------
 .env
 .env.*
 !.env.example
 config/profile.toml
 config/settings.local.toml
-# 邮件真实配置（发件/收件地址、SMTP 主机）；模板是 config/email.example.toml
+# Private runtime/configuration or generated local files: never public.
 config/email.toml
 config/web.toml
 *.key
 *.pem
 
 # ---------------------------------------------------------------------------
-# 运行数据：真实档案、证据缓存、报告输出、SQLite、日志、原始材料
+# Private runtime/configuration or generated local files: never public.
 # ---------------------------------------------------------------------------
 data/
 logs/
@@ -38,7 +38,7 @@ frontend/dist/
 venv/
 
 # ---------------------------------------------------------------------------
-# 编辑器 / 系统
+# Private runtime/configuration or generated local files: never public.
 # ---------------------------------------------------------------------------
 .idea/
 .vscode/

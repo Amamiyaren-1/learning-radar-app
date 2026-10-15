@@ -1,4 +1,4 @@
-"""历史读取视图：只使用保存字段，缺失归属保留为未分类，不从编号猜测。"""
+"""Read historical saved fields; preserve missing ownership as unclassified rather than guessing from IDs."""
 import json
 import re
 from pathlib import Path
@@ -35,7 +35,7 @@ def history_records(store, topics):
     root=store.path.parent/"runs"
     for raw in rows:
         row=dict(raw)
-        # 只读取本数据目录内的旧上下文；缺失/损坏不猜测，也不回写。
+        # Read old context only within this data directory; do not guess or write back damaged data.
         context={}
         path=root/row["run_id"]/"run-context.json"
         if path.resolve().is_relative_to(root.resolve()):

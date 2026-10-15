@@ -1,0 +1,2 @@
+# Preserve reviewed bytes across clones for source/artifact hash verification.
+* -text

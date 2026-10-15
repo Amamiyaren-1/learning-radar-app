@@ -1,4 +1,4 @@
-"""冷却期过滤：只读已有运行记录；成功 30 天、失败 7 天；不改变反馈与兴趣规则。"""
+"""Read-only cooldown regression with default success/failure windows and no preference changes."""
 
 from __future__ import annotations
 
@@ -97,7 +97,7 @@ class HistoryTestCase(unittest.TestCase):
         self.store.finish_run(run_id, status=run_status, finished_at=stamp, notes="")
 
     def seed_report_only(self, run_id: str, repo: str, *, status: str, created_at: str) -> None:
-        """成功收尾的重放只写 reports 行，没有 runs 行（真实库里就是这样）。"""
+        """Successful replay finalization can have a reports row without a runs row."""
         self.store.save_report(
             run_id,
             report_id=run_id,
@@ -115,7 +115,7 @@ class HistoryTestCase(unittest.TestCase):
         items = [make_item("owner/proj")]
         return filter_items(items, history, config=CONFIG, now=NOW), history
 
-    # --- 成功 30 天 / 失败 7 天
+    # --- Success: 30 days; failure: 7 days
     def test_published_target_skips_for_30_days(self) -> None:
         self.seed("run-a", target="owner/proj", report_status="published", finished=days_ago(10))
         decisions, _history = self.decisions()
@@ -153,7 +153,7 @@ class HistoryTestCase(unittest.TestCase):
         self.assertEqual(decisions[0].state, "skipped")
         self.assertIn("生成失败", decisions[0].reason)
 
-    # --- 不因离线复检改变历史
+    # --- Offline rechecks do not change historical state
     def test_offline_recheck_pass_does_not_publish_rejected_run(self) -> None:
         self.seed("run-a", target="owner/proj", run_status="rejected", report_status="rejected", finished=days_ago(3))
         recheck = self.data_dir / "runs" / "run-a" / "offline-recheck.json"
@@ -166,7 +166,7 @@ class HistoryTestCase(unittest.TestCase):
         self.assertEqual(decisions[0].days, 7)
         self.assertNotEqual(decisions[0].until, days_ago(-27))
 
-    # --- 失败不能缩短成功冷却
+    # --- Failure cannot shorten successful cooldown
     def test_later_failure_does_not_shorten_success_cooldown(self) -> None:
         self.seed("run-a", target="owner/proj", report_status="published", finished=days_ago(10))
         self.seed("run-b", target="owner/proj", run_status="rejected", report_status="rejected", finished=days_ago(1))
@@ -175,7 +175,7 @@ class HistoryTestCase(unittest.TestCase):
         self.assertEqual(decisions[0].days, 30)
         self.assertEqual(decisions[0].until, days_ago(-20))
 
-    # --- 跨主题、大小写
+    # --- Cross-topic and case-insensitive identity
     def test_same_repo_across_topics_and_case_is_one_history(self) -> None:
         self.seed("run-a", target="Owner/Proj", report_status="published", finished=days_ago(5), topic="tool-calling")
         self.seed("run-b", target="owner/proj", run_status="rejected", report_status="rejected", finished=days_ago(2), topic="agent-memory")
@@ -184,7 +184,7 @@ class HistoryTestCase(unittest.TestCase):
         self.assertEqual(len(history["owner/proj"]), 2)
         self.assertEqual(decisions[0].state, "skipped")
 
-    # --- 只当对照 / 只初筛 / 只搜到：不参与
+    # --- Comparator/search/screening-only appearances do not count
     def test_comparator_only_and_screened_only_are_not_counted(self) -> None:
         self.seed(
             "run-a",
@@ -208,7 +208,7 @@ class HistoryTestCase(unittest.TestCase):
         self.assertEqual(history, {})
         self.assertEqual(decisions[0].state, "allowed")
 
-    # --- 字段缺失 / 未知状态
+    # --- Missing fields and unknown states
     def test_unknown_status_is_recorded_but_allowed(self) -> None:
         self.seed("run-a", target="owner/proj", run_status="something-new", finished=days_ago(1))
         decisions, _history = self.decisions()
@@ -242,7 +242,7 @@ class HistoryTestCase(unittest.TestCase):
         decisions, _history = self.decisions()
         self.assertEqual(decisions[0].state, "allowed")
 
-    # --- 反馈不影响
+    # --- Feedback has no effect
     def test_feedback_does_not_affect_cooldown(self) -> None:
         self.store.save_feedback(
             "run-a", "owner/proj", {"want_more": "no"}, "", now=days_ago(1)
@@ -253,7 +253,7 @@ class HistoryTestCase(unittest.TestCase):
         decisions, _history = self.decisions()
         self.assertEqual(decisions[0].state, "skipped", "有冷却历史时仍然跳过，与反馈无关")
 
-    # --- 提示与摘要
+    # --- Hints and summaries
     def test_manual_notice_explains_history_without_blocking(self) -> None:
         self.seed("run-a", target="owner/proj", report_status="published", finished=days_ago(2))
         history = target_history(self.store, runs_dir=self.data_dir / "runs")
@@ -282,7 +282,7 @@ class HistoryTestCase(unittest.TestCase):
 
 
 class CooldownCliTests(unittest.TestCase):
-    """用假搜索 + 假模型验证 CLI 编排：全部跳过时 0 次调用；被跳过项目仍可作对照。"""
+    """Fake search/models: all cooled targets consume zero calls; skipped targets may be comparators."""
 
     def setUp(self) -> None:
         self._tmp = tempfile.TemporaryDirectory()

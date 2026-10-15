@@ -1,0 +1,271 @@
+[
+  {
+    "package": "esbuild",
+    "version": "0.28.2",
+    "license": "MIT",
+    "source": "https://www.npmjs.com/package/esbuild",
+    "notices": [
+      "frontend/licenses/npm/esbuild-LICENSE.md"
+    ],
+    "modified": false,
+    "shipped_as_node_modules": false
+  },
+  {
+    "package": "fdir",
+    "version": "6.5.0",
+    "license": "MIT",
+    "source": "https://www.npmjs.com/package/fdir",
+    "notices": [
+      "frontend/licenses/npm/fdir-LICENSE"
+    ],
+    "modified": false,
+    "shipped_as_node_modules": false
+  },
+  {
+    "package": "fflate",
+    "version": "0.8.3",
+    "license": "MIT",
+    "source": "https://www.npmjs.com/package/fflate",
+    "notices": [
+      "frontend/licenses/npm/fflate-LICENSE"
+    ],
+    "modified": false,
+    "shipped_as_node_modules": false
+  },
+  {
+    "package": "meshoptimizer",
+    "version": "1.0.1",
+    "license": "MIT",
+    "source": "https://www.npmjs.com/package/meshoptimizer",
+    "notices": [
+      "frontend/licenses/npm/meshoptimizer-LICENSE.md"
+    ],
+    "modified": false,
+    "shipped_as_node_modules": false
+  },
+  {
+    "package": "nanoid",
+    "version": "3.3.20",
+    "license": "MIT",
+    "source": "https://www.npmjs.com/package/nanoid",
+    "notices": [
+      "frontend/licenses/npm/nanoid-LICENSE"
+    ],
+    "modified": false,
+    "shipped_as_node_modules": false
+  },
+  {
+    "package": "picocolors",
+    "version": "1.1.1",
+    "license": "ISC",
+    "source": "https://www.npmjs.com/package/picocolors",
+    "notices": [
+      "frontend/licenses/npm/picocolors-LICENSE"
+    ],
+    "modified": false,
+    "shipped_as_node_modules": false
+  },
+  {
+    "package": "picomatch",
+    "version": "4.0.7",
+    "license": "MIT",
+    "source": "https://www.npmjs.com/package/picomatch",
+    "notices": [
+      "frontend/licenses/npm/picomatch-LICENSE"
+    ],
+    "modified": false,
+    "shipped_as_node_modules": false
+  },
+  {
+    "package": "postcss",
+    "version": "8.5.29",
+    "license": "MIT",
+    "source": "https://www.npmjs.com/package/postcss",
+    "notices": [
+      "frontend/licenses/npm/postcss-LICENSE"
+    ],
+    "modified": false,
+    "shipped_as_node_modules": false
+  },
+  {
+    "package": "rollup",
+    "version": "4.64.3",
+    "license": "MIT",
+    "source": "https://www.npmjs.com/package/rollup",
+    "notices": [
+      "frontend/licenses/npm/rollup-LICENSE.md"
+    ],
+    "modified": false,
+    "shipped_as_node_modules": false
+  },
+  {
+    "package": "source-map-js",
+    "version": "1.2.2",
+    "license": "BSD-3-Clause",
+    "source": "https://www.npmjs.com/package/source-map-js",
+    "notices": [
+      "frontend/licenses/npm/source-map-js-LICENSE"
+    ],
+    "modified": false,
+    "shipped_as_node_modules": false
+  },
+  {
+    "package": "three",
+    "version": "0.183.0",
+    "license": "MIT",
+    "source": "https://www.npmjs.com/package/three",
+    "notices": [
+      "frontend/licenses/npm/three-LICENSE"
+    ],
+    "modified": false,
+    "shipped_as_node_modules": false
+  },
+  {
+    "package": "tinyglobby",
+    "version": "0.2.17",
+    "license": "MIT",
+    "source": "https://www.npmjs.com/package/tinyglobby",
+    "notices": [
+      "frontend/licenses/npm/tinyglobby-LICENSE"
+    ],
+    "modified": false,
+    "shipped_as_node_modules": false
+  },
+  {
+    "package": "typescript",
+    "version": "5.9.3",
+    "license": "Apache-2.0",
+    "source": "https://www.npmjs.com/package/typescript",
+    "notices": [
+      "frontend/licenses/npm/typescript-LICENSE.txt"
+    ],
+    "modified": false,
+    "shipped_as_node_modules": false
+  },
+  {
+    "package": "vite",
+    "version": "7.3.7",
+    "license": "MIT",
+    "source": "https://www.npmjs.com/package/vite",
+    "notices": [
+      "frontend/licenses/npm/vite-LICENSE.md"
+    ],
+    "modified": false,
+    "shipped_as_node_modules": false
+  },
+  {
+    "package": "@dimforge/rapier3d-compat",
+    "version": "0.12.0",
+    "license": "Apache-2.0",
+    "source": "https://www.npmjs.com/package/@dimforge/rapier3d-compat",
+    "notices": [
+      "frontend/licenses/npm/dimforge_rapier3d-compat-LICENSE"
+    ],
+    "modified": false,
+    "shipped_as_node_modules": false
+  },
+  {
+    "package": "@esbuild/win32-x64",
+    "version": "0.28.2",
+    "license": "MIT",
+    "source": "https://www.npmjs.com/package/@esbuild/win32-x64",
+    "notices": [],
+    "modified": false,
+    "shipped_as_node_modules": false
+  },
+  {
+    "package": "@kitlangton/rolling-number",
+    "version": "0.4.1",
+    "license": "MIT",
+    "source": "https://www.npmjs.com/package/@kitlangton/rolling-number",
+    "notices": [
+      "frontend/licenses/npm/kitlangton_rolling-number-LICENSE"
+    ],
+    "modified": false,
+    "shipped_as_node_modules": false
+  },
+  {
+    "package": "@rollup/rollup-win32-x64-gnu",
+    "version": "4.64.3",
+    "license": "MIT",
+    "source": "https://www.npmjs.com/package/@rollup/rollup-win32-x64-gnu",
+    "notices": [],
+    "modified": false,
+    "shipped_as_node_modules": false
+  },
+  {
+    "package": "@rollup/rollup-win32-x64-msvc",
+    "version": "4.64.3",
+    "license": "MIT",
+    "source": "https://www.npmjs.com/package/@rollup/rollup-win32-x64-msvc",
+    "notices": [],
+    "modified": false,
+    "shipped_as_node_modules": false
+  },
+  {
+    "package": "@tweenjs/tween.js",
+    "version": "23.1.3",
+    "license": "MIT",
+    "source": "https://www.npmjs.com/package/@tweenjs/tween.js",
+    "notices": [
+      "frontend/licenses/npm/tweenjs_tween.js-LICENSE"
+    ],
+    "modified": false,
+    "shipped_as_node_modules": false
+  },
+  {
+    "package": "@types/estree",
+    "version": "1.0.9",
+    "license": "MIT",
+    "source": "https://www.npmjs.com/package/@types/estree",
+    "notices": [
+      "frontend/licenses/npm/types_estree-LICENSE"
+    ],
+    "modified": false,
+    "shipped_as_node_modules": false
+  },
+  {
+    "package": "@types/stats.js",
+    "version": "0.17.4",
+    "license": "MIT",
+    "source": "https://www.npmjs.com/package/@types/stats.js",
+    "notices": [
+      "frontend/licenses/npm/types_stats.js-LICENSE"
+    ],
+    "modified": false,
+    "shipped_as_node_modules": false
+  },
+  {
+    "package": "@types/three",
+    "version": "0.183.0",
+    "license": "MIT",
+    "source": "https://www.npmjs.com/package/@types/three",
+    "notices": [
+      "frontend/licenses/npm/types_three-LICENSE"
+    ],
+    "modified": false,
+    "shipped_as_node_modules": false
+  },
+  {
+    "package": "@types/webxr",
+    "version": "0.5.24",
+    "license": "MIT",
+    "source": "https://www.npmjs.com/package/@types/webxr",
+    "notices": [
+      "frontend/licenses/npm/types_webxr-LICENSE"
+    ],
+    "modified": false,
+    "shipped_as_node_modules": false
+  },
+  {
+    "package": "@webgpu/types",
+    "version": "0.1.74",
+    "license": "BSD-3-Clause",
+    "source": "https://www.npmjs.com/package/@webgpu/types",
+    "notices": [
+      "frontend/licenses/npm/webgpu_types-LICENSE"
+    ],
+    "modified": false,
+    "shipped_as_node_modules": false
+  }
+]

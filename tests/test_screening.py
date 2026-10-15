@@ -1,4 +1,4 @@
-"""初筛阶段测试：保留不确定候选、排除必须有理由、失败不换模型。"""
+"""Screening retains uncertainty, requires exclusion reasons, and does not switch models on failure."""
 
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ def candidate(repo: str) -> dict:
 
 
 class StubAdapter:
-    """按脚本返回文本；记录被调用次数，用于证明没有发生模型切换。"""
+    """Script output text and count calls to verify no model switching occurred."""
 
     def __init__(self, texts: list[str], *, model_id: str = "stub-screening-model") -> None:
         self.texts = list(texts)
@@ -161,7 +161,7 @@ class ScreeningTests(unittest.TestCase):
 
 
     def test_parseable_but_wrong_shape_output_keeps_all_candidates(self) -> None:
-        # 两次都返回合法 JSON、但没有 candidates 数组：必须安全失败，不能抛异常
+        # Valid JSON without candidates on both attempts must fail safely rather than raise.
         adapter, outcome = self.screen(['{"foo": 1}', '{"bar": 2}'])
         self.assertTrue(outcome.failed)
         self.assertEqual(adapter.calls, 2)

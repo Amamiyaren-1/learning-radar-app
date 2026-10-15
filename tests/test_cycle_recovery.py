@@ -1,4 +1,4 @@
-"""周期异常路径：占位后未捕获异常的状态/用量/锁、锁存活判断、一次性恢复。"""
+"""Test unexpected cycle failures, usage/state/lock retention, owner liveness, and explicit recovery."""
 from __future__ import annotations
 
 import argparse
@@ -19,7 +19,7 @@ from tests.test_weekly import WeeklyTestCase
 
 
 class WeeklyErrorPathTests(WeeklyTestCase):
-    """周期占位之后出现未捕获异常：状态可诊断、用量保留、锁释放、不重跑、不发邮件。"""
+    """Post-reservation exceptions retain diagnosable state/usage, release locks, and do not rerun/send."""
 
     def _run_with_crash(self, *, crash_message: str) -> tuple[int, str]:
         items = self.items(["a/one", "a/two", "a/three"])
@@ -55,7 +55,7 @@ class WeeklyErrorPathTests(WeeklyTestCase):
         return code, buffer.getvalue()
 
     def test_unexpected_error_marks_failed_with_sanitized_diagnostics(self) -> None:
-        # 故意写成“token=…”的形式：既能验证脱敏，又不会被当成 sk- 风格的真实密钥
+        # Use a synthetic token= value to test redaction without imitating a real sk-style key.
         secret_like = "FAKE-ABCDEFGH12345678"
         crash_key = f"token={secret_like}"
         code, output = self._run_with_crash(
@@ -100,7 +100,7 @@ class WeeklyErrorPathTests(WeeklyTestCase):
 
 
 class CycleLockAndRecoverTests(WeeklyTestCase):
-    """锁的存活判断与一次性恢复：不把还在跑的周期误判为中断。"""
+    """Do not recover a still-running cycle as interrupted."""
 
     def _seed_running_cycle(self, *, hours_ago: float = 3.0) -> None:
         started = (
@@ -140,7 +140,7 @@ class CycleLockAndRecoverTests(WeeklyTestCase):
         self.assertEqual(adapter.calls, 0)
 
     def test_non_posix_never_probes_pid(self) -> None:
-        """Windows 上 os.kill(pid, 0) 会真的终止进程，所以那里绝不探测。"""
+        """Never probe with os.kill(pid, 0) on Windows, where it can terminate processes."""
         lock = self._write_lock(999999)
         task_lock = TaskLock(lock)
         with mock.patch("learnradar.cycle.os.name", "nt"), mock.patch(
@@ -183,10 +183,10 @@ class CycleLockAndRecoverTests(WeeklyTestCase):
 
 
 class UnreadableRunContextTests(HistoryTestCase):
-    """迁移后目录权限不对时：读不到 run-context.json 不能把整轮拖垮。"""
+    """Unreadable migrated run directories must not abort the whole task."""
 
     def test_unreadable_run_context_is_skipped_with_warning(self) -> None:
-        # 只有 runs 行、没有 report：目标要从 run-context.json 里读，才会走到被加固的那段
+        # A run-only row must recover its target from run-context.json to reach the guarded path.
         self.seed(
             "run-locked", target="owner/proj", run_status="model-failed", report_status=None,
             finished=days_ago(2),

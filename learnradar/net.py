@@ -1,16 +1,9 @@
-"""受限 HTTP 读取。
-
-安全边界（与规划第 4 节一致）：
-- 只访问公开 http/https；
-- 拒绝内网、回环、链路本地、保留地址与云元数据地址（重定向目标同样复检）；
-- 重定向策略：默认允许跟随，但
-    1) 拒绝 HTTPS -> HTTP 降级；
-    2) 跨源重定向时剥掉敏感头（Authorization/Cookie 等）；
-    3) 跨源重定向且方法带正文（POST/PUT/PATCH）时直接拒绝，绝不把含私人档案的正文转发给新主机；
-    4) `allow_redirects=False` 时任何重定向都拒绝（模型 API 用这条，要求直接配置最终端点）。
-- 每次请求写审计记录（URL、状态、耗时、字节数）；
-- 429/5xx 有限重试并遵守 Retry-After，不无限重试。
-"""
+"""Restricted public HTTP(S) transport.
+Reject private, loopback, link-local, reserved, and metadata addresses, including redirect targets.
+Reject HTTPS downgrade; strip sensitive headers across origins.
+Reject cross-origin redirects with POST/PUT/PATCH bodies to protect profiles.
+allow_redirects=False rejects all redirects for model APIs.
+Audit URL, status, elapsed time, and bytes; retry 429/5xx only within limits and Retry-After."""
 
 from __future__ import annotations
 
@@ -52,7 +45,7 @@ BODY_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
 
 
 class FetchError(RuntimeError):
-    """网络读取失败，或被安全规则拒绝。"""
+    """Fetch failed or was rejected by network safety rules."""
 
 
 def now_iso() -> str:
@@ -97,14 +90,14 @@ def _ip_blocked(ip: ipaddress.IPv4Address | ipaddress.IPv6Address) -> bool:
     return False
 
 
-# 未展开的模板占位符（来自文档站的 JS 模板）与空格/控制字符都不是可请求的地址。
-# 这里只做拒绝，不做 URL 编码：把 {{…}} 编码成 %7B%7B…%7D%7D 只会造出一个假地址。
+# Unexpanded templates, whitespace, and control characters are not requestable URLs.
+# Reject placeholders instead of URL-encoding them into fabricated addresses.
 TEMPLATE_MARKER = re.compile(r"\{\{|\}\}|\{%|%\}|\$\{|<%")
 _CONTROL_CHARS = re.compile(r"[\x00-\x20\x7f]")
 
 
 def unrequestable_reason(url: str) -> str:
-    """返回“不该请求这个地址”的原因；返回空串表示可以请求。只看地址本身，不发请求。"""
+    """Return a rejection reason or an empty string; inspect the address without requesting it."""
     text = str(url or "")
     if not text.strip():
         return "地址为空"
@@ -115,7 +108,7 @@ def unrequestable_reason(url: str) -> str:
     return ""
 
 def assert_public_url(url: str) -> str:
-    """校验 URL 指向公网地址；不通过则抛 FetchError。"""
+    """Require a URL resolving to public addresses or raise FetchError."""
     reason = unrequestable_reason(url)
     if reason:
         raise FetchError(f"{reason}，已拒绝请求：{str(url)[:120]}")
@@ -196,7 +189,7 @@ def fetch(
     body: bytes | None = None,
     allow_redirects: bool = True,
 ) -> FetchResult:
-    """读取一个公开 URL。成功返回 FetchResult，失败抛 FetchError。"""
+    """Read a public URL; return FetchResult or raise FetchError."""
     attempts = 0
     redirects = 0
     current = url
@@ -209,8 +202,8 @@ def fetch(
         try:
             request = urllib.request.Request(current, method=current_method, data=current_body)
         except (http.client.InvalidURL, ValueError, UnicodeError) as exc:
-            # 兜底：即使地址通过了上面的检查，构造请求失败也算明确的请求失败，
-            # 不要让它变成未捕获异常把整轮任务打断。
+            # Request-construction failures remain explicit fetch failures even after URL checks.
+            # Do not let an uncaught construction error abort the whole task.
             raise FetchError(f"无法构造请求（地址不合法）：{exc}") from exc
         header_map = {"User-Agent": "learning-radar/0.1", **current_headers}
         for key, value in header_map.items():
@@ -224,8 +217,8 @@ def fetch(
                 response_headers = dict(response.headers.items())
                 final_url = response.geturl()
         except http.client.InvalidURL as exc:
-            # 地址在“发送阶段”被判非法（http.client 会因为空格/控制字符抛这个）：
-            # 明确的请求失败，而且重试没有意义，所以不计入重试、也不发出去。
+            # http.client can reject whitespace/control characters during request transmission.
+            # This explicit URL failure is not retryable and must not be sent.
             record.update({"status": 0, "ms": 0, "bytes": 0, "error": f"InvalidURL: {exc}"})
             if audit is not None:
                 audit.append(record)
@@ -241,7 +234,7 @@ def fetch(
             final_url = current
             try:
                 raw = exc.read(max_bytes + 1) or b""
-            except Exception:  # pragma: no cover - 读错误体失败不影响判断
+            except Exception:  # pragma: no cover - failure to read an error body does not change classification
                 raw = b""
             exc.close()
         except (urllib.error.URLError, socket.timeout, OSError) as exc:
@@ -362,7 +355,7 @@ def post_json(
     retries: int = 0,
     allow_redirects: bool = False,
 ) -> tuple[Any, FetchResult]:
-    """POST JSON。默认不跟随重定向：调用方（模型 API）必须自己配置最终端点。"""
+    """POST JSON without redirects by default; model callers configure the final endpoint explicitly."""
     merged = {"Content-Type": "application/json", **(headers or {})}
     body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
     result = fetch(

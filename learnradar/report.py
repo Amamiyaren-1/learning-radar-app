@@ -1,4 +1,4 @@
-"""Markdown 报告渲染。报告是程序根据已验证的结构化输出渲染的，模型不直接写文件。"""
+"""Render Markdown from validated structured output; models do not write report files directly."""
 
 from __future__ import annotations
 
@@ -27,7 +27,7 @@ LEVEL_LABELS = {
 }
 CONTENT_REVIEW_LABEL = "未完成（需要人工核对摘录是否支持结论）"
 def _sources(ids: Any, evidence_map: dict[str, Evidence]) -> str:
-    """把证据编号换成可读来源（标题 + 链接）；编号只在附录 A 出现。"""
+    """Replace evidence IDs with readable source titles/links; keep IDs in appendix A only."""
     links: list[str] = []
     for evidence_id in ids or []:
         item = evidence_map.get(str(evidence_id))
@@ -372,7 +372,7 @@ def render_rejection(
     meta: dict[str, Any],
     stage_usage: list[dict[str, Any]] | None = None,
 ) -> str:
-    """结构失败时的类型安全展示：绝不假设报告结构，也绝不当成学习建议渲染。"""
+    """Display structural failures safely without assuming payload structure or presenting learning advice."""
     lines: list[str] = [
         "# 报告未通过结构检查（未发布）",
         "",
@@ -402,7 +402,7 @@ def render_rejection(
     lines += ["", "## 原始输出片段（截断）", "", "```json"]
     try:
         snapshot = json.dumps(report, ensure_ascii=False, default=str)[:2000]
-    except Exception as exc:  # pragma: no cover - 兜底
+    except Exception as exc:  # pragma: no cover - fallback
         snapshot = f"（无法序列化：{type(exc).__name__}: {exc}）"
     lines.append(snapshot)
     lines += ["```", "", "## 本次运行与消耗", "", "| 项目 | 值 |", "| --- | --- |"]
@@ -414,7 +414,7 @@ def render_rejection(
 
 
 def basis_text(container: Any, evidence_map: dict[str, Evidence]) -> str:
-    """正文里只给可读来源与短摘录；内部编号、commit、定位留在附录 A。"""
+    """Use readable sources/excerpts in prose; preserve IDs, commits, and locators in appendix A."""
     parts: list[str] = []
     snippet_source = ""
     if isinstance(container, dict):
@@ -443,7 +443,7 @@ def basis_text(container: Any, evidence_map: dict[str, Evidence]) -> str:
 
 
 def _stage_usage_block(stage_usage: list[dict[str, Any]] | None) -> list[str]:
-    """分阶段模型调用表：阶段、模型、调用次数、token、耗时、失败原因。"""
+    """Build stage usage rows: model, calls, tokens, duration, and failure reasons."""
     if not stage_usage:
         return []
     lines = [

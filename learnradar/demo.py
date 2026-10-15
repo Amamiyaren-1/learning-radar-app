@@ -1,4 +1,4 @@
-"""显式离线演示适配器；不读取私人档案、不修改正式配置、不发网络请求。"""
+"""Explicit offline demo adapters: no private profiles, production configuration changes, or network calls."""
 import dataclasses
 import json
 import smtplib
@@ -29,7 +29,7 @@ class DemoServices:
         self.settings, self.delay, self.scenario = settings, delay, scenario
         raw=(FIXTURES/"offline_evidence.json").read_text(encoding="utf-8")
         report=(FIXTURES/"offline_analysis.json").read_text(encoding="utf-8")
-        # 每次任务独立演示项目，仍然经过实际冷却逻辑；不拿私人项目当示例。
+        # Use a distinct synthetic project per task while exercising actual cooldown rules.
         for name in ("target","baseline-a","baseline-b"):
             old=f"example-offline/{name}"
             new=f"example-offline/{name}-{run_id[-8:]}"

@@ -1,46 +1,46 @@
-# learning-radar 运行配置（不含密钥；密钥一律放 .env）
-# 模型名称、推理参数、价格、限额、模型角色全部从这里读，代码里不写死。
+# Configuration guidance: see README and DEVELOPER-GUIDE.md.
+# Request budgets include underlying failures and share the task-wide hard cap.
 
 [app]
 timezone = "Asia/Shanghai"
 data_dir = "data"
 user_agent = "learning-radar/0.1 (+personal learning assistant; local use only)"
 
-# 模型角色：业务流程只按角色取模型（screening / analysis），替换模型只改这里与对应候选。
-# 因此 V4.1 Flash 用 flash 档、V4 Pro 用 pro 档；实际 model_id 以提供方可用列表为准。
+# Model roles and provider parameters are configuration-driven.
+# Configuration guidance: see README and DEVELOPER-GUIDE.md.
 [models]
-screening = "flash"    # 初筛角色：候选保留/排除判断
-analysis = "pro"       # 分析角色：最终报告的关键判断由它生成
+screening = "flash"  # Configured screening role.
+analysis = "pro"  # Configured analysis role.
 
-# --- 初筛：V4.1 Flash -------------------------------------------------------
+# Configuration guidance: see README and DEVELOPER-GUIDE.md.
 [[models.candidate]]
 name = "flash"
 label = "V4.1 Flash（初筛）"
 provider = "chat_completions"
-model_id = "deepseek-flash"             # 提供方 /models 里实际存在的 ID
+model_id = "deepseek-flash"  # See DEVELOPER-GUIDE.md for this setting; runtime value unchanged.
 base_url = "https://api.deepseek.com/v1"
 api_key_env = "LEARNRADAR_FALLBACK_API_KEY"
-reasoning_effort = ""                   # 初筛不需要长推理，留空即不发送该参数
+reasoning_effort = ""  # Provider-specific reasoning setting.
 temperature = 0.2
-max_output_tokens = 4000                # 5 个候选 × 四条依据的理由需要更大输出空间（2000 会被截断）
+max_output_tokens = 4000  # Configured output limit; provider limits may differ.
 timeout_seconds = 180
 probe_completion = false
-follow_redirects = false                # 模型 API 默认拒绝重定向：跨源跳转会转发密钥与档案正文
+follow_redirects = false  # Do not forward credentials/profile bodies to redirected endpoints.
 pricing_input_per_mtok = 0.0
 pricing_output_per_mtok = 0.0
 pricing_currency = "USD"
 
-# --- 分析：V4 Pro -----------------------------------------------------------
+# Configuration guidance: see README and DEVELOPER-GUIDE.md.
 [[models.candidate]]
 name = "pro"
 label = "V4 Pro（分析）"
 provider = "chat_completions"
-model_id = "deepseek-v4-pro"            # 提供方 /models 里实际存在的 ID
+model_id = "deepseek-v4-pro"  # See DEVELOPER-GUIDE.md for this setting; runtime value unchanged.
 base_url = "https://api.deepseek.com/v1"
 api_key_env = "LEARNRADAR_FALLBACK_API_KEY"
-reasoning_effort = "low"                # 2026-09-22 起：先降到 low，给正文腾出输出预算
+reasoning_effort = "low"  # Provider-specific reasoning setting.
 temperature = 0.2
-max_output_tokens = 16000               # 请求 16000：若接口回报仍为 6000 且 finish_reason=length，即可确认是端点上限而非本程序设置
+max_output_tokens = 16000  # Configured output limit; provider limits may differ.
 timeout_seconds = 300
 probe_completion = false
 follow_redirects = false
@@ -48,7 +48,7 @@ pricing_input_per_mtok = 0.0
 pricing_output_per_mtok = 0.0
 pricing_currency = "USD"
 
-# --- 离线夹具（测试用，不算真实接入） --------------------------------------
+# Explicit offline fixture for tests, not a real integration.
 [[models.candidate]]
 name = "offline"
 label = "离线夹具（测试用，非真实模型）"
@@ -65,9 +65,9 @@ pricing_input_per_mtok = 0.0
 pricing_output_per_mtok = 0.0
 pricing_currency = "USD"
 
-# 选点规则（固定顺序见 cli._select_auto_target，这里只留开关）：
-# 1) 初筛 keep 优先，uncertain 作后备；2) 同档内按初筛 fit（high > medium > low > unknown）；
-# 3) 仅在前两项都相同时才比较最近推送时间。语言只作环境信息，不参与排序，也不是排除理由。
+# Select by screening decision, then fit; recency breaks ties, never language.
+# Select by screening decision, then fit; recency breaks ties, never language.
+# Configuration guidance: see README and DEVELOPER-GUIDE.md.
 [discovery]
 directions_per_task = 3
 candidates_per_direction = 10
@@ -75,42 +75,42 @@ merged_candidates = 30
 
 [selection]
 tiebreak_recent = true
-# 冷却期（天）：近期处理过的目标不重复入选，但**不是永久排除名单**，到期自然恢复。
-# 判定只用原运行记录（runs/reports + run-context.json）；离线复检通过≠原报告已发布。
-cooldown_success_days = 30   # 作为目标完成分析、结构检查通过并已发布
-cooldown_failure_days = 7    # 作为目标尝试但生成失败 / 结构拒绝 / 渲染失败
+# Cooldown uses original run/report state; rechecks and feedback do not alter it.
+# Explicit offline fixture for tests, not a real integration.
+cooldown_success_days = 30  # Published target cooldown.
+cooldown_failure_days = 7  # Failed/rejected target cooldown.
 
-# 云端每周任务（最小可部署版）：systemd timer 每周调用一次 `python -m learnradar.cli weekly`。
-# 时区显式写明；时间、主题都可改；一次只跑一个主题，不自动扩成多主题，也不追加批次。
+# Weekly remains one configured topic; deployment requires separate acceptance.
+# Configuration guidance: see README and DEVELOPER-GUIDE.md.
 [schedule]
 timezone = "Asia/Shanghai"
 weekday = "Sun"
 at = "20:17"
 topic = "agent-memory"
-task_timeout_seconds = 3600   # 任务总超时；systemd 的 TimeoutStartSec 应与它一致
-attach_markdown = true        # 邮件是否附带完整 Markdown 报告
+task_timeout_seconds = 3600  # See DEVELOPER-GUIDE.md for this setting; runtime value unchanged.
+attach_markdown = true  # See DEVELOPER-GUIDE.md for this setting; runtime value unchanged.
 
 [limits]
 discover_max_candidates = 30
-# 初筛与分析各自的调用上限（正常 1 次 + 必要时修复 1 次），
-# 并统一受 max_model_calls_per_run 硬约束；失败与底层请求同样计入。
+# Request budgets include underlying failures and share the task-wide hard cap.
+# Configuration guidance: see README and DEVELOPER-GUIDE.md.
 screening_max_calls = 2
 analysis_max_calls = 2
-screening_max_candidates = 5   # 第一轮真实批次：最多送筛 5 个候选
+screening_max_candidates = 5  # See DEVELOPER-GUIDE.md for this setting; runtime value unchanged.
 screening_max_keep = 8
-# README 章节取证（A.1）：按相关章节挑选，而不是固定截取开头
+# Configuration guidance: see README and DEVELOPER-GUIDE.md.
 readme_head_chars = 500
 readme_section_chars = 900
 readme_max_sections = 4
 readme_budget_chars = 3200
-fetch_learning_entry = true   # 为目标项目实际读取学习入口页面
-learning_entry_max_attempts = 3   # 最多尝试读取几个候选入口，直到检测到示例信号
-example_file_max = 2              # 入口页没有示例信号时，沿 README 链接最多读几个示例文件（占用同一来源预算）
+fetch_learning_entry = true  # See DEVELOPER-GUIDE.md for this setting; runtime value unchanged.
+learning_entry_max_attempts = 3  # See DEVELOPER-GUIDE.md for this setting; runtime value unchanged.
+example_file_max = 2  # See DEVELOPER-GUIDE.md for this setting; runtime value unchanged.
 deep_analysis_max = 4
 max_recommendations = 2
 max_sources_per_candidate = 8
 max_search_rounds = 2
-max_model_calls_per_run = 4   # 第一轮真实批次：总量最多 4 次模型请求（含失败）
+max_model_calls_per_run = 4  # Hard task-wide request budget, including failures.
 max_evidence_bytes = 400000
 min_comparators = 2
 

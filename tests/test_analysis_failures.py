@@ -1,4 +1,4 @@
-"""分析阶段失败分类测试：空正文/截断换策略，JSON 不合法才修 JSON。"""
+"""Test analysis failure classification: compact empty/truncated output; repair only invalid JSON."""
 
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ REPORT = {
 
 
 class StubAdapter:
-    """按脚本返回 (text, finish_reason)，并记录每次收到的提示词。"""
+    """Script text/finish_reason responses and retain received prompts."""
 
     def __init__(self, script: list[tuple[str, str]]) -> None:
         self.script = list(script)

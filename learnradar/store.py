@@ -1,4 +1,4 @@
-"""SQLite 存储：运行、HTTP 审计、候选、证据、报告、用量。"""
+"""SQLite persistence for runs, HTTP audit, candidates, evidence, reports, and usage."""
 
 from __future__ import annotations
 
@@ -123,7 +123,7 @@ CREATE TABLE IF NOT EXISTS emails (
 
 
 def backup_database(source: Path, target: Path) -> None:
-    """用 SQLite 在线备份 API 生成一致性快照（运行中直接复制文件会不完整）。"""
+    """Use SQLite online backup for consistent snapshots instead of copying a live database file."""
     target.parent.mkdir(parents=True, exist_ok=True)
     with closing(sqlite3.connect(source)) as origin, closing(sqlite3.connect(target)) as out:
         origin.backup(out)
@@ -149,7 +149,7 @@ class Store:
         self.conn.commit()
 
     def _migrate(self) -> None:
-        """老库平滑升级：usage_log 补上 ok / error 两列（记录失败原因）。"""
+        """Migrate older databases by adding usage_log ok/error failure fields."""
         columns = {row[1] for row in self.conn.execute("PRAGMA table_info(usage_log)")}
         for name, ddl in (
             ("ok", "ALTER TABLE usage_log ADD COLUMN ok INTEGER"),
@@ -171,8 +171,8 @@ class Store:
     def close(self) -> None:
         self.conn.close()
 
-    def __del__(self) -> None:  # pragma: no cover - 兜底
-        """兜底：某条路径忘了 close() 时，别让 SQLite 文件一直被占着。"""
+    def __del__(self) -> None:  # pragma: no cover - fallback
+        """Release SQLite files if a caller forgot close()."""
         try:
             self.conn.close()
         except Exception:
@@ -353,7 +353,7 @@ class Store:
         return dict(row) if row else None
 
     def list_candidates(self, run_id: str) -> list[dict[str, Any]]:
-        """取回某次运行保存的候选（用于复用候选，不重新搜索）。"""
+        """Retrieve saved candidates without searching again."""
         cursor = self.conn.execute(
             "SELECT repo_id, full_name, html_url, stars, pushed_at, role, description, raw"
             " FROM candidates WHERE run_id = ? ORDER BY rowid",
@@ -380,7 +380,7 @@ class Store:
         *,
         now: str,
     ) -> dict[str, Any]:
-        """同一份报告重复提交是更新，不新增记录；answered_at 保留首次填写时间。"""
+        """Update repeated report feedback without new rows; retain the original answered_at."""
         existing = self.get_feedback(run_id)
         answered_at = str(existing["answered_at"]) if existing else now
         self.conn.execute(
@@ -410,7 +410,7 @@ class Store:
         return dict(row) if row else None
 
     def feedback_for_repos(self, repos: Iterable[str]) -> list[dict[str, Any]]:
-        """按项目取最近一次反馈（同一项目多次运行只取最近一次），并带上历史条数。"""
+        """Get latest feedback and historical count for each project across its runs."""
         wanted: list[str] = []
         for name in repos:
             normalized = normalize_repo_name(name)
@@ -433,9 +433,9 @@ class Store:
             rows.append(item)
         return rows
 
-    # ---- 周期执行记录：一个周期只跑一次，绑定 run_id ----
+    # ---- Cycle records: execute each cycle once and bind run_id ----
     def claim_cycle(self, cycle_id: str, *, topic: str, started_at: str) -> bool:
-        """原子占位：同一周期只有一个执行者能拿到 running 记录。"""
+        """Atomically reserve a running cycle for one executor."""
         cursor = self.conn.execute(
             "INSERT INTO cycles(cycle_id, topic, run_id, status, started_at, finished_at, notes)"
             " VALUES (?,?,?,?,?,?,?) ON CONFLICT(cycle_id) DO NOTHING",
@@ -459,7 +459,7 @@ class Store:
         finished_at: str = "",
         notes: str = "",
     ) -> None:
-        """已有记录就更新状态与备注，不覆盖首次 started_at。"""
+        """Update existing status/notes without replacing the original started_at."""
         existing = self.get_cycle(cycle_id)
         if existing is None:
             self.conn.execute(
@@ -488,7 +488,7 @@ class Store:
         ).fetchall()
         return [dict(row) for row in rows]
 
-    # ---- 待发/已发邮件：先落盘再发送，重发只发保存内容 ----
+    # ---- Mail records: persist before sending; retry saved content only ----
     def create_email(
         self,
         email_id: str,
@@ -504,7 +504,7 @@ class Store:
         now: str = "",
         replace: bool = False,
     ) -> None:
-        """同一封邮件只保存一次；`replace=True` 时用新渲染的内容覆盖旧内容（状态与重试次数保留）。"""
+        """Save each mail once; replace=True updates content while retaining status and retry count."""
         conflict = (
             " DO UPDATE SET kind=excluded.kind, subject=excluded.subject, body=excluded.body,"
             " attachment_path=excluded.attachment_path, cycle_id=excluded.cycle_id,"

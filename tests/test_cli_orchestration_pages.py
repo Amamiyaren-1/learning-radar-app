@@ -1,4 +1,4 @@
-"""行为验证：正常 CLI 编排下，页面正文/成功与失败清单/模型证据都要落盘。"""
+"""Verify normal CLI orchestration persists page bodies, fetch outcomes, and model evidence."""
 
 from __future__ import annotations
 

@@ -1,12 +1,10 @@
-"""分析阶段：把证据与档案组装成提示词，调用配置好的分析角色模型，解析结构化输出。
+"""Assemble evidence and the learner profile, call the configured analysis role, and parse structured output.
 
-失败分类（用于决定是否值得再花一次请求）：
-- `empty_output`：正文为空（常见于推理把输出预算吃光）。**不重发同一请求**，
-  而是改用"压缩输出策略"再试一次；再失败就停下并记录原因。
-- `truncated`：`finish_reason` 表明被输出上限截断，处理方式同上。
-- `invalid_json`：有正文但 JSON 不合法，用一次修复调用（提示具体错误）。
-- `validation_failed`：JSON 合法但未过发布校验，在同一分析预算内修复一次。
-"""
+Failure classes determine whether to spend one remaining attempt:
+- empty_output: compact the requested output instead of resending; stop if it fails again.
+- truncated: finish_reason reports an output limit; use the same compact strategy.
+- invalid_json: send the concrete parse error for one repair.
+- validation_failed: repair valid JSON within the same publication-check budget."""
 
 from __future__ import annotations
 
@@ -46,7 +44,7 @@ COMPRESS_INSTRUCTION = (
 
 
 class AnalysisError(RuntimeError):
-    """分析失败：empty_output / truncated / invalid_json / validation_failed / model_error。"""
+    """Analysis failure: empty_output, truncated, invalid_json, validation_failed, or model_error."""
 
     def __init__(self, message: str, *, kind: str = "invalid_json", attempts: int = 1) -> None:
         super().__init__(message)
@@ -79,7 +77,7 @@ def load_prompt_template(settings: Settings) -> str:
 
 
 def _learning_entry_block(target: dict[str, Any]) -> str:
-    """把本次实际读取到的学习入口写进提示词；没读到示例信号就必须标为不可执行。"""
+    """Include the entry actually read; without an example signal, mark it non-executable."""
     entry = target.get("learning_entry") if isinstance(target, dict) else None
     if not isinstance(entry, dict) or not entry.get("url"):
         return '本次没有取到可核验的学习入口：executable=false，entry=""；缺口只写在action等文字字段，done_criteria允许为空。'
@@ -165,7 +163,7 @@ def parse_json_response(text: str) -> dict[str, Any]:
 
 
 def classify_failure(response: ModelResponse) -> str | None:
-    """空正文 / 被截断先判定；返回 None 表示正文存在，可以尝试解析。"""
+    """Check empty/truncated output first; None means content is available for parsing."""
     if not (response.text or "").strip():
         return "empty_output"
     if getattr(response, "truncated", False):
@@ -187,12 +185,11 @@ def run_analysis(
     feedback_text: str = "",
     report_validator: Callable[[dict[str, Any]], list[str]] | None = None,
 ) -> AnalysisOutcome:
-    """分析与修复共用最多两次请求，且不超过 max_calls。
+    """Analysis and repairs share at most two requests, bounded by max_calls.
 
-    sink 用于记录每次真实调用（即使随后失败，调用与消耗也不会丢失）。
-    report_validator 是调用方的纯发布预检。只读草稿，不放宽最终校验；
-    合法但仍不合格的草稿交给最终校验持久化为 rejected。
-    """
+sink records every actual call, including failed responses and consumption.
+report_validator is a pure publication precheck: it reads drafts without relaxing final validation.
+A valid but unacceptable draft remains available for finalization as rejected."""
     user_prompt = build_user_prompt(
         settings,
         profile=profile,
@@ -214,7 +211,7 @@ def run_analysis(
         return errors
 
     def retained(error: str, *, failed_requests: list[str] | None = None) -> AnalysisOutcome:
-        # 修复响应坏掉时，保留第一份可解析草稿，不让它或消耗记录消失。
+        # If a repair response is malformed, retain the first parseable draft and usage records.
         assert first_report is not None
         return AnalysisOutcome(report=first_report, responses=responses, attempts=2,
                                retry_kind=kind, validation_checks=checks, selected_attempt=1,
@@ -271,7 +268,7 @@ def run_analysis(
             + "这不是免检通道，修复结果仍会经过同一发布校验；不要为了通过而虚构字段。"
         )
     elif kind in ("empty_output", "truncated"):
-        # 不重发同一请求：换成压缩输出策略，并说明上一次的失败类型
+        # Do not resend the same request: compact the output and explain the previous failure.
         retry_prompt = user_prompt + COMPRESS_INSTRUCTION + f"\n上一次的失败类型：{kind}（{first_error}）\n"
     else:
         retry_prompt = (

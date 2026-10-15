@@ -1,4 +1,4 @@
-"""2.1 本机网页/执行进程入口；演示必须显式指定隔离目录。"""
+"""Local web/worker entry point; demos require an explicit isolated directory."""
 import argparse
 import dataclasses
 import ipaddress

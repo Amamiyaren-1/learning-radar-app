@@ -1,4 +1,4 @@
-"""离线夹具回归；用户提供的原样字段不代表已读过云端产物。"""
+"""Offline fixture regressions; supplied fields do not prove cloud artifacts were read."""
 
 import contextlib
 import io
@@ -145,7 +145,7 @@ class OfflineRecheckTests(unittest.TestCase):
         self.assertTrue(any("claims[1].quote 无法" in error for error in result.errors), result.errors)
 
     def test_first_claim_failure_is_not_attributed_to_second_matching_quote(self):
-        """通用 fixture：直接匹配第二项为 True，但完整校验正确拒绝第一项拼接引文。"""
+        """Fixture matching accepts the second quote while full validation rejects the first stitched quote."""
         self.report["claims"].insert(0, {
             "type": "fact", "text": "材料称语言为 Python，许可为 BSD。",
             "quote": "语言=Python；许可证=BSD",

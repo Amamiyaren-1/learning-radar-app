@@ -1,12 +1,10 @@
-"""证据收集编排：对目标项目与对照项目抓取公开证据。
+"""Collect public evidence for the target and comparators.
 
-本轮（取证修复）要点：
-- 读过的候选页面**全部保留**（正文 + 获取记录），不再读完就丢；调用方负责落盘。
-- 送进模型的网页证据只挑**相关且去重**的片段，并有条数上限，给入门/核心机制材料留位置。
-- 允许从项目明确链接的官方文档页**再跟随一跳**（同一站点、最多 N 个），只取入门/机制类链接，
-  不是通用爬虫；安全与预算沿用 `learnradar/net.py` 与 `limits`。
-- 示例文件只接受与示例相关的候选（得分 > 0 且非无关文件）；没有就如实记“未找到”，不凑数量。
-"""
+Retain all fetched page bodies and fetch records for caller persistence.
+Select relevant deduplicated excerpts within evidence limits.
+Follow at most one same-site hop from explicit official-documentation links.
+Use learnradar/net.py guards and configured budgets; this is not a general crawler.
+Accept only relevant example files and report missing examples honestly."""
 
 from __future__ import annotations
 
@@ -201,7 +199,7 @@ def collect_repository(
 
 
 def _fetch_page(client: GitHubClient, url: str, *, stamp: str, reason: str = "") -> dict[str, Any]:
-    """读取一个网页并保留正文与获取记录（失败也记录）。"""
+    """Read a page and retain its body and fetch record, including failures."""
     record: dict[str, Any] = {"url": url, "retrieved_at": stamp, "reason": reason}
     try:
         result = fetch(
@@ -237,7 +235,7 @@ def _fetch_page(client: GitHubClient, url: str, *, stamp: str, reason: str = "")
 
 
 def _page_relevance(page: dict[str, Any]) -> int:
-    """相关度：有代码/长正文/机制关键词的页面优先；列表页与空壳页靠后。"""
+    """Prioritize code, substantial text, and mechanism keywords over index or empty pages."""
     text = (page.get("text") or "").lower()
     score = 0
     if page.get("example_signal"):
@@ -253,7 +251,7 @@ def _page_relevance(page: dict[str, Any]) -> int:
 
 
 def _select_entry_evidence(pages: list[dict[str, Any]], limit: int) -> list[dict[str, Any]]:
-    """只把相关且去重的网页送进模型证据，并保留条数上限。"""
+    """Send only relevant deduplicated page evidence within the item limit."""
     kept: list[dict[str, Any]] = []
     seen_hash: set[str] = set()
     seen_url: set[str] = set()
@@ -289,7 +287,7 @@ def _collect_learning_entry(
     remaining_sources: int = 4,
     stamp: str,
 ) -> dict[str, Any]:
-    """读取候选入口页 →（必要时）同站一跳 → 选相关片段 → （没有示例信号时）找示例文件。"""
+    """Read entry pages, optionally follow one same-site hop, select excerpts, then seek example files if needed."""
     pages: list[dict[str, Any]] = []
     skipped_links: list[dict[str, str]] = []
     ranked = pick_entry_candidates(
@@ -432,7 +430,7 @@ def _collect_example_files(
     stamp: str,
     skipped: list[dict[str, str]] | None = None,
 ) -> list[dict[str, Any]]:
-    """沿 README 的明确链接读取与示例相关的具体文件；只接受示例相关候选。"""
+    """Follow explicit README links to concrete example-related files; reject irrelevant files."""
     if max_files <= 0:
         return []
     results: list[dict[str, Any]] = []

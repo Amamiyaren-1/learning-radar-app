@@ -1,4 +1,4 @@
-"""端口拒绝的清楚诊断；实际系统分配端口见进程测试。"""
+"""Clear rejected-port diagnostics; subprocess tests exercise OS-assigned ports."""
 import contextlib
 import io
 import tempfile

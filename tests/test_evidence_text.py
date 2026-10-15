@@ -1,4 +1,4 @@
-"""抽取文本时保留代码块与链接（避免"丢代码块=没有示例"的误判）。"""
+"""Preserve code blocks/links during extraction to avoid false missing-example results."""
 
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ class StripHtmlTests(unittest.TestCase):
 
 
 class QuoteMatchingTests(unittest.TestCase):
-    """引文匹配只做格式归一，不放松“必须是连续原文”。"""
+    """Quote normalization preserves the contiguous-source requirement."""
 
     def _evidence(self, excerpt: str) -> Evidence:
         return Evidence(

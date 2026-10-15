@@ -1,10 +1,8 @@
-"""周期执行：一个周期只跑一次，绑定 run_id；并发只允许一个执行者；不自动重跑。
+"""Execute each cycle once, binding run_id with a single executor and no automatic rerun.
 
-- 周期记录写在 SQLite 的 `cycles` 表（不新建名单、不新建队列）；
-- 冷却期负责“跨周期选哪些项目”，周期记录负责“同一周期不重复执行”，两者互不替代；
-- 中断、失败保留真实状态（interrupted / unknown / failed），人工确认后才用 --force-redo 重跑；
-- 任务总超时用 POSIX 的 SIGALRM（Windows 上只能靠 systemd 的 TimeoutStartSec 兜底）。
-"""
+SQLite cycles records provide same-cycle deduplication; cooldown handles cross-cycle selection.
+Preserve interrupted/unknown/failed states until explicit --force-redo.
+SIGALRM enforces timeouts on POSIX; Windows needs an external supervisor."""
 
 from __future__ import annotations
 
@@ -27,14 +25,14 @@ CYCLE_FAILED = "failed"
 CYCLE_INTERRUPTED = "interrupted"
 CYCLE_UNKNOWN = "unknown"
 
-# 已经跑完的周期（无论有没有推荐）都不再自动重跑
+# Completed cycles never rerun automatically, regardless of recommendation outcome.
 CYCLE_TERMINAL = {CYCLE_COMPLETED, CYCLE_FAILED, CYCLE_INTERRUPTED, CYCLE_UNKNOWN}
 
 _FALLBACK_OFFSETS = {"Asia/Shanghai": 8, "UTC": 0, "Etc/UTC": 0}
 
 
 class TaskTimeout(RuntimeError):
-    """任务总超时。"""
+    """Task-wide timeout."""
 
 
 @dataclass(frozen=True)
@@ -58,7 +56,7 @@ class ScheduleConfig:
 
 
 def timezone_for(name: str) -> timezone | Any:
-    """优先用系统 tzdata；拿不到 IANA 数据时退回固定偏移（只在少数环境发生）。"""
+    """Prefer system tzdata; fall back to a fixed offset if IANA data is unavailable."""
     try:
         from zoneinfo import ZoneInfo
 
@@ -121,7 +119,7 @@ def parse_at(text: str) -> tuple[int, int]:
 
 
 def scheduled_instant(schedule: ScheduleConfig, now: datetime) -> datetime:
-    """最近一次“计划时刻”（含 now 本身）。补触发时用它决定归属哪个周期。"""
+    """Find the most recent scheduled instant, including now, for delayed cycle attribution."""
     hour, minute = parse_at(schedule.at)
     target = weekday_index(schedule.weekday)
     candidate = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
@@ -132,7 +130,7 @@ def scheduled_instant(schedule: ScheduleConfig, now: datetime) -> datetime:
 
 
 class TaskLock:
-    """同一时间只允许一个周任务实例（O_EXCL 创建，正常结束时删除）。"""
+    """Allow one weekly instance using O_EXCL; remove the lock on normal exit."""
 
     def __init__(self, path: Path, *, stale_seconds: int = 0) -> None:
         self.path = path
@@ -161,7 +159,7 @@ class TaskLock:
         return True, ""
 
     def holder_pid(self) -> int:
-        """锁文件里记录的进程号；读不到就返回 0。"""
+        """Read the lock owner PID; return zero if unreadable."""
         try:
             first = self.path.read_text(encoding="utf-8").splitlines()[0]
         except (OSError, IndexError):
@@ -170,13 +168,13 @@ class TaskLock:
         return int(match.group(1)) if match else 0
 
     def holder_alive(self) -> bool:
-        """锁是否被仍然活着的进程持有；拿不准时按“活着”处理，避免误判。"""
+        """Check whether a live process owns the lock; uncertainty is treated as alive."""
         pid = self.holder_pid()
         if pid <= 0:
             return self.path.exists()
         if os.name != "posix" or not hasattr(os, "kill"):
-            # Windows 上 os.kill(pid, 0) 不是“探测”，而是真的终止进程：
-            # 非 POSIX 平台一律按“持有者还活着”处理，避免误判与误杀。
+            # On Windows, os.kill(pid, 0) can terminate a process rather than probe it.
+            # Conservatively treat non-POSIX owners as alive to prevent false recovery or termination.
             return True
         try:
             os.kill(pid, 0)
@@ -202,7 +200,7 @@ class TaskLock:
 
 
 def install_task_timeout(seconds: int) -> str:
-    """返回一行说明，供日志记录。Windows 没有 SIGALRM，只能靠 systemd 超时。"""
+    """Return a log description; Windows lacks SIGALRM and needs an external timeout supervisor."""
     if seconds <= 0:
         return "未启用（配置为 0）"
     if not hasattr(signal, "SIGALRM"):
@@ -253,7 +251,7 @@ def _json_field(raw: Any) -> dict[str, Any]:
 
 
 def collect_outcome(store: Any, settings: Any, run_id: str, *, cycle_id: str = "") -> dict[str, Any]:
-    """把一次运行的结果收成渲染邮件需要的字段（只读）。"""
+    """Read-only aggregation of run fields needed for mail rendering."""
     row = store.conn.execute(
         "SELECT status, started_at, finished_at FROM runs WHERE run_id = ?", (run_id,)
     ).fetchone()
@@ -311,7 +309,7 @@ def collect_outcome(store: Any, settings: Any, run_id: str, *, cycle_id: str = "
 
 
 def classify_cycle(run_status: str, report_status: str, decision: str) -> tuple[str, str]:
-    """返回 (周期状态, 邮件类型)。'待观察' 也算正常完成。"""
+    """Return cycle status and mail type; an observation-only result is normal completion."""
     if report_status == "published":
         kind = "report" if decision in {"recommend", "watch"} else "status"
         return CYCLE_COMPLETED, kind

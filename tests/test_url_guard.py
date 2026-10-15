@@ -1,4 +1,4 @@
-"""未展开模板/非法地址：拒绝且不发起请求，且不影响其它候选与整轮收尾。"""
+"""Reject templates/invalid URLs without requests while preserving other candidates and finalization."""
 from __future__ import annotations
 
 import contextlib
@@ -24,7 +24,7 @@ DOCS_HTML = (
 
 
 class UrlGuardTests(unittest.TestCase):
-    """地址守卫本身：只拒绝真正不可请求的地址。"""
+    """URL guards reject only genuinely unrequestable addresses."""
 
     def test_template_url_is_rejected_without_any_request(self) -> None:
         self.assertIn("模板", unrequestable_reason(TEMPLATE_URL))
@@ -47,7 +47,7 @@ class UrlGuardTests(unittest.TestCase):
         dns.assert_not_called()
 
     def test_invalid_url_at_send_stage_becomes_fetch_error(self) -> None:
-        """即使地址绕过了前置检查，发送阶段的 InvalidURL 也只能变成 FetchError，不能打断整轮。"""
+        """A send-time InvalidURL becomes FetchError without aborting the entire task."""
         with mock.patch("learnradar.net.unrequestable_reason", return_value=""), mock.patch(
             "learnradar.net.socket.getaddrinfo",
             return_value=[(2, 1, 6, "", ("93.184.216.34", 443))],
@@ -83,7 +83,7 @@ class UrlGuardTests(unittest.TestCase):
 
 
 class CollectorBadLinkTests(unittest.TestCase):
-    """取证阶段：坏链接只记缺口，不打断后续合法候选。"""
+    """Bad links record gaps without aborting later valid evidence candidates."""
 
     def _client(self, readme: str):
         client = mock.Mock()
@@ -161,7 +161,7 @@ class CollectorBadLinkTests(unittest.TestCase):
 
 
 class WeeklyBadLinkTests(WeeklyTestCase):
-    """整轮验证：README 指向的文档页里带未展开模板时，仍能正常收尾并保留用量与周期状态。"""
+    """Unexpanded documentation URLs preserve finalization, usage, and cycle state."""
 
     README = (
         "# demo\n\n## Docs\n\n[Getting started](https://docs.example.dev/get-started)\n\n"
@@ -198,7 +198,10 @@ class WeeklyBadLinkTests(WeeklyTestCase):
 
     def test_weekly_completes_and_records_the_skipped_link(self) -> None:
         WeeklyBadLinkTests.fetched = []
-        code, output, _adapter = self.run_weekly(["a/one", "a/two", "a/three"])
+        # All adapters and SMTP are fake in this case; only mock key presence.
+        with mock.patch('learnradar.config.CandidateModel.api_key',
+                        return_value='offline-test-placeholder'):
+            code, output, _adapter = self.run_weekly(["a/one", "a/two", "a/three"])
         self.assertEqual(code, 0, output)
         self.assertEqual(self.store.get_cycle("2026-W39")["status"], "completed")
         emails = self.emails()
@@ -218,7 +221,7 @@ class WeeklyBadLinkTests(WeeklyTestCase):
 
 
 class FakeResponse:
-    """最小 HTTP 响应替身，供真实 net.fetch 使用（不建连接）。"""
+    """Minimal response double for real net.fetch without connections."""
 
     def __init__(self, url: str, body: str, content_type: str = "text/html") -> None:
         self.status = 200
@@ -243,7 +246,7 @@ class FakeResponse:
 
 
 class RealFetchPathTests(unittest.TestCase):
-    """走真实 net.fetch（只替掉 DNS 与 opener）：模板地址根本不进入请求。"""
+    """Real net.fetch with fake DNS/opener never requests template URLs."""
 
     def test_template_link_never_reaches_the_network(self) -> None:
         calls: list[str] = []

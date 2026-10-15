@@ -1,10 +1,7 @@
-"""README 章节选取、学习入口识别与"入口里是否真有可执行示例"的检查。
-
-固定截取开头会把"快速开始"这类真正决定能不能上手的材料丢掉，
-所以这里按标题切分、按用途打分，在有界预算内挑选相关章节，并保留章节与行号定位。
-另外：能打开一个页面不等于找到了可学步骤（例如打开 docs overview），
-因此还要在页面里检查是否真的存在可执行示例，检查不到就如实标记。
-"""
+"""Select README sections, learning entries, and executable-example signals.
+Score relevant sections within bounded excerpts and preserve headings/line locators.
+Opening an overview page alone is not an executable learning step.
+Detect example signals explicitly and report their absence honestly."""
 
 from __future__ import annotations
 
@@ -48,7 +45,7 @@ BADGE_LINE = re.compile(r"^\s*(\[!\[|<img|<div|</div|!\[|\[[^\]]*\]\([^)]*\)\s*$
 
 
 def strip_badge_lines(text: str) -> str:
-    """去掉徽章/图片/纯链接行：它们会占满 head 窗口，把真正的说明文字挤出摘录。"""
+    """Remove badges, images, and link-only lines that crowd out informative head excerpts."""
     kept: list[str] = []
     for line in text.splitlines():
         stripped = line.strip()
@@ -119,7 +116,7 @@ def score_section(section: Section) -> int:
 
 
 def _windowed_fallback(text: str, budget: int) -> str:
-    """没有任何相关章节时，均匀取开头/中间/结尾三段，并标出字符位置。"""
+    """When no relevant section exists, sample head/middle/tail with character positions."""
     span = max(budget // 3 - 40, 200)
     starts = [0, max(len(text) // 2 - span // 2, 0), max(len(text) - span, 0)]
     seen: set[int] = set()
@@ -142,7 +139,7 @@ def select_excerpt(
     max_sections: int = 4,
     budget: int = 3200,
 ) -> tuple[str, list[dict[str, Any]]]:
-    """返回 (摘录, 用到的章节列表)。章节列表带标题与行号，用于定位。"""
+    """Return excerpt and selected section headings/line locators."""
     if not text:
         return "", []
     sections = split_sections(text)
@@ -152,7 +149,7 @@ def select_excerpt(
     used: list[dict[str, Any]] = []
 
     remaining = budget
-    # head 窗口取"去掉徽章后的正文"，避免第一屏全是徽章；章节提取仍用原文以保留行号
+    # Use badge-free text for the head excerpt; retain original sections for line locators.
     head = _trim(strip_badge_lines(text)[:head_chars], head_chars)
     if head and remaining > 0:
         parts.append(head)
@@ -186,10 +183,8 @@ def extract_links(text: str) -> list[tuple[str, str]]:
 
 
 def analyze_example_content(text: str) -> dict[str, Any]:
-    """检查页面里是否出现示例信号：代码块 + 安装命令或可直接运行的使用片段。
-
-    注意：这只是"检测到示例信号"，不等于已经跑通，本层不实际运行任何示例。
-    """
+    """Detect code blocks plus installation commands or runnable snippets.
+An example signal does not prove successful execution; this layer runs no examples."""
     body = text or ""
     fences = len(re.findall(r"(?m)^\s*(?:```|~~~)", body))
     html_blocks = len(HTML_CODE.findall(body))
@@ -251,10 +246,8 @@ NOISE_FILE = re.compile(
 def example_file_links(
     readme_text: str, *, limit: int = 2, skipped: list[dict[str, str]] | None = None
 ) -> list[tuple[str, str]]:
-    """沿 README 的明确链接找示例/源码文件；**只接受与示例相关的候选**，不凑数量。
-
-    得分大于零只是"与示例/样例/教程相关"的筛选条件，不代表已验证可运行。
-    """
+    """Find concrete example/source files through explicit README links.
+Positive relevance is a filter, not verification that a candidate runs."""
     found: list[tuple[int, int, str, str]] = []
     seen: set[str] = set()
     for order, (label, url) in enumerate(extract_links(readme_text)):
@@ -296,7 +289,7 @@ NAV_PATH = re.compile(r"/(category|tags?|search|archive)(/|$)", re.I)
 def pick_entry_candidates(
     repo, readme_text, *, limit: int = 4, skipped: list[dict[str, str]] | None = None
 ):
-    # 按用途给入口链接分档：docs（入门/文档）与 examples（示例），并记录所属章节
+    # Classify docs and examples entry links and record their containing sections.
     homepage = str(repo.get("homepage") or "").strip()
     sections = split_sections(readme_text)
 
@@ -350,7 +343,7 @@ def pick_entry_candidates(
 
 
 def pick_learning_entries(repo: dict[str, Any], readme_text: str, *, limit: int = 3) -> list[str]:
-    """按确定规则挑候选学习入口（越像"示例/快速开始"越靠前），取不到就返回仓库主页。"""
+    """Rank entry candidates by quick-start/example relevance, falling back to the repository page."""
     homepage = str(repo.get("homepage") or "").strip()
     scored: list[tuple[int, int, str]] = []
     for order, (label, url) in enumerate(extract_links(readme_text)):
@@ -376,7 +369,7 @@ def pick_learning_entries(repo: dict[str, Any], readme_text: str, *, limit: int 
 
 
 def pick_learning_entry(repo: dict[str, Any], readme_text: str) -> str:
-    """单入口版本：返回最优先的候选（没有就返回空字符串，不猜链接）。"""
+    """Return the highest-priority entry or an empty string without inventing links."""
     entries = pick_learning_entries(repo, readme_text, limit=1)
     return entries[0] if entries else ""
 
@@ -391,7 +384,7 @@ ASSET_EXT = (".png", ".jpg", ".jpeg", ".svg", ".gif", ".css", ".js", ".ico", ".w
 
 
 def _same_site(left: str, right: str) -> bool:
-    """只允许同站（含其子域），避免跳到站外。"""
+    """Allow the same site and its subdomains only."""
     import urllib.parse as _u
 
     host_left = _u.urlsplit(left).netloc.lower()
@@ -408,7 +401,7 @@ def _same_site(left: str, right: str) -> bool:
 def _record_skipped(
     skipped: list[dict[str, str]] | None, url: str, reason: str
 ) -> None:
-    """把被拒绝的链接记下来（有上限，避免刷屏）。"""
+    """Record rejected links within a bounded diagnostic list."""
     if skipped is None or len(skipped) >= 20:
         return
     skipped.append({"url": str(url)[:200], "reason": reason})
@@ -421,7 +414,7 @@ def docs_followup_links(
     limit: int = 1,
     skipped: list[dict[str, str]] | None = None,
 ) -> list[tuple[str, str]]:
-    """从官方文档页提取"入门/核心机制"链接：仅同站、排除资源与锚点。"""
+    """Extract same-site introduction/mechanism links from official docs, excluding assets and anchors."""
     import urllib.parse as _u
 
     found: list[tuple[int, int, str, str]] = []
@@ -435,8 +428,8 @@ def docs_followup_links(
         url = _u.urljoin(base_url, href)
         reason = unrequestable_reason(url)
         if reason:
-            # 例如文档站里未展开的 {{ meta.url | default(url) | safeUrl }}：
-            # 既不是地址，也不该被编码成假地址去请求，直接跳过并记下原因。
+            # Documentation may contain unexpanded template expressions.
+            # Skip and record them instead of constructing fabricated URLs.
             _record_skipped(skipped, url, reason)
             continue
         parts = _u.urlsplit(url)

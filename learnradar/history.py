@@ -1,15 +1,8 @@
-"""冷却期过滤：按已有运行记录判断“这个项目最近是不是刚处理过”。
-
-只读现有记录（SQLite 的 `runs` / `reports`，以及 `data/runs/<run_id>/run-context.json`），
-不新建“已分析项目名单”。规则与字段缺失时的处理见 `docs/RUNBOOK.md` 的“冷却期”一节。
-
-要点：
-- 只统计**作为目标**的运行；只被搜索到、只被初筛、只当对照的项目不参与；
-- 成功（结构检查通过并发布）默认 30 天，失败（生成失败 / 结构拒绝 / 渲染失败）默认 7 天；
-- 冷却期取两者的最晚值：成功还在冷却期内时，后续一次失败不会把它缩短成 7 天；
-- 历史字段缺失时记为“无法判定”，并按可参与处理，不猜测成功或失败；
-- 用户反馈（例如“不想进一步了解”）不参与这里的任何判断。
-"""
+"""Apply cooldown using existing target-run history only.
+Read SQLite runs/reports and run-context.json without a separate analyzed-project list.
+Search/screening/comparator appearances do not count. Defaults are 30 days for published success and 7 for failure.
+Use the latest expiry so a later failure does not shorten successful cooldown.
+Missing fields remain indeterminate and eligible; feedback has no effect."""
 
 from __future__ import annotations
 
@@ -108,8 +101,8 @@ class CooldownDecision:
         }
 
 
-# report.created_at 用的是本地可读格式（例如“2026-09-23 14:07:58 中国标准时间”）；
-# 认得出才解析，认不出就按“时间字段缺失”处理，不猜测。
+# report.created_at uses a localized readable timestamp.
+# Parse only recognized formats; otherwise treat the timestamp as missing without guessing.
 _LOCAL_SUFFIXES = (("中国标准时间", 8), ("CST", 8), ("UTC", 0), ("GMT", 0))
 
 
@@ -139,7 +132,7 @@ def _iso(moment: datetime) -> str:
 
 
 def classify(run_status: str, report_status: str) -> tuple[str, str]:
-    """只按运行记录里已有的终态判断；看不懂的状态记为 unknown。"""
+    """Use only recorded terminal states; unfamiliar states remain unknown."""
     report_status = str(report_status or "")
     run_status = str(run_status or "")
     if report_status in SUCCESS_REPORT_STATUSES:
@@ -177,8 +170,8 @@ def _repo_from_run_context(
             return ""
         payload = json.loads(path.read_text(encoding="utf-8"))
     except OSError as exc:
-        # 目录权限、文件损坏等：不猜这个运行的目标，按“没有目标记录”处理，但要说出来。
-        # 注意：这不能替代修权限——迁移后仍应让运行账号能遍历 runs/ 下的全部目录。
+        # Permission/corruption failures leave the target unrecorded and are reported explicitly.
+        # This does not fix permissions; the runtime account must still traverse all run directories.
         if warnings is not None:
             warnings.append(
                 f"{run_id} 的 run-context.json 读不到（{type(exc).__name__}）："
@@ -195,7 +188,7 @@ def _repo_from_run_context(
 def target_history(
     store: Store, *, runs_dir: Path, warnings: list[str] | None = None
 ) -> dict[str, list[HistoryRecord]]:
-    """按项目汇总“作为目标”的历史（同一项目跨主题、跨大小写都算同一个）。"""
+    """Aggregate target history across topics and repository-name case variants."""
     runs = {
         str(row["run_id"]): dict(row)
         for row in store.conn.execute(
@@ -208,7 +201,7 @@ def target_history(
             "SELECT run_id, status, created_at, payload FROM reports"
         )
     ]
-    # 用并集：有的运行只有 runs 行（如 model-failed），有的只有 reports 行（成功收尾的重放不写 runs）。
+    # Union runs and reports: failures may have only runs; successful replays may have only reports.
     pairs: list[tuple[str, dict[str, Any], dict[str, Any]]] = []
     seen: set[str] = set()
     for report in reports:
@@ -233,7 +226,7 @@ def target_history(
         if not repo:
             repo = _repo_from_run_context(runs_dir, run_id, warnings)
         if not repo:
-            continue  # 没有目标记录（搜索失败 / 只初筛 / 没选点）：不参与冷却
+            continue  # Records without targets do not participate in cooldown.
         finished = str(
             run.get("finished_at") or run.get("started_at") or report.get("created_at") or ""
         )
@@ -270,7 +263,7 @@ def decide(
     for record in items:
         moment = parse_time(record.finished_at)
         if moment is None:
-            continue  # 时间字段缺失：不猜测，按可参与处理
+            continue  # Missing timestamps do not imply cooldown; keep the candidate eligible.
         days = config.window_days(record.outcome)
         if days <= 0:
             continue
@@ -312,7 +305,7 @@ def filter_items(
     config: CooldownConfig,
     now: str,
 ) -> list[CooldownDecision]:
-    """按候选顺序逐个判定（返回顺序与 items 一致，便于和候选一一对应）。"""
+    """Evaluate candidates in their original order for one-to-one correspondence."""
     decisions: list[CooldownDecision] = []
     for item in items:
         full_name = str(item.get("full_name") or "")
@@ -369,7 +362,7 @@ def manual_notice(
     config: CooldownConfig,
     now: str,
 ) -> str:
-    """手动指定目标或重放时的提示：只说明历史，不阻止。"""
+    """Explain history for manual targets/replays without blocking them."""
     items = tuple(records)
     if not items:
         return ""
@@ -384,7 +377,7 @@ def manual_notice(
 
 
 def to_context(decisions: list[CooldownDecision], *, config: CooldownConfig, now: str) -> dict[str, Any]:
-    """写进运行记录的简短说明（复用 run-context.json，不新增表）。"""
+    """Build a short explanation for existing run-context.json without adding a table."""
     return {
         "checked_at": now,
         "config": config.as_dict(),

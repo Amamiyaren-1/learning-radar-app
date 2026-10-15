@@ -1,8 +1,6 @@
-"""本地报告页面：Markdown 报告展示 + 页内反馈，绑定 127.0.0.1。
-
-页面由 Markdown 报告渲染，保证工作台与导出内容一致；
-未发布的运行保留“未发布/检查未通过”状态并展示未发布草稿，结构损坏到无法渲染正文的运行只显示诊断。
-"""
+"""Loopback report pages with Markdown rendering and run-bound feedback.
+Published content and exports share rendering; rejected runs retain marked drafts.
+Unrenderable damaged payloads show diagnostics only."""
 
 from __future__ import annotations
 
@@ -80,7 +78,7 @@ def _inline(text: str) -> str:
 
 
 def markdown_to_html(markdown_text: str) -> str:
-    """极简 Markdown 子集渲染：标题、表格、列表、引用、分隔线、段落、行内代码/链接/加粗。"""
+    """Render a small Markdown subset: headings, tables, lists, quotes, rules, paragraphs, code, links, and bold."""
     out: list[str] = []
     lines = markdown_text.splitlines()
     index = 0
@@ -206,7 +204,7 @@ def _load_validation(row: dict[str, Any]) -> ValidationResult:
 
 
 def _displayable(payload: dict[str, Any]) -> bool:
-    """结构损坏到无法展示正文时不要假装有报告。"""
+    """Do not imply a report exists when its payload cannot render."""
     if not payload or payload.get("error"):
         return False
     return all(key in payload for key in REQUIRED_TOP_LEVEL)
@@ -248,7 +246,7 @@ def _preview_meta(row: dict[str, Any], status: str, validation: ValidationResult
 
 
 def build_report_view(store: Store, run_id: str) -> dict[str, Any] | None:
-    """页面视图三选一：已发布正文 / 未发布草稿 / 只有诊断。"""
+    """Choose published content, rejected draft, or diagnostics-only page state."""
     row = store.get_report(run_id)
     if not row:
         return None
@@ -280,7 +278,7 @@ def build_report_view(store: Store, run_id: str) -> dict[str, Any] | None:
                 validation=validation,
                 stage_usage=[],
             )
-        except Exception:  # pragma: no cover - 任何渲染异常都退回诊断视图
+        except Exception:  # pragma: no cover - every rendering failure falls back to diagnostics
             draft = ""
         if draft.strip():
             view.update(document=draft, document_kind="draft", can_feedback=True)

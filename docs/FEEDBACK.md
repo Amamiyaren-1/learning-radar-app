@@ -1,42 +1,15 @@
-# 反馈规则（增量 A.9）
+# Feedback rules
 
-页面内反馈的取值、存储与使用方式都遵循本文；代码里的唯一来源是 `learnradar/feedback.py`。
+`learnradar/feedback.py` is the single source for values, display text, and prompt blocks.
 
-## 三个独立反馈项 + 可选备注
-
-| 键 | 问题 | 取值 |
+| Key | Meaning | Options |
 | --- | --- | --- |
-| `understood_what` | 是否读懂项目做什么 | 是 / 不确定 / 否 / 未填写 |
-| `understood_highlight` | 是否看懂至少一个具体亮点 | 是 / 不确定 / 否 / 未填写 |
-| `want_more` | 是否想进一步了解 | 是 / 不确定 / 否 / 未填写 |
+| `understood_what` | Did the explanation clarify what the project does? | yes / uncertain / no / unanswered |
+| `understood_highlight` | Did at least one concrete strength become understandable? | yes / uncertain / no / unanswered |
+| `want_more` | Do you want to learn more? | yes / uncertain / no / unanswered |
 
-备注是自由文本，可以留空；**不要求**用户解释“不想”的原因。
+Notes are optional; declining interest does not require explanation. Feedback binds to a normalized repository and a specific run. SQLite feedback is keyed by run_id. Repeated submissions update the same row, preserving first answered_at and recording updated_at. Original choices/notes remain private and unscored.
 
-## 绑定与存储
+Reuse only the latest verbatim feedback for the same target and current comparators, with time/run context. Display it to the user and label report appendix text as user speech. It is not evidence, never evidence_ids, and cannot change a claim's type. Do not infer long-term interests/language preferences, create exclusion lists, treat comprehension as endorsement, infer cross-project preferences, or add a feedback-analysis model.
 
-- 绑定到具体项目（`repo`）与具体运行（`run_id`）：
-  `data/learning-radar.sqlite` 的 `feedback` 表，主键是 `run_id`。
-- 重复提交是**更新同一条记录**，不新增：保留首次填写时间 `answered_at`，同时记录最近更新时间 `updated_at`。
-- 保存的是用户的原始选择与原始备注，不做评分、不做推断、不进入 Git（`data/` 已被忽略）。
-
-## 允许与禁止的用途
-
-允许：
-
-- 页面显示、用户自行查看与修改；
-- 下次分析**同一个项目**时，把该项目（以及本次对照项目）的既有反馈原文放进提示词，并注明时间与所属运行；
-- 写进报告附录，明确标注为“用户原话”。
-
-禁止：
-
-- 当作证据：反馈不能作为任何结论的 `evidence_ids`，也不能把结论的 `type` 依据它改写；
-- 把“不想进一步了解”变成排除名单、语言偏好或长期兴趣规则；
-- 把“读懂了 / 看懂了亮点”当成“用户认可该项目”；它只表示叙述可理解；
-- 跨项目推断偏好（例如由某个项目推出用户喜欢或讨厌某类框架）；
-- 为反馈增加分析模型或自动打分。
-
-## 状态与页面行为
-
-- 已发布报告：正常显示正文与反馈表单。
-- 未发布（结构检查未通过）：页面保留“未发布／检查未通过”状态与错误清单，展示从已保存模型输出重新渲染的**未发布草稿**，并可接收反馈。
-- 结构损坏到无法渲染正文（例如渲染失败、payload 缺必需字段）：只显示诊断，不展示“报告”，也不接受反馈。
+Published reports show content and forms. Rejected but renderable reports show their marked unpublished drafts and errors and accept feedback. Unrenderable damaged payloads show diagnostics only and do not accept feedback.

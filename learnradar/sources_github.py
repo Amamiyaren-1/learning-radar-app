@@ -1,15 +1,9 @@
-"""GitHub 官方适配器（增量 A 的唯一外部资料源）。
-
-只用 GitHub 自己的地址：搜索仓库、读取仓库元数据、README、最近提交与发布记录。
-每次调用都写入审计列表，便于核对真实消耗。
-
-两种证据模式：
-- api：调用 REST（core 限额 60/小时/IP，配置只读令牌可提高）。
-- public：core 限额用尽时的兜底。元数据改用搜索接口（独立限额），
-  README 走 raw.githubusercontent.com，提交与发布走仓库自带的 atom 订阅源。
-  内容仍然来自 GitHub 官方地址，只是换了不受 core 限额约束的入口；
-  代价是拿不到发布说明正文，且 README 只能按 HEAD 或 commit 锁定而非接口返回的 sha。
-"""
+"""Official GitHub evidence adapter.
+Search repositories and read metadata, README, commits, and releases from GitHub endpoints.
+Audit every call for consumption inspection.
+api uses REST core quota; optional read-only tokens raise limits.
+public falls back to search metadata, raw README, and Atom commit/release feeds.
+The fallback lacks release bodies and may pin README by HEAD/commit instead of API blob SHA."""
 
 from __future__ import annotations
 
@@ -44,9 +38,9 @@ class GitHubClient:
     mode: str = "api"
     notes: list[str] = field(default_factory=list)
 
-    # ------------------------------------------------------------ 模式与限额
+    # ------------------------------------------------------------ Modes and quotas
     def preflight(self) -> dict[str, Any]:
-        """看一次限额（/rate_limit 本身不计入限额），据此决定 api 还是 public 模式。"""
+        """Inspect /rate_limit to choose api or public evidence mode."""
         try:
             payload, _ = self._get("/rate_limit")
         except FetchError as exc:
@@ -69,7 +63,7 @@ class GitHubClient:
             self.mode = "public"
             self.notes.append("核心接口返回 403/429，已切换到 public 模式继续取证")
 
-    # ------------------------------------------------------------ 底层请求
+    # ------------------------------------------------------------ HTTP requests
     def _headers(self, accept: str = "application/vnd.github+json") -> dict[str, str]:
         headers = {
             "Accept": accept,
@@ -97,7 +91,7 @@ class GitHubClient:
         payload, _ = self._get("/rate_limit")
         return payload
 
-    # ------------------------------------------------------------ 搜索
+    # ------------------------------------------------------------ Search
     def search_repositories(self, query: str, *, per_page: int = 10, sort: str = "stars") -> list[dict[str, Any]]:
         payload, _ = self._get(
             "/search/repositories",
@@ -120,7 +114,7 @@ class GitHubClient:
             return items[0]
         return None
 
-    # ------------------------------------------------------------ 仓库元数据
+    # ------------------------------------------------------------ Repository metadata
     def get_repository(self, full_name: str) -> dict[str, Any]:
         if self.mode == "api":
             try:
@@ -177,9 +171,9 @@ class GitHubClient:
             }
         raise FetchError(f"public 模式下没有取到 {full_name} 的 README：{last_error}")
 
-    # ------------------------------------------------------------ 具体文件
+    # ------------------------------------------------------------ Concrete files
     def fetch_repo_file(self, full_name: str, path: str, *, ref: str | None = None) -> str:
-        """按路径读取仓库内的具体文件（raw 入口，按 commit 锁定）。"""
+        """Read a concrete repository file through the raw endpoint pinned to a commit."""
         revision = ref or "HEAD"
         result = fetch(
             f"{RAW_ROOT}/{full_name}/{revision}/{path.lstrip('/')}",
@@ -191,7 +185,7 @@ class GitHubClient:
         )
         return result.text()
 
-    # ------------------------------------------------------------ 提交
+    # ------------------------------------------------------------ Commits
     def latest_commits(self, full_name: str, *, ref: str | None = None, per_page: int = 3) -> list[dict[str, Any]]:
         if self.mode == "api":
             try:
@@ -239,7 +233,7 @@ class GitHubClient:
             )
         return entries
 
-    # ------------------------------------------------------------ 发布
+    # ------------------------------------------------------------ Releases
     def latest_release(self, full_name: str) -> dict[str, Any] | None:
         if self.mode == "api":
             try:

@@ -1,4 +1,4 @@
-"""云端每周任务：周期去重、并发、中断恢复、邮件状态与单独重试（全部离线）。"""
+"""Offline weekly deduplication/concurrency/recovery/mail-state/separate-retry tests."""
 
 from __future__ import annotations
 
@@ -45,7 +45,7 @@ BLOCK_RE = re.compile(r"^\[(E-[A-Za-z0-9\-]+)\][^\n]*\n(.*?)(?=^\[E-|\Z)", re.S 
 
 
 def parse_evidence(prompt: str) -> list[dict]:
-    """从提示词里读回证据编号、所属仓库与摘录（假模型按真实证据作答）。"""
+    """Read evidence IDs, owners, and excerpts from prompts so fake responses follow supplied evidence."""
     items: list[dict] = []
     for match in BLOCK_RE.finditer(prompt):
         block = match.group(2)
@@ -187,7 +187,7 @@ def build_report(prompt: str, target: str, comparators: list[str], decision: str
 
 
 class FakeAdapter:
-    """假模型：按提示词里的真实证据作答，可选地破坏结构。"""
+    """Fake model answers from supplied prompt evidence and can deliberately damage structure."""
 
     def __init__(self, target: str, comparators: list[str], *, decision: str = "watch", broken: bool = False) -> None:
         self.target = target
@@ -408,7 +408,7 @@ class WeeklyFlowTests(WeeklyTestCase):
         )
         self.assertLessEqual(usage["budget"]["used"], 4, "模型预算仍然生效")
 
-        # 同一周期重复触发：不再分析、不再发新邮件
+        # Repeating the same cycle does not analyze again or create new mail.
         code2, output2, adapter2 = self.run_weekly(["a/one", "a/two", "a/three"])
         self.assertEqual(code2, 0, output2)
         self.assertIn("该周期已经处理过", output2)
@@ -469,7 +469,7 @@ class WeeklyFlowTests(WeeklyTestCase):
         self.assertEqual(self.store.get_cycle("2026-W39")["status"], "running", "时间不能证明旧执行者已停止")
         self.assertIn("--force-redo", output)
 
-        # 人工恢复先核对并备份，才授权新的分析。
+        # Manual recovery checks and backs up before authorizing new analysis.
         self.assertEqual(cloud.cmd_cycle_recover(self.settings,argparse.Namespace(cycle="2026-W39",backup_out=None)),0)
 
         code2, output2, adapter2 = self.run_weekly(
@@ -591,7 +591,7 @@ class EmailStateTests(WeeklyTestCase):
 
 
 class ScheduleAnchorTests(unittest.TestCase):
-    """补触发归属哪个周期：按“最近一次计划时刻”，且不追补多周。"""
+    """Catch-up uses the latest scheduled instant without replaying multiple weeks."""
 
     def setUp(self) -> None:
         self.schedule = schedule_config(
@@ -609,21 +609,21 @@ class ScheduleAnchorTests(unittest.TestCase):
         )
 
     def test_planned_instant_is_used_for_the_cycle(self) -> None:
-        # 周日 20:17 正常触发
+        # Normal Sunday 20:17 trigger.
         sunday = datetime(2026, 9, 27, 20, 17, tzinfo=timezone(timedelta(hours=8)))
         anchor = scheduled_instant(self.schedule, sunday)
         self.assertEqual(anchor, sunday)
         self.assertEqual(cycle_id_for(anchor), "2026-W39")
 
     def test_catch_up_after_downtime_belongs_to_the_missed_week(self) -> None:
-        # 周一 09:00 补触发（周日 20:17 错过）：仍归属上周日那一周，而不是新的一周
+        # Monday 09:00 catch-up belongs to the missed Sunday cycle, not a new week.
         monday = datetime(2026, 9, 28, 9, 0, tzinfo=timezone(timedelta(hours=8)))
         anchor = scheduled_instant(self.schedule, monday)
         self.assertEqual(anchor, datetime(2026, 9, 27, 20, 17, tzinfo=timezone(timedelta(hours=8))))
         self.assertEqual(cycle_id_for(anchor), "2026-W39")
 
     def test_long_downtime_only_catches_up_one_cycle(self) -> None:
-        # 停机三周后启动：只取最近一次计划时刻，不会补跑中间几周
+        # After three weeks offline, select only the latest scheduled instant without backlog replay.
         later = datetime(2026, 10, 12, 9, 0, tzinfo=timezone(timedelta(hours=8)))
         anchor = scheduled_instant(self.schedule, later)
         self.assertEqual(anchor, datetime(2026, 10, 11, 20, 17, tzinfo=timezone(timedelta(hours=8))))
@@ -636,7 +636,7 @@ class ScheduleAnchorTests(unittest.TestCase):
 
 
 class AttachmentPrivacyTests(WeeklyTestCase):
-    """对外附件只能由允许字段生成：不含用户反馈、档案、提示词与运行元信息。"""
+    """Outbound attachments use allowed fields only, excluding feedback, profiles, prompts, and run metadata."""
 
     def test_email_attachment_is_the_external_version(self) -> None:
         self.run_weekly(["a/one", "a/two", "a/three"])
@@ -684,7 +684,7 @@ class AttachmentPrivacyTests(WeeklyTestCase):
 
 
 class EmailTestCommandTests(WeeklyTestCase):
-    """单独测试邮件：不调用模型、不改报告状态、不占正式周期。"""
+    """Mail tests do not call models, modify report states, or consume production cycles."""
 
     def test_smtp_test_sends_without_touching_cycles_or_reports(self) -> None:
         reports_before = self.store.conn.execute("SELECT COUNT(*) AS c FROM reports").fetchone()["c"]
@@ -717,7 +717,7 @@ class EmailTestCommandTests(WeeklyTestCase):
 
 
 class BackupRestoreTests(WeeklyTestCase):
-    """完整备份（数据库 + 必要文件）恢复后，历史/反馈/查看/重发都要真的可读。"""
+    """Restored database/files support history, feedback, viewing, and saved-mail readback."""
 
     def test_bundle_backup_restores_readable_data(self) -> None:
         self.run_weekly(["a/one", "a/two", "a/three"])
@@ -742,7 +742,7 @@ class BackupRestoreTests(WeeklyTestCase):
         self.assertFalse((bundle / "profile.toml").exists())
         self.assertFalse((bundle / "secret.env").exists())
 
-        # 恢复到另一个数据目录（模拟新服务器）
+        # Restore to another isolated data directory, simulating a new server.
         restored_dir = self.data_dir / "restored"
         (restored_dir / "reports").mkdir(parents=True)
         shutil.copy(backup_db, restored_dir / "learning-radar.sqlite")

@@ -1,17 +1,9 @@
-"""发布前质量门槛（聚焦"结构可核对"，不冒充内容已核验）。
-
-参考规划第 3、6 节与 A.1 评审：
-- 引文必须能追溯到证据编号，且必须能在所引证据的摘录里匹配到；
-- 必须有至少两个**本次实际采集过**的、互不重复的对照项目；
-- 对照结论必须引用属于该对照项目的证据；
-- 项目数值（星数）必须绑定到所属项目，不能张冠李戴；
-- 查阅状态由运行记录生成，不由模型自报；
-- 不得输出装饰性评分与没有根据的精确学习时长；
-- 学习动作：是否可执行由显式状态 `executable` 决定（不从链接形式或措辞推断）。声明可执行时必须给出
-  具体动作、已核验入口与完成标准；声明不可执行时允许完成标准为空，并保留来源链接与缺口说明。
-
-注意：这里的"通过"只代表结构检查通过，内容复核（摘录是否真的支持结论）由人工完成。
-"""
+"""Publication gate for inspectable structure, not comprehensive semantic verification.
+Quotes must match cited excerpts; require two distinct comparators actually collected in this run.
+Bind comparator conclusions and numeric metadata to the correct owner.
+Inspection state comes from records, not model claims. Reject decorative scores and unsupported precise durations.
+executable=true requires a concrete action, checked entry, and completion criteria.
+Non-executable actions may retain sources/gaps with empty criteria. Humans still assess whether quotes support conclusions."""
 
 from __future__ import annotations
 
@@ -31,11 +23,11 @@ DECISIONS = {"recommend", "watch", "not_recommend"}
 CLAIM_TYPES = {"fact", "vendor_claim", "inference"}
 QUOTE_REQUIRED_TYPES = {"fact", "vendor_claim"}
 
-# 关键条件（通用分类，覆盖目标实际技术栈）：runtime = 运行时及版本
+# Generic critical-condition categories cover actual stacks; runtime includes versions.
 CONDITION_KEYS = ("runtime", "os_support", "gpu", "external_cost")
 CONDITION_STATUS = {"evidence", "unknown", "inference", "not_applicable"}
 _NOT_APPLICABLE_WORDS = re.compile(r"不适用")
-# 用户已配置的通道（写在档案 resources 里）；其他提供方的密钥不能假定存在
+# Only configured profile resource channels exist; never assume other provider keys.
 OTHER_PROVIDER_PATTERN = re.compile(
     r"(anthropic|claude|openai|gpt-|gemini|google|azure|mistral|grok|xai|x\.ai)", re.I
 )
@@ -260,8 +252,8 @@ def validate_report(
     if not isinstance(action, dict):
         _err(result, "learning_action 必须是对象")
     else:
-        # “本次是否提供了可执行动作”由显式状态 executable 决定：
-        # 不看入口是不是 URL，也不看措辞。不可执行时同样允许保留来源链接与缺口说明。
+        # The explicit executable state determines whether an action is runnable.
+        # URL shape/wording is insufficient; non-executable actions may retain sources and gaps.
         executable = action.get("executable")
         if not isinstance(executable, bool):
             _err(
@@ -292,8 +284,8 @@ def validate_report(
                 _err(result, "learning_action.entry 必须是本次核验过的 http(s) 入口")
             if not action.get("done_criteria"):
                 _err(result, "learning_action.done_criteria 不能为空：提供了可执行动作时必须给出完成标准")
-        # executable=false（或未显式给出，已由上一条报错覆盖）时：完成标准可以留空，
-        # 也可以保留 README/文档链接与缺口说明，不要求入口是可执行动作。
+        # With executable=false, completion criteria may be empty; missing state is already an error.
+        # README/docs links and gap explanations need not describe executable steps.
         if is_link:
             in_evidence = any(item.url == entry for item in evidence)
             if executable is True and not in_evidence and require_verified_entry:
@@ -434,7 +426,7 @@ def _check_ids(
 
 
 def _has_example_entry(verified_entry: dict[str, Any] | None) -> bool:
-    """本次是否取到"已读取且检测到示例信号"的入口；没有的话允许写“暂不可执行”。"""
+    """Require an entry actually read with example signals, or allow an explicit non-executable action."""
     if not isinstance(verified_entry, dict):
         return False
     return bool(verified_entry.get("verified") and verified_entry.get("example_signal"))
@@ -446,7 +438,7 @@ def _check_highlight(
     *,
     require_quotes: bool,
 ) -> None:
-    """亮点必须写清解决什么问题、为什么值得关注，并给证据。"""
+    """Require evidence-backed strengths explaining the problem solved and why it matters."""
     if not isinstance(highlight, dict):
         _err(result, "highlight 必须是对象")
         return
@@ -477,8 +469,8 @@ def _check_highlight(
 
 
 def _check_unavailable_credentials(result: ValidationResult, report: dict[str, Any]) -> None:
-    """不得把用户没有的提供方密钥当作已满足：提到别的提供方时必须写明缺口。"""
-    # 只检查"声称已具备"的字段：gaps 与 suggested_change 本来就是在讲缺口与改动，提到别的提供方不算违规
+    """Do not assume absent provider keys; state resource gaps explicitly."""
+    # Check asserted available resources; gaps/suggested_change may name missing providers.
     starting = report.get("starting_conditions") or {}
     containers = {
         "learning_action": report.get("learning_action"),
@@ -493,8 +485,8 @@ def _check_unavailable_credentials(result: ValidationResult, report: dict[str, A
         text = _text_of(container)
         if not OTHER_PROVIDER_PATTERN.search(text):
             continue
-        # 显式不可执行动作可以用“需要 X 密钥，而用户只有 Y API”说明缺口。
-        # 不只因 executable=false 放行；仍需同时给出需求和另一通道的资源限制。
+        # A non-executable action can explain that one key is required while only another API exists.
+        # executable=false alone is insufficient: both requirements and resource limits must be stated.
         unavailable_action = False
         if label == "learning_action" and isinstance(container, dict) and container.get("executable") is False:
             explanation = str(container.get("action") or "")
@@ -517,7 +509,7 @@ def _check_conditions(
     owners: dict[str, str],
     allowed: set[str] | None,
 ) -> None:
-    """关键条件逐条核对：evidence 要带可匹配引文，unknown 不许有证据，inference 要有依据。"""
+    """Check conditions individually: evidence requires matching quotes, unknown has none, inference needs support."""
     conditions = difficulty.get("conditions")
     if not isinstance(conditions, list) or not conditions:
         _err(result, "difficulty.conditions 必须是数组：运行环境等关键条件要逐条标明依据")
@@ -574,7 +566,7 @@ def _check_verified_entry(
     action: dict[str, Any],
     verified_entry: dict[str, Any],
 ) -> None:
-    """运行记录核验过入口时：声称可执行就必须用那个入口，不能换成别的链接。"""
+    """Executable claims must use the entry verified by the current run, not a substituted link."""
     url = str(verified_entry.get("url") or "")
     if not url:
         return
@@ -628,7 +620,7 @@ def _check_metadata_values(
     text: str,
     cited: list[Evidence],
 ) -> None:
-    """免逐字引文的条件：结论里的元数据值要能在所属项目的结构化证据里找到。"""
+    """Waive verbatim quotes only when metadata values match the owning repository's structured evidence."""
     haystack = " ".join(
         [item.excerpt or "" for item in cited]
         + [json.dumps(item.extra or {}, ensure_ascii=False) for item in cited]
@@ -666,7 +658,7 @@ _CJK_CHAR = re.compile(r"[\u4e00-\u9fff]")
 
 
 def _structured_fields_text(cited: list[Evidence]) -> str:
-    """把结构化字段渲染成可比较文本（程序渲染，不要求模型抄写）。"""
+    """Render structured fields as comparable text; do not require model transcription."""
     chunks: list[str] = []
     for item in cited:
         extra = item.extra or {}
@@ -682,12 +674,12 @@ def _structured_fields_text(cited: list[Evidence]) -> str:
 
 
 def _covered_by_structured_fields(text: str, cited: list[Evidence]) -> bool:
-    """结论是否完全由该项目的结构化字段覆盖；不覆盖就必须给连续原文引文。"""
+    """Require contiguous source quotes unless the claim is fully covered by the repository's metadata."""
     subject = text or ""
     if not subject.strip():
         return False
-    # 此类显式元数据句式按字段绑定值，不用“显/示/近”等字是否出现在证据里来判定。
-    # 整句必须解析完；失败不能退回字符覆盖，否则功能判断或字段值互换可能被误放行。
+    # Parse explicit metadata statements by their bound fields rather than character overlap.
+    # Require complete parsing; do not fall back to character coverage or permit swapped values.
     prefix = "仓库元数据显示"
     if subject.startswith(prefix):
         labels = {label: key for key, label in _METADATA_FIELDS}
@@ -737,7 +729,7 @@ def _check_quote(
     text: str = "",
 ) -> None:
     cited = [known[evidence_id] for evidence_id in ids if evidence_id in known]
-    # 元数据类证据不要求逐字抄写，但结论里出现的版本/日期/星数必须能在该项目自己的结构化字段里找到
+    # Metadata need not be verbatim, but versions/dates/stars must match that repository's fields.
     if cited and all(item.kind in {"github_repo", "github_release", "github_commit"} for item in cited):
         subject = text or (quote if isinstance(quote, str) else "")
         if _covered_by_structured_fields(subject, cited):

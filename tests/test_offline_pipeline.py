@@ -1,7 +1,5 @@
-"""离线端到端测试：没有模型凭据时，用夹具跑通 分析 -> 质量门槛 -> 报告渲染。
-
-夹具数据全部是测试数据，不得当作真实证据；报告标题与说明里都带“夹具”标记。
-"""
+"""Offline analysis, publication gate, and rendering without real model credentials.
+All evidence is synthetic and marked as fixtures; never present it as real evidence."""
 
 from __future__ import annotations
 

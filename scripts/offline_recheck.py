@@ -1,16 +1,8 @@
-"""离线复检：用已保存的原始产物重跑质量门槛，不调用模型、不改动原产物。
-
-用法（开发/审计用，不属于产品流程）：
-
-    python scripts/offline_recheck.py <run-id> [--data-dir data]
-
-它读取 `data/runs/<run-id>/` 里的 `report.json`、`evidence.json`、`run-context.json`
-与 `validation.json`，按当前 `learnradar/validate.py` 的规则重新核对一次，把结果
-写成同目录的 `offline-recheck.json`（含规则版本、前后差异）。原 `report.json`、
-`validation.json`、`raw_model_output.txt` 一律不改。
-
-注意：复检只说明“结构门槛”在新规则下的结果，不代表内容复核（引文是否真的支持结论）已完成。
-"""
+"""Recheck saved artifacts offline without models or modifications to original output.
+Usage: python scripts/offline_recheck.py <run-id> [--data-dir data]
+Read report/evidence/context/validation and write a separate offline-recheck.json with rule version and differences.
+Original report.json, validation.json, and raw_model_output.txt remain unchanged.
+Passing structure still does not verify semantic support."""
 
 from __future__ import annotations
 
@@ -23,7 +15,7 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from learnradar.cli import _generated_verification  # noqa: E402  （与正常流程共用同一套查阅状态生成）
+from learnradar.cli import _generated_verification  # noqa: E402 - share inspection-state generation with normal execution
 from learnradar.config import load_settings  # noqa: E402
 from learnradar.evidence import Evidence, matchable, quote_supported_by  # noqa: E402
 from learnradar.validate import validate_report  # noqa: E402
@@ -31,7 +23,7 @@ from learnradar import evidence as evidence_module, validate as validate_module 
 
 
 def _apply_compat_conversions(report: Any, conversions: list[str]) -> None:
-    """旧产物缺显式可执行状态时的兼容转换：只补状态，绝不判定该动作可执行。"""
+    """Add explicit compatibility state to old artifacts without declaring their action executable."""
     action = report.get("learning_action") if isinstance(report, dict) else None
     if isinstance(action, dict) and "executable" not in action:
         action["executable"] = False
@@ -44,7 +36,7 @@ def _apply_compat_conversions(report: Any, conversions: list[str]) -> None:
 def _quote_diagnostics(
     report: Any, evidence: list[Evidence], errors: list[str] | None = None,
 ) -> list[dict[str, Any]]:
-    """记录与 validate_report 相同的按 ID 选取（重复 ID 时最后一项），只诊断不改变判定。"""
+    """Mirror validate_report ID resolution (last duplicate wins) for diagnostics only."""
     known = {item.evidence_id: (index, item) for index, item in enumerate(evidence)}
     rows: list[dict[str, Any]] = []
 

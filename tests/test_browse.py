@@ -1,4 +1,4 @@
-"""历史导航、旧上下文缺失与原报告反馈复用；隔离库与实际 HTTP。"""
+"""Test history navigation, missing context, and feedback reuse with isolated data and actual HTTP."""
 import json
 import tempfile
 import unittest

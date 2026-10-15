@@ -1,4 +1,4 @@
-"""2.1 持久手动队列；事务管占位与预算，系统文件锁管整个执行进程。"""
+"""Durable manual queue: transactions reserve work/budget, and a kernel lock owns execution."""
 from __future__ import annotations
 
 import json
@@ -48,7 +48,7 @@ def moment():
 
 
 class WorkerLock:
-    """内核释放的锁；不以 PID、文件年龄或超时推断旧进程已停止。"""
+    """Kernel-released lock; never infer dead owners from PID, file age, or timeout alone."""
     def __init__(self, directory: Path):
         self.path = directory / "locks" / "manual-worker.lock"
         self.stream = None
@@ -94,7 +94,7 @@ class TaskQueue:
         self.daily_limit = min(3, max(1, int(daily_limit)))
         self.demo = demo
         mode = "demo" if demo else "production"
-        # 演示不能先迁移、再发现自己误用了真实库。
+        # Reject real databases before performing demo migrations.
         if self.path.exists():
             connection = sqlite3.connect(f"{self.path.as_uri()}?mode=ro", uri=True)
             try:
@@ -249,7 +249,7 @@ class TaskQueue:
             conn.execute("UPDATE tasks SET consumed_day=COALESCE(consumed_day,?),reserved_day=NULL,model_requests=?,uncertain=1,updated_at=? WHERE task_id=?",
                          (day,attempt,ts,task_id))
             conn.execute("INSERT INTO task_requests(task_id,attempt,started_at,status) VALUES(?,?,?,'pending')", (task_id,attempt,ts))
-            conn.commit()  # 请求发出前持久化；进程消失也保留此次占用。
+            conn.commit()  # Reserve consumption durably before sending; process loss retains the reservation.
             return attempt
 
     def end_request(self, task_id, attempt, status):
@@ -274,7 +274,7 @@ class TaskQueue:
             store.conn.commit()
 
     def recover(self, lock):
-        """只能在取得 WorkerLock 后调用：锁证实旧执行进程不再持有它。"""
+        """Call only after acquiring WorkerLock, proving the previous executor no longer owns it."""
         if not lock.stream or lock.path != self.directory/"locks"/"manual-worker.lock":
             raise TaskError("恢复必须先持有该数据目录的系统执行锁")
         ts, _ = self.now()

@@ -1,12 +1,8 @@
-"""模型适配层。
-
-规则（规划第 5 节）：
-- 模型名、推理参数、超时、单价、是否跟随重定向全部来自 config/settings.toml；
-- 第一层只实现一种真实接入方式 + 一个离线夹具，不做多模型自动切换；
-- 模型 API 请求默认拒绝重定向（`follow_redirects = false`）：跨源跳转会把密钥与档案正文
-  转发给新主机，因此宁可失败并要求用户直接配置最终端点；
-- 对外只暴露 complete()（一次有界的文本补全）与 verify_candidate()（接入核验）。
-"""
+"""Configured model adapters.
+Names, reasoning, timeout, pricing, and redirects come from config/settings.toml.
+Use explicit real transports or offline fixtures without automatic model switching.
+Reject redirects by default because cross-origin redirects could disclose keys and profiles.
+Expose bounded complete() and verify_candidate() operations."""
 
 from __future__ import annotations
 
@@ -22,7 +18,7 @@ DEFAULT_FIXTURE = REPO_ROOT / "tests" / "fixtures" / "offline_analysis.json"
 
 
 class ModelError(RuntimeError):
-    """模型调用失败。"""
+    """Model call failed."""
 
 
 @dataclass
@@ -54,7 +50,7 @@ class ModelResponse:
 
     @property
     def truncated(self) -> bool:
-        """输出是否因为达到上限而被截断（用于区分"该换策略"和"该修 JSON"）。"""
+        """Detect output-limit truncation to choose compaction rather than JSON repair."""
         return self.finish_reason in ("length", "max_tokens", "max_output_tokens")
 
     def usage_summary(self, candidate: CandidateModel) -> dict[str, Any]:
@@ -83,7 +79,7 @@ class ModelAdapter(Protocol):
 
 
 class _HttpAdapter:
-    """chat_completions / responses 两种 HTTP 形态的公共部分。"""
+    """Shared HTTP behavior for chat_completions and responses transports."""
 
     def __init__(self, candidate: CandidateModel, *, audit: list[dict[str, Any]] | None = None) -> None:
         self.candidate = candidate
@@ -111,7 +107,7 @@ class _HttpAdapter:
         return f"{self.candidate.base_url.rstrip('/')}/{path.lstrip('/')}"
 
     def _post(self, endpoint: str, body: dict[str, Any]) -> tuple[Any, Any]:
-        headers = self._headers()  # 缺凭据不算请求；持久计数只发生在实际请求边界。
+        headers = self._headers()  # Missing credentials consume no requests; durable counting happens at the HTTP boundary.
         attempt = self.request_budget.consume() if self.request_budget else None
         try:
             result = post_json(
@@ -121,7 +117,7 @@ class _HttpAdapter:
                 timeout=self.candidate.timeout_seconds,
                 audit=self.audit,
                 allow_redirects=self.candidate.follow_redirects,
-                retries=0,  # 模型请求不自动重试：一次 complete 对应一次请求，便于按次数计预算
+                retries=0,  # Disable automatic model retries: one complete call maps to one request for budget accounting.
             )
         except FetchError as exc:
             if hasattr(self.request_budget, "finish_request"):
@@ -145,7 +141,7 @@ class _HttpAdapter:
 
 
 class ChatCompletionsAdapter(_HttpAdapter):
-    """OpenAI 兼容的 /chat/completions 形态。"""
+    """OpenAI-compatible /chat/completions transport."""
 
     def complete(self, *, system: str, user: str, max_output_tokens: int | None = None) -> ModelResponse:
         body = self._common_body(max_output_tokens=max_output_tokens)
@@ -185,7 +181,7 @@ class ChatCompletionsAdapter(_HttpAdapter):
 
 
 class ResponsesAdapter(_HttpAdapter):
-    """OpenAI /responses 形态。"""
+    """OpenAI /responses transport."""
 
     def complete(self, *, system: str, user: str, max_output_tokens: int | None = None) -> ModelResponse:
         body = self._common_body(max_output_tokens=max_output_tokens)
@@ -238,7 +234,7 @@ def _extract_responses_text(payload: dict[str, Any]) -> str:
 
 
 class OfflineFixtureAdapter:
-    """离线夹具：读取本地 JSON，不产生任何真实调用。用于流程测试。"""
+    """Local JSON fixture adapter for workflow tests; no real requests."""
 
     def __init__(self, candidate: CandidateModel, fixture_path: Path | None = None) -> None:
         raw_path = candidate.extra_body.get("fixture_path")
@@ -284,7 +280,7 @@ def verify_candidate(
     *,
     probe: bool | None = None,
 ) -> dict[str, Any]:
-    """核验一个候选模型的实际可用接入，如实记录成功与失败。"""
+    """Check actual candidate availability and record success or failure honestly."""
     audit: list[dict[str, Any]] = []
     result: dict[str, Any] = {
         "name": candidate.name,
@@ -333,8 +329,8 @@ def verify_candidate(
     should_probe = candidate.probe_completion if probe is None else probe
     if should_probe:
         try:
-            # 探针不使用 JSON 模式：各供应商对 response_format 支持不一致，
-            # 探针只回答“这个 model_id 能否真的生成”。
+            # Probes omit JSON mode because response_format support differs between providers.
+            # A probe answers only whether this model_id can actually generate output.
             probe_candidate = replace(candidate, json_mode=False, temperature=-1.0)
             adapter = build_adapter(probe_candidate, audit=audit)
             response = adapter.complete(

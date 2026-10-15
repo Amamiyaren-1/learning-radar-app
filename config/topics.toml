@@ -1,5 +1,5 @@
-# 候选发现用的搜索主题。搜索词是配置，不依赖用户列出仓库名。
-# broad 使用本文件作为轮换方向池；focused 只使用明确指定方向，搜索来源不是归档标签。
+# Configuration guidance: see README and DEVELOPER-GUIDE.md.
+# Configuration guidance: see README and DEVELOPER-GUIDE.md.
 
 [[topic]]
 id = "tool-calling"

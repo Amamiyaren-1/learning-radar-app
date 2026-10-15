@@ -1,13 +1,16 @@
-# 3–5分钟视频脚本（仅准备）
+# Video preparation: 3–5 minutes
 
-| 时间 | 镜头/讲述 | 真实性与保密 |
+Use the final reviewed public SHA recorded in the local release handoff. Screenshots are in docs/images/ and their index in docs/SCREENSHOTS.md. Chinese narration is in video/NARRATION.zh.md; this requested narration is a language exception, not developer prose.
+
+| Time | Shot | Evidence and editing note |
 | --- | --- | --- |
-| 0:00–0:25 | 简短视觉开场：找到可动手的小实验 | 标注LBEILC/RhineLabUI复用与AI辅助，隐藏账号 |
-| 0:25–1:05 | 项目用途、对照、开始条件；broad/focused、单用户 | 默认AI/Agent池，不称全GitHub覆盖 |
-| 1:05–2:10 | 打开保存报告：一个亮点、来源和学习入口 | 不再次点击生成；真实片段脱敏，fixture显著标记；失败/拒绝就如实展示，不制造优质发布结论 |
-| 2:10–2:50 | 任务/报告/通知三轴，4请求预算、费用未知 | SMTP接受不等于收件，不隐藏失败/放宽校验 |
-| 2:50–3:25 | 合成fixture反馈和run/repo绑定 | 不展示私人反馈、不推断长期偏好 |
-| 3:25–4:10 | 新目录安装、构建、离线demo启动/停止 | 隐去邮箱/路径/终端历史；剪辑等待需注明；缺商业字体回退可读 |
-| 4:10–4:40 | 人工决策与Agent辅助实施、验证、文档的实际分工 | 不称全部视觉原创/完全自主手写，不虚构多Agent团队 |
+| 0:00–0:20 | Home, project purpose, Chinese reading workbench | Keep the fixture/not-tested banner visible; use the generic public assets. |
+| 0:20–0:55 | Sign-in, broad discovery submission, task status | Do not record passwords, session/CSRF values, API keys, or terminal authentication. Use only isolated fixtures. |
+| 0:55–1:50 | Open a saved fixture report, sources, quote/learning entry | Label saved-result playback. If waiting is cut, explain the cut and that the output is simulated. |
+| 1:50–2:35 | Project history, original repository identity, saved feedback | Show synthetic notes; feedback is project-bound speech, not inferred preferences. |
+| 2:35–3:20 | Simple architecture and budget graphic | Four task requests, two shared analysis/repair attempts; structure is not semantic verification. |
+| 3:20–4:00 | Public source, setup commands, acknowledgments and limits | Add the real repository URL only after publication. Explain AI assistance, adapted MIT code, MiSans, original generic assets. |
 
-录制前检查账号栏、设置、开发者工具、通知主题、终端、地址栏、路径和背景窗口。商业字体及原作视觉按实际许可处理。只准备脚本，未授权录制或发布。
+Description draft: “Learning Radar is my single-user project-discovery and reading workbench. This recording uses synthetic offline fixtures, not real-time model/search results or a project installation test. Development is AI-assisted. Visual code adapts LBEILC/RhineLabUI under its notice; MiSans and dependencies keep their terms. Public geometry is original and generic. Repository URL and license will be added after approval.”
+
+Do not claim all reports pass or that one historical quote repair proves general reliability. Do not record private profiles, full real reports, notification addresses, purchases, or private audit logs. The owner handles recording, voiceover, editing, codec/HDR decisions, and Bilibili upload; no automatic login/upload is authorized.

@@ -1,11 +1,8 @@
-"""邮件：只从已保存的结构化结果确定性渲染，用标准库 SMTP 发送。
-
-约束（见 docs/DEPLOY-CLOUD.md）：
-- 不调用模型、不抓 CLI 控制台输出、不追加摘要阶段；
-- 发送前先把待发邮件与状态写进 SQLite，重发只发已保存内容；
-- 不声称“恰好一次送达”：服务器接受记 sent，“连接中断、无法确定”记 unknown，不盲目自动重试；
-- 邮件里不出现本机地址、磁盘路径、档案、原始提示词、审计日志、凭据或反馈全文。
-"""
+"""Deterministically render stored structured results and send with stdlib SMTP.
+Do not call models, scrape CLI output, or add a summary stage.
+Persist mail before delivery; retries use saved content only.
+SMTP acceptance is sent, ambiguous disconnection is unknown; neither proves receipt.
+Exclude local URLs/paths, profiles, prompts, audit logs, credentials, and full feedback."""
 
 from __future__ import annotations
 
@@ -119,7 +116,7 @@ def smtp_password(config: EmailConfig) -> str:
     return os.environ.get(config.password_env, "")
 
 
-# ---------------------------------------------------------------- 渲染
+# ---------------------------------------------------------------- Rendering
 
 def _http_links(text: Any) -> list[str]:
     found: list[str] = []
@@ -278,15 +275,15 @@ def build_email(
     else:
         subject, body = render_failure_email(outcome, config)
     attachments: list[tuple[str, str]] = []
-    # 附件内容由调用方按“允许对外发送的字段”渲染（不含反馈附录与运行元信息），
-    # 这里直接使用渲染结果，绝不原样附上服务器上的报告文件。
+    # The caller renders attachments from outbound-safe fields, excluding feedback and run metadata.
+    # Use that rendered content; never attach a server report file verbatim.
     if config.attach_markdown and kind == KIND_REPORT and attachment_text.strip():
         attachments.append((f"report-{outcome.get('run_id')}.md", attachment_text))
     return {"kind": kind, "subject": subject, "body": body, "attachments": attachments}
 
 
 def scan_sensitive(text: str) -> list[str]:
-    """邮件预览与测试用：找出不该出现在邮件里的内容。"""
+    """Find content forbidden in outbound mail for preview and tests."""
     findings: list[str] = []
     for label, pattern in SENSITIVE_PATTERNS:
         match = pattern.search(text or "")
@@ -298,10 +295,10 @@ def scan_sensitive(text: str) -> list[str]:
     return findings
 
 
-# ---------------------------------------------------------------- 发送
+# ---------------------------------------------------------------- Delivery
 
 def _smtp_diagnostic_factory(config: EmailConfig, record):
-    """沿用标准库传输，只观察阶段/响应码，绝不启用 AUTH debug。"""
+    """Observe stdlib SMTP phases/status codes without enabling AUTH debug output."""
     base = smtplib.SMTP_SSL if config.security == "ssl" else smtplib.SMTP
 
     class TracedSMTP(base):
@@ -356,7 +353,7 @@ def _smtp_diagnostic_factory(config: EmailConfig, record):
 
 
 def diagnose_smtp(config: EmailConfig, *, password: str | None = None, smtp_factory=None) -> dict[str, Any]:
-    """一次连接/认证检查：不发送 MAIL、RCPT、DATA 或测试邮件，不自动重试。"""
+    """Check connection/authentication once; do not send MAIL/RCPT/DATA or retry."""
     stages: list[dict[str, Any]] = []
     def record(stage, code=None):
         row = {"stage": stage}
@@ -413,7 +410,7 @@ def send_email(
     password: str | None = None,
     smtp_factory: Any = None,
 ) -> tuple[str, str]:
-    """发送一次，不做自动重试。返回 (status, detail)：sent / failed / unknown。"""
+    """Send once without automatic retry; return sent, failed, or unknown and detail."""
     message = EmailMessage()
     message["From"] = config.sender
     message["To"] = config.recipient
@@ -423,7 +420,7 @@ def send_email(
         message.add_attachment(
             text.encode("utf-8"), maintype="text", subtype="markdown", filename=name
         )
-    context = ssl.create_default_context()  # 证书校验保持开启
+    context = ssl.create_default_context()  # Keep certificate verification enabled.
     try:
         if config.security == "ssl":
             server: smtplib.SMTP = (smtp_factory or smtplib.SMTP_SSL)(
@@ -445,13 +442,13 @@ def send_email(
             accepted = True
             server.send_message(message)
     except smtplib.SMTPServerDisconnected as exc:
-        # 连接在发送过程中断开：无法确定服务器是否接受，标 unknown 且不自动重试
+        # A disconnect during delivery leaves acceptance unknown; never automatically retry.
         return ("unknown" if accepted else "failed"), f"{type(exc).__name__}: {exc}"
     except TimeoutError as exc:
         return ("unknown" if accepted else "failed"), f"超时：{type(exc).__name__}: {exc}"
     except smtplib.SMTPException as exc:
-        # 注意：smtplib.SMTPException 是 OSError 的子类，必须先于 OSError 捕获，
-        # 否则认证失败/收件人被拒/数据被拒都会被误判成 unknown。
+        # SMTPException subclasses OSError and must be caught first.
+        # Otherwise authentication/recipient/data rejection would be misclassified as unknown.
         return "failed", f"发送被拒绝：{type(exc).__name__}: {exc}"
     except OSError as exc:
         return ("unknown" if accepted else "failed"), f"{type(exc).__name__}: {exc}"

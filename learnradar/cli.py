@@ -1,12 +1,9 @@
-"""命令行入口。
+"""Command-line entry point.
 
-命令：
-  verify-models  核验配置里的模型候选是否真的可用（如实记录成功/失败）
-  discover       用配置里的主题查询真实 GitHub 搜索，列出候选
-  run            证据收集 -> 模型分析 -> 质量门槛 -> 渲染报告（增量 A 主流程）
-  list / show    查看已生成报告
-  serve          启动本机报告页面（127.0.0.1）
-"""
+verify-models checks configured candidates and records availability.
+discover queries configured topics on GitHub.
+run collects evidence, analyzes, validates, and renders.
+list/show read saved reports; serve opens the local report web server."""
 
 from __future__ import annotations
 
@@ -94,7 +91,7 @@ def _client(settings: Settings, audit: list[dict[str, Any]]) -> GitHubClient:
         max_bytes=int(settings.http.get("max_response_bytes", 2_000_000)),
         retries=int(settings.http.get("max_retries", 2)),
     )
-    # 先看限额，决定用完整 REST 还是 public 兜底入口（两者都是 GitHub 官方地址）
+    # Check quota before choosing REST or the public fallback; both use official GitHub endpoints.
     preflight = client.preflight()
     client.notes.insert(
         0,
@@ -182,7 +179,7 @@ def cmd_discover(settings: Settings, args: argparse.Namespace) -> int:
 
 
 def _decision_map(screening: Any) -> dict[str, str]:
-    """初筛结论：仓库名（小写）-> keep / uncertain / exclude。"""
+    """Map lowercase repository names to keep, uncertain, or exclude screening outcomes."""
     mapping: dict[str, str] = {}
     for item in getattr(screening, "entries", []) or []:
         mapping[str(item.get("repo", "")).lower()] = str(item.get("decision", "uncertain"))
@@ -190,7 +187,7 @@ def _decision_map(screening: Any) -> dict[str, str]:
 
 
 def _fit_map(screening: Any) -> dict[str, str]:
-    """初筛给出的适配等级：仓库名（小写）-> high / medium / low / unknown。"""
+    """Map lowercase repository names to high, medium, low, or unknown screening fit."""
     mapping: dict[str, str] = {}
     for item in getattr(screening, "entries", []) or []:
         mapping[str(item.get("repo", "")).lower()] = str(item.get("fit", "unknown"))
@@ -198,7 +195,7 @@ def _fit_map(screening: Any) -> dict[str, str]:
 
 
 def _reason_map(screening: Any) -> dict[str, str]:
-    """初筛理由：仓库名（小写）-> 理由原文（写进选点说明，便于复核）。"""
+    """Preserve original screening reasons in the target-selection explanation."""
     mapping: dict[str, str] = {}
     for item in getattr(screening, "entries", []) or []:
         mapping[str(item.get("repo", "")).lower()] = str(item.get("reason", ""))
@@ -213,14 +210,10 @@ def _select_auto_target(
     reasons: dict[str, str],
     selection: dict[str, Any],
 ) -> tuple[dict[str, Any] | None, str]:
-    """按初筛结论与理由选点（语言只作环境信息，不参与排序）。
+    """Select using screening decisions and reasons; language is contextual, not a ranking signal.
 
-    固定顺序：
-    1) 初筛 keep 优先，uncertain 作后备（exclude 不参与）；
-    2) 同档内按初筛给出的 fit 等级 high > medium > low > unknown（由初筛理由得出）；
-    3) 只有前两项都相同时，才比较最近推送时间（可用配置关掉）。
-    没有任何可用候选时返回 None —— 本轮不推荐，而不是硬凑一个。
-    """
+Prefer keep over uncertain and omit exclude. Within each group, prefer high, medium, low, then unknown fit.
+Only ties use recent push time, if enabled. Return None when no candidate is usable."""
     fit_order = {"high": 0, "medium": 1, "low": 2, "unknown": 3}
     tiebreak_recent = bool(selection.get("tiebreak_recent", True))
     eligible: list[tuple[int, int, dict[str, Any], str, str]] = []
@@ -267,15 +260,14 @@ def _auto_comparators(items: list[dict[str, Any]], target: str, count: int) -> l
 
 
 class ModelBudgetExceeded(RuntimeError):
-    """模型请求预算用尽：停止调用，不换模型、不静默继续。"""
+    """Model request budget exhausted: stop without switching models or silently continuing."""
 
 
 class ModelBudget:
-    """按"真实发出的模型请求次数"计数，失败与底层重试都算一次。
+    """Count actual model HTTP requests, including failures and underlying retries.
 
-    底层 post_json 对模型请求固定 retries=0，因此一次 complete() 恰好对应一次 HTTP 请求；
-    失败（网络错误、HTTP 4xx/5xx、响应不可用）同样消耗一次预算。
-    """
+Model post_json uses retries=0, so complete() corresponds to one HTTP request.
+Network, HTTP, and unusable-response failures also consume budget."""
 
     def __init__(self, limit: int) -> None:
         self.limit = max(1, int(limit))
@@ -295,7 +287,7 @@ class ModelBudget:
 
 
 class BudgetedAdapter:
-    """只加一层请求计数，不改模型、不做任何切换。"""
+    """Add request accounting without changing or switching the configured model."""
 
     def __init__(self, inner: Any, budget: ModelBudget) -> None:
         self.inner = inner
@@ -328,10 +320,8 @@ def _failure_usage_rows(
     unrecorded_calls: int,
     stage: str = "analysis",
 ) -> list[dict[str, Any]]:
-    """失败路径的用量：先保留此前阶段的记录，再补本阶段的调用与失败行。
-
-    不能让后面阶段的失败把前面阶段（例如初筛）的用量抹掉。
-    """
+    """Preserve earlier usage before adding calls and failures from this stage.
+A later failure must not erase earlier screening consumption."""
     rows = list(prior)
     rows.extend(
         _usage_entry(stage, item, candidate, role=stage, ok=False) for item in responses_seen
@@ -344,7 +334,7 @@ def _failure_usage_rows(
 def _load_evidence_for_run(
     settings: Settings, run_id: str, run_dir: Path
 ) -> tuple[list[Evidence], str]:
-    """优先读运行目录的 evidence.json；没有就从 SQLite 的 evidence 表回读。"""
+    """Read evidence.json from the run directory, falling back to SQLite evidence rows."""
     path = run_dir / "evidence.json"
     if path.exists():
         payload = json.loads(path.read_text(encoding="utf-8"))
@@ -363,7 +353,7 @@ def _load_evidence_for_run(
     return items, ("sqlite:evidence" if items else "")
 
 def _repo_facts_from_evidence(evidence: list[Evidence], repo: str) -> dict[str, Any]:
-    """从已保存的证据里取回该仓库的元数据（重放时不再联网）。"""
+    """Recover repository metadata from saved evidence without network access during replay."""
     wanted = normalize_repo_name(repo)
     for item in evidence:
         if item.kind == "github_repo" and normalize_repo_name(item.owner) == wanted:
@@ -379,7 +369,7 @@ def _has_readme(evidence: list[Evidence], repo: str) -> bool:
 
 
 def _learning_entry_from_evidence(evidence: list[Evidence], repo: str) -> dict[str, Any]:
-    """重放时从保存的证据还原学习入口状态（含示例信号）。"""
+    """Restore saved learning-entry state and example signals for replay."""
     wanted = normalize_repo_name(repo)
     from .readme import analyze_readme_entry
     for item in evidence:
@@ -418,7 +408,7 @@ def cmd_replay_analysis(settings: Settings, args: argparse.Namespace) -> int:
 
 
 def run_replay_analysis(settings: Settings, args: argparse.Namespace, *, hooks=None) -> int:
-    """用已保存的证据单独重跑分析阶段：不重新搜索、不重新初筛。"""
+    """Replay analysis from saved evidence without repeating search or screening."""
     from .pipeline import RunHooks
     hooks=hooks or RunHooks()
     run_dir = settings.data_dir / "runs" / args.run
@@ -486,8 +476,8 @@ def run_replay_analysis(settings: Settings, args: argparse.Namespace, *, hooks=N
         for name in comparator_names
     ]
 
-    # 保存本次实际分析输入，而非原运行上下文的副本（命令行可能覆盖目标/对照）。
-    # 在模型请求之前落盘，使失败与成功路径都能追溯；不修改原运行目录。
+    # Save effective analysis inputs, including command-line target/comparator overrides.
+    # Persist before requesting a model; preserve traceability without changing the source run.
     runs_dir.mkdir(parents=True, exist_ok=True)
     (runs_dir / "run-context.json").write_text(
         json.dumps(
@@ -625,7 +615,7 @@ def run_replay_analysis(settings: Settings, args: argparse.Namespace, *, hooks=N
     return EXIT_OK
 
 def _load_candidates_from_run(settings: Settings, run_id: str) -> list[dict[str, Any]]:
-    """复用某次运行保存的候选；不重新搜索、不改动原运行。"""
+    """Reuse saved candidates without searching again or modifying the source run."""
     store_path = settings.data_dir / "learning-radar.sqlite"
     if not store_path.exists():
         return []
@@ -643,7 +633,7 @@ def _load_candidates_from_run(settings: Settings, run_id: str) -> list[dict[str,
 
 
 def _load_screening_from_run(settings: Settings, run_id: str) -> ScreeningOutcome:
-    """复用某次运行保存的初筛结论；没有就明确报错，不退化成按新鲜度排序。"""
+    """Require saved screening; do not silently fall back to recency ranking."""
     path = settings.data_dir / "runs" / run_id / "run-context.json"
     if not path.exists():
         raise ConfigError(f"运行 {run_id} 没有保存 run-context.json，无法复用初筛结论")
@@ -659,7 +649,7 @@ def _load_screening_from_run(settings: Settings, run_id: str) -> ScreeningOutcom
     )
 
 def _persist_pages(runs_dir: Path, pages: list[dict[str, Any]]) -> None:
-    # 把读过的候选页面与获取记录落盘：正文写文件，清单写 pages.json（失败也留记录）
+    # Persist page bodies and pages.json fetch records, including failures.
     if not pages:
         return
     pages_dir = runs_dir / "pages"
@@ -695,7 +685,7 @@ def _model_snapshot(candidate: CandidateModel) -> dict[str, Any]:
 
 
 def _roles_text(settings: Settings) -> str:
-    """把角色 -> 候选 -> 实际 model_id 写清楚，便于事后核对用了哪个模型。"""
+    """Record role, configured candidate, and actual model_id for later inspection."""
     parts: list[str] = []
     for role in sorted(settings.roles):
         try:
@@ -748,7 +738,7 @@ def _failure_entry(
     role: str = "",
     calls: int = 0,
 ) -> dict[str, Any]:
-    """记录一次"没有产生结果"的失败；calls 表示这次失败实际消耗的请求数。"""
+    """Record a no-result failure; calls is the number of requests actually consumed."""
     return {
         "ts": now_iso(),
         "stage": stage,
@@ -770,7 +760,7 @@ def _failure_entry(
 
 
 def _stage_usage_rows(entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """按阶段汇总用量与失败原因，写进报告附录。"""
+    """Summarize stage usage and failure reasons in the report appendix."""
     rows: dict[str, dict[str, Any]] = {}
     for entry in entries:
         stage = str(entry.get("stage") or "unknown")
@@ -813,7 +803,7 @@ def _run_screening_stage(
     budget: "ModelBudget | None" = None,
     adapter_factory: Any = None,
 ):
-    """初筛阶段：只调用 screening 角色的模型；失败就如实记录并保留全部候选。"""
+    """Use only the screening-role model; record failures and retain all candidates."""
     _print(f"\n[1b/5] 候选初筛（角色 screening → {model.describe()}）")
     responses: list[Any] = []
     budget = budget or ModelBudget(1)
@@ -899,10 +889,8 @@ def _snapshot_usage(
     budget: Any,
     audit: list[dict[str, Any]],
 ) -> None:
-    """把“到此刻为止”的模型用量立刻落盘：后面即使异常退出，已发生的调用也不会丢。
-
-    只是尽力而为：失败不影响主流程，终态写入仍是权威记录。
-    """
+    """Persist usage so far before later exceptions can lose it.
+This is best effort; persistence failure does not replace authoritative finalization."""
     try:
         screening_calls = sum(
             int(item.get("calls") or 0) for item in usage_entries if item.get("stage") == "screening"
@@ -936,7 +924,7 @@ def _snapshot_usage(
 def _cooldown_history(
     settings: Settings, warnings: list[str] | None = None
 ) -> dict[str, list[Any]]:
-    """只读已有运行记录，用于冷却期判断（不新建“已分析项目名单”）。"""
+    """Read existing run records for cooldown without creating a separate analyzed-project list."""
     path = settings.data_dir / "learning-radar.sqlite"
     if not path.exists():
         return {}
@@ -945,7 +933,7 @@ def _cooldown_history(
 
 
 def _print_history_notice(settings: Settings, repo: str) -> None:
-    """手动指定目标或重放时的提示：把已有历史说清楚，但不阻止运行。"""
+    """Explain existing history for manual targets/replays without blocking them."""
     if not repo:
         return
     records = _cooldown_history(settings).get(normalize_repo_name(repo), [])
@@ -956,7 +944,7 @@ def _print_history_notice(settings: Settings, repo: str) -> None:
         _print(f"  - {notice}")
 
 def _feedback_prompt_text(settings: Settings, repos: list[str]) -> str:
-    """只读取反馈用于提示词；用短连接，不与其它 Store 生命周期纠缠。"""
+    """Read feedback for prompting with short-lived connections independent of other Store instances."""
     path = settings.data_dir / "learning-radar.sqlite"
     if not path.exists():
         return ""
@@ -964,7 +952,7 @@ def _feedback_prompt_text(settings: Settings, repos: list[str]) -> str:
         return prompt_text_for_repos(store, repos)
 
 def _generated_verification(evidence: list[Evidence]) -> dict[str, Any]:
-    """查阅状态由运行记录生成，不由模型自报。"""
+    """Derive inspection state from run records rather than model self-reporting."""
     docs = any(item.kind in ("github_readme", "web_page") for item in evidence)
     release = any(item.kind == "github_release" for item in evidence)
     fixture = any("fixture://" in item.locator or "测试夹具" in item.title for item in evidence)
@@ -993,7 +981,7 @@ def _validate_analysis_candidate(
     comparator_names: list[str], require_quotes: bool = False,
     require_verified_entry: bool = False, verified_entry: dict[str, Any] | None = None,
 ) -> ValidationResult:
-    """纯预检与最终发布共用同一门槛；运行状态由程序生成，草稿不变。"""
+    """Share the final publication gate in a pure precheck; generate run state without mutating drafts."""
     from copy import deepcopy
 
     draft = deepcopy(report)
@@ -1010,7 +998,7 @@ def _validate_analysis_candidate(
 
 
 def _save_analysis_checks(runs_dir: Path, outcome: Any) -> None:
-    """每次候选的检查与最终采用尝试单独落盘；不覆盖原始输出。"""
+    """Persist each check and the selected attempt separately without overwriting raw output."""
     if not outcome.validation_checks:
         return
     (runs_dir / "analysis-validation.json").write_text(
@@ -1049,10 +1037,8 @@ def finalize_run(
     budget_info: dict[str, Any] | None = None,
     on_stage: Any = None,
 ) -> tuple[str, ValidationResult, Path, dict[str, Any]]:
-    """校验 -> 先落盘用量与审计 -> 再渲染。
-
-    结构失败或渲染异常都不会丢掉用量、证据与运行终态（A.1 评审第 5 条）。
-    """
+    """Validate, persist usage/audit, then render.
+Structural or rendering failures retain usage, evidence, and terminal run state."""
     runs_dir = settings.data_dir / "runs" / run_id
     runs_dir.mkdir(parents=True, exist_ok=True)
     reports_dir = settings.data_dir / "reports"
@@ -1129,7 +1115,7 @@ def finalize_run(
 
     if on_stage:
         on_stage("archive")
-    # 1) 先落盘：即使渲染失败，用量、审计、证据与校验结果也已经保存
+    # 1) Persist usage, audit, evidence, and validation before rendering can fail.
     (runs_dir / "usage.json").write_text(
         json.dumps(
             {
@@ -1157,7 +1143,7 @@ def finalize_run(
         (runs_dir / "report.json").write_text(
             json.dumps(report, ensure_ascii=False, indent=2, default=str), encoding="utf-8"
         )
-    except Exception as exc:  # pragma: no cover - 兜底
+    except Exception as exc:  # pragma: no cover - fallback
         (runs_dir / "report.json").write_text(
             json.dumps({"error": f"{type(exc).__name__}: {exc}"}), encoding="utf-8"
         )
@@ -1167,7 +1153,7 @@ def finalize_run(
     store.log_http(run_id, audit)
     feedback_rows = report_rows(store, [target_name, *comparator_names])
 
-    # 2) 结构失败不进入正常渲染：走独立的、类型安全的展示
+    # 2) Structural failures use a separate type-safe view instead of normal rendering.
     status = "published"
     try:
         if validation.ok:
@@ -1548,7 +1534,7 @@ def run_recommendation(settings: Settings, args: argparse.Namespace, *, hooks=No
         _print(f"  初筛结论可用 --screening-from {run_id} 复用")
         return EXIT_OK if not screening.failed else EXIT_GATE_FAILED
 
-    # 手动指定目标时初筛失败不阻塞（初筛结论只作参考）
+    # Screening failure does not block a manually specified target; screening is advisory.
     if screening.failed and args.candidate:
         _print("  - 初筛失败，但目标由命令行指定：继续分析（不依赖初筛结论）")
     retained_names = set(screening.retained_names)
@@ -1746,7 +1732,7 @@ def run_recommendation(settings: Settings, args: argparse.Namespace, *, hooks=No
             ).errors,
         )
     except (ModelError, ModelBudgetExceeded, AnalysisError, FetchError) as exc:
-        # 失败也要把已经发生的调用、消耗和原始输出留下，便于核对与修复。
+        # Keep actual calls, consumption, and raw responses on failure for inspection and repair.
         analysis_requests = model_budget.used - budget_before_analysis
         failed_usage = _failure_usage_rows(
             usage_entries,

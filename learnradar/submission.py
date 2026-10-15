@@ -1,4 +1,4 @@
-"""CLI 同步提交与等待；执行入口只领取持久任务，不递归调用 CLI/weekly。"""
+"""Synchronously submit/wait through the durable queue without recursively invoking CLI or weekly."""
 import uuid
 
 from .tasks import TaskError, TaskQueue
@@ -23,7 +23,7 @@ def submit_cli(settings,args,*,replay=False):
     from .worker import wait_for_task, task_exit_code
     topic="replay" if replay else str(_find_topic(settings,getattr(args,"topic",None))["id"])
     options={name:getattr(args,name,None) for name in (REPLAY_OPTIONS if replay else RUN_OPTIONS)}
-    # 缺省值与现有解析器相同；保留旧测试/调用方的 Namespace 兼容性。
+    # Defaults match the parser and preserve old Namespace callers/tests.
     if not replay:
         for name,value in (("per_page",20),("limit",20),("screening_only",False)):
             if options[name] is None: options[name]=value
