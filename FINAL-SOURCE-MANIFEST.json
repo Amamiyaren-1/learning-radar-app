@@ -5,7 +5,7 @@
   "note": "EXPORT-MANIFEST is historical provenance, not equality with this source. This file excludes itself; the external artifact manifest binds its hash and the committed source SHA.",
   "allowed_change_categories": [
     "English developer docs/comments and bilingual README",
-    "pending MIT proposal and precise third-party scope notices",
+    "owner-approved MIT for original Learning Radar code and precise third-party scope notices",
     "owner-directed restoration of accepted original visuals; substitute geometry/contour withdrawn",
     "commercial fonts excluded with existing fallback",
     "compatible Vite/esbuild security patches and dependency lock/notices",
@@ -23,7 +23,6 @@
     "CONTRIBUTING.md",
     "EXPORT-MANIFEST.json",
     "LICENSE",
-    "LICENSE-MIT.DRAFT.txt",
     "README.en.md",
     "README.md",
     "config/email.example.toml",
@@ -185,23 +184,18 @@
     },
     {
       "file": "LICENSE",
-      "bytes": 468,
-      "sha256": "ceb0eca4d7bb7d4b3af1ba753149c304867d812b5d91df963b7933ad1e1b0049"
-    },
-    {
-      "file": "LICENSE-MIT.DRAFT.txt",
-      "bytes": 1283,
-      "sha256": "13a45fd58550b0a3426e0e981d9f41c20ca5840c20249ed85c5bec5328acc0c2"
+      "bytes": 1101,
+      "sha256": "dd505e647ad85f73cb9215107868aa1a54fefbc52fc1b143cdcbf5f4ae072cb8"
     },
     {
       "file": "README.en.md",
-      "bytes": 10505,
-      "sha256": "bd474914cded770f1021d7356f36634a64a17d7ae51d77b911ac4a7103b8c120"
+      "bytes": 10534,
+      "sha256": "1528fa1eeed32611db98648a30440a9012017e0b384a87b98873ac606c3adff7"
     },
     {
       "file": "README.md",
-      "bytes": 9560,
-      "sha256": "1399545e0129b8344cecfb10d1b8401265ad23b0f1ee749187aea6fca8d92c45"
+      "bytes": 9563,
+      "sha256": "c43be93df9cd6fd642ab14dda2cba09fedccdc31e1b995215abee4a1290d67a3"
     },
     {
       "file": "config/email.example.toml",
@@ -245,18 +239,18 @@
     },
     {
       "file": "docs/PUBLIC-SOURCE-GUIDE.md",
-      "bytes": 1370,
-      "sha256": "8eb982b58fa4099afb4437b79d3ece9c8d0dd167e18d5fb9dc71f59ecc040ed9"
+      "bytes": 1411,
+      "sha256": "7b68ac99edfbcf4e2065baacc1939031871187ac2682f313d2e286962c968762"
     },
     {
       "file": "docs/PUBLIC-VISUALS.md",
-      "bytes": 4135,
-      "sha256": "9607a497b5ad6f3ca6aacf292bb4f6bccf4bd6cc7987295530106a9e5934d7db"
+      "bytes": 4219,
+      "sha256": "2c757b7593a02e0cd80192d0b14606c6ba8440fc3ba91bc419bb42e5939aa35c"
     },
     {
       "file": "docs/RELEASE-NOTES.md",
-      "bytes": 1443,
-      "sha256": "039f61c7ebe1946d29fb6f100f0ce82e136ad812cdb6658a5acd09ec34739ac8"
+      "bytes": 1522,
+      "sha256": "7b2bba1016baedab97af0198cc0b058c951bf9477a1d44ca2ce2baa3b1ebcde6"
     },
     {
       "file": "docs/SCREENSHOTS.md",
@@ -270,13 +264,13 @@
     },
     {
       "file": "docs/THIRD-PARTY.md",
-      "bytes": 4924,
-      "sha256": "92e018c083d399c2fce1a9c061e48eebccc8047aaf1e6610cf4a3a0508100d9e"
+      "bytes": 4909,
+      "sha256": "3107885f1edf5530f1214f6a8b344c3ac3bb0ae44fd8396d0245a88604ebc8ae"
     },
     {
       "file": "docs/VIDEO-OUTLINE.md",
-      "bytes": 2437,
-      "sha256": "fb942d794d2107954e15e7ca91d3c100385d4a6db4deb0db40341460df34d264"
+      "bytes": 2540,
+      "sha256": "186d77b621b0d43e024a7eb4e670b47958130e127bb2a63c74962e9236586633"
     },
     {
       "file": "docs/examples/historical-project.en.md",
@@ -330,8 +324,8 @@
     },
     {
       "file": "docs/video/NARRATION.zh.md",
-      "bytes": 2536,
-      "sha256": "20ae58e5590aa72ea652216765ae1ead4fa7a0002dcdd5dce31d42d9a6380388"
+      "bytes": 2620,
+      "sha256": "9e39af89bfe68a78fc30f2d8de8e841f55efc41cfeff8199f965cabc44a08cd5"
     },
     {
       "file": "frontend/licenses/MiSans-license.pdf",
@@ -1080,8 +1074,8 @@
     },
     {
       "file": "scripts/source_manifest.py",
-      "bytes": 2859,
-      "sha256": "78650a7ad06247e5e02550a172c9139dea41a609152b8e47cde9f5377bc6de2a"
+      "bytes": 2890,
+      "sha256": "fabe763be2da8fe6fcb2867e946be0485aade90a7677a80fd7ae611097a18120"
     },
     {
       "file": "scripts/start.ps1",

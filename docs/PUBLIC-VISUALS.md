@@ -48,5 +48,6 @@ dimensions before and after capture; do not use a full-page capture if it
 temporarily changes vh-based scene height. README screenshots are refreshed
 from these actual restored pages, without image retouching or model redesign.
 Fixture success never proves real collection, model calls, SMTP, project
-installation or deployment. Publication remains subject to an explicit later
-instruction and the outstanding license/target/resource decisions.
+installation or deployment. Original Learning Radar code uses the approved
+MIT license; third-party terms and the distinctions above remain unchanged.
+Source publication does not authorize deployment or another visual redesign.
